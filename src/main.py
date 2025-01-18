@@ -75,13 +75,4 @@ async def get_messages() -> list:
         )
 
 if __name__ == "__main__":
-    import uvicorn
-    
-    print(f"Running on {settings.HOST}:{settings.PORT}")
-    
-    uvicorn.run(
-        "main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        reload=True
-    )
+    app.run(debug=True, host=host, port=port)
