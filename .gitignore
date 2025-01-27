@@ -135,7 +135,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+# Environment files
+.env
+.env.development
+.env.production
+.env.local
 # Spyder project settings
 .spyderproject
 .spyproject
