@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -10,10 +11,9 @@ from .base_handler import BaseHandler
 
 
 class RouteEnum(str, Enum):
-    hey = "HEY"
     summarize = "SUMMARIZE"
     ask_question = "ASK_QUESTION"
-    ignore = "IGNORE"
+    other = "OTHER"
 
 
 class RouteModel(BaseModel):
@@ -24,20 +24,16 @@ class Router(BaseHandler):
     async def __call__(self, message: Message):
         route = await self._route(message.text)
         match route:
-            case RouteEnum.hey:
-                await self.send_message(
-                    message.chat_jid, "Who is calling my name?"
-                )
             case RouteEnum.summarize:
                 await self.summarize(message.chat_jid)
             case RouteEnum.ask_question:
                 await self.ask_question(message.text)
-            case RouteEnum.ignore:
-                pass
+            case RouteEnum.other:
+                logging.warning(f"OTHER route was chosen Lets see why: {message.text}, {message.chat_jid}")
 
     async def _route(self, message: str) -> RouteEnum:
         agent = Agent(
-            model="anthropic:claude-3-5-sonnet-latest",
+            model="anthropic:claude-3-5-haiku-latest",
             system_prompt="Extract a routing decision from the input.",
             result_type=RouteEnum,
         )
@@ -70,7 +66,7 @@ class Router(BaseHandler):
     async def ask_question(self, question: str):
         
         refrased_agent = Agent(
-            model="anthropic:claude-3-5-sonnet-latest",
+            model="anthropic:claude-3-5-haiku-latest",
             system_prompt="Phrase the following sentence to retrieve information for the knowledge base."
         )
 
@@ -84,19 +80,19 @@ class Router(BaseHandler):
         # self. whatsapp.send_message([refrased_response.data])[0]
         # self.embedding_function.
         # query for user query
-        relevant_conversations = self.session.exec(
+        retrieved_topics = self.session.exec(
             select(KBTopic)
             .order_by(KBTopic.embedding.l2_distance(embeded_question))
             .limit(5)
         )
         
-        similar_conversations = []
-        for result in relevant_conversations:
-            similar_conversations.append(result.content)
+        similar_topics = []
+        for result in retrieved_topics:
+            similar_topics.append(result.content)
 
-        agent2 = Agent(
+        generation_agent = Agent(
             model="anthropic:claude-3-5-sonnet-latest",
-            system_prompt="""Based on the conversation attached, write a response to the query.
+            system_prompt="""Based on the topics attached, write a response to the query.
             - Write a casual direct response to the query. no need to repeat the query.
             - Answer in the same language as the query.
             - Please do tag users while talking about them (e.g., @972536150150). ONLY answer with the new phrased query, no other text."""
@@ -106,10 +102,10 @@ class Router(BaseHandler):
         question: {refrased_response.data}
 
         topics related to the query:
-        {"\n---\n".join(similar_conversations)}
+        {"\n---\n".join(similar_topics)}
         '''
         
-        responses2 = await agent2.run(prompt_template)
-        return responses2.data
+        generation_response = await generation_agent.run(prompt_template)
+        return generation_response.data
 
         
