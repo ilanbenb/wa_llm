@@ -20,6 +20,11 @@ def mock_whatsapp():
     client.get_my_jid = AsyncMock(return_value="bot@s.whatsapp.net")
     return client
 
+@pytest.fixture
+def mock_embedding_client():
+    client = AsyncMock()
+    client.embed = AsyncMock(return_value=["1", "2", "3"])
+    return client
 
 @pytest.fixture
 def test_message():
@@ -39,34 +44,8 @@ def MockAgent(return_value: Any):
 
 
 @pytest.mark.asyncio
-async def test_router_hey_route(mock_session, mock_whatsapp, test_message, monkeypatch):
-    # Mock the Agent class
-    mock_agent = MockAgent(RouteEnum.hey)
-
-    monkeypatch.setattr(Agent, "__init__", lambda *args, **kwargs: None)
-    monkeypatch.setattr(Agent, "run", mock_agent.run)
-
-    # Set up mock response for send_message
-    mock_whatsapp.send_message.return_value.results.message_id = "response_id"
-
-    # Create router instance
-    router = Router(mock_session, mock_whatsapp)
-
-    # Test the route
-    await router(test_message)
-
-    # Verify the message was sent
-    mock_whatsapp.send_message.assert_called_once_with(
-        SendMessageRequest(
-            phone="user@s.whatsapp.net",
-            message="Who is calling my name?",
-        )
-    )
-
-
-@pytest.mark.asyncio
 async def test_router_summarize_route(
-    mock_session, mock_whatsapp, test_message, monkeypatch
+    mock_session, mock_whatsapp, mock_embedding_client, test_message, monkeypatch
 ):
     # Mock the Agent class for routing
     mock_route_agent = MockAgent(RouteEnum.summarize)
@@ -100,7 +79,7 @@ async def test_router_summarize_route(
     mock_whatsapp.send_message.return_value.results.message_id = "response_id"
 
     # Create router instance
-    router = Router(mock_session, mock_whatsapp)
+    router = Router(mock_session, mock_whatsapp, mock_embedding_client)
 
     # Test the route
     await router(test_message)
@@ -115,16 +94,16 @@ async def test_router_summarize_route(
 
 
 @pytest.mark.asyncio
-async def test_router_ignore_route(
-    mock_session, mock_whatsapp, test_message, monkeypatch
+async def test_router_other_route(
+    mock_session, mock_whatsapp, mock_embedding_client,test_message, monkeypatch
 ):
     # Mock the Agent class
-    mock_agent = MockAgent(RouteEnum.ignore)
+    mock_agent = MockAgent(RouteEnum.other)
     monkeypatch.setattr(Agent, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Agent, "run", mock_agent.run)
 
     # Create router instance
-    router = Router(mock_session, mock_whatsapp)
+    router = Router(mock_session, mock_whatsapp, mock_embedding_client)
 
     # Test the route
     await router(test_message)
@@ -134,13 +113,13 @@ async def test_router_ignore_route(
 
 
 @pytest.mark.asyncio
-async def test_send_message(mock_session, mock_whatsapp):
+async def test_send_message(mock_session, mock_whatsapp, mock_embedding_client):
     # Set up mock response
     mock_whatsapp.send_message.return_value.results.message_id = "response_id"
     mock_session.get.return_value = None  # Simulate sender doesn't exist
 
     # Create router instance
-    router = Router(mock_session, mock_whatsapp)
+    router = Router(mock_session, mock_whatsapp, mock_embedding_client)
 
     # Test sending a message
     await router.send_message("user@s.whatsapp.net", "Test message")
