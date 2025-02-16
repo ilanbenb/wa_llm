@@ -65,20 +65,18 @@ class Router(BaseHandler):
 
     async def ask_question(self, question: str):
         
-        refrased_agent = Agent(
+        rephrased_agent = Agent(
             model="anthropic:claude-3-5-haiku-latest",
             system_prompt="Phrase the following sentence to retrieve information for the knowledge base."
         )
 
         # We obviously need to translate the question and turn the question vebality to a title / summary text to make it closer to the questions in the rag
-        refrased_response = await refrased_agent.run(question)
-        print(refrased_response.data)
+        rephrased_response = await rephrased_agent.run(question)
+        print(rephrased_response.data)
 
         # Get query embedding
-        embeded_question = self.embedding_function([refrased_response.data])[0]
+        embeded_question = self.embedding_function([rephrased_response.data])[0]
         
-        # self. whatsapp.send_message([refrased_response.data])[0]
-        # self.embedding_function.
         # query for user query
         retrieved_topics = self.session.exec(
             select(KBTopic)
@@ -99,7 +97,7 @@ class Router(BaseHandler):
         )
 
         prompt_template = f'''
-        question: {refrased_response.data}
+        question: {rephrased_response.data}
 
         topics related to the query:
         {"\n---\n".join(similar_topics)}
