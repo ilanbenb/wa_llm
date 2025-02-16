@@ -26,7 +26,7 @@ services:
       - APP_PORT=3000
       - APP_DEBUG=true
       - APP_OS=Chrome
-      - DB_URI=postgres://user:password@postgres:5432/whatsapp?sslmode=disable
+      - DB_URI=postgres://user:password@postgres:5432/webhook_db?sslmode=disable
       - APP_BASIC_AUTH=admin:admin
       - WHATSAPP_CHAT_STORAGE=false
 

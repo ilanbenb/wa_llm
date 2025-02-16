@@ -68,7 +68,7 @@ async def webhook(
     payload: models.WhatsAppWebhookPayload,
     handler: Annotated[MessageHandler, Depends(get_handler)],
 ) -> str:
-    if payload.message and payload.from_:
+    if payload.from_:
         await handler(payload)
 
     return "ok"

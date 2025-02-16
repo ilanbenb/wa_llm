@@ -5,7 +5,7 @@ from pydantic import field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
 from .jid import normalize_jid, parse_jid, JID
-from .webhook import WhatsAppWebhookPayload
+from .webhook import WhatsAppWebhookPayload, Message as PayloadMessage
 
 if TYPE_CHECKING:
     from .group import Group
@@ -70,6 +70,8 @@ class Message(BaseMessage, table=True):
     @classmethod
     def from_webhook(cls, payload: WhatsAppWebhookPayload) -> "Message":
         """Create Message instance from WhatsApp webhook payload."""
+        if not payload.message:
+            payload.message = PayloadMessage(id=f"na-{payload.timestamp.timestamp()}")
         assert payload.message, "Missing message"
         assert payload.message.id, "Missing message ID"
         assert payload.from_, "Missing sender"
