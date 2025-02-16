@@ -36,7 +36,5 @@ class KBTopic(KBTopicBase, table=True):
             postgresql_ops={'embedding': 'vector_cosine_ops'}
         ),
     )
-    group: Group = Relationship(sa_relationship_kwargs={'lazy': 'selectin'})
-KBTopic.model_rebuild()
 
 
