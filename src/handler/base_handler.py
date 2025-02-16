@@ -12,13 +12,14 @@ from models import (
 )
 from models.jid import normalize_jid
 from whatsapp import WhatsAppClient, SendMessageRequest
-from text_embeding import VoyageEmbeddingFunction
+from voyageai.client_async import AsyncClient
+
 
 class BaseHandler:
-    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_function: VoyageEmbeddingFunction):
+    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_client: AsyncClient):
         self.session = session
         self.whatsapp = whatsapp
-        self.embedding_function = embedding_function
+        self.embedding_client = embedding_client
 
     async def store_message(
         self,

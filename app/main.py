@@ -13,7 +13,8 @@ from deps import get_handler
 from handler import MessageHandler
 from whatsapp import WhatsAppClient
 from whatsapp.init_groups import gather_groups
-from text_embeding import VoyageEmbeddingFunction
+from voyageai.client_async import AsyncClient
+
 settings = Settings()  # pyright: ignore [reportCallIssue]
 
 
@@ -47,11 +48,9 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(gather_groups(engine, app.state.whatsapp))
 
     app.state.db_engine = engine
-    app.state.embedding_function = VoyageEmbeddingFunction(
-        settings.voyage_api_key,
-        settings.voyage_max_retries,
-        settings.voyage_model_name,
-        settings.voyage_batch_size
+    app.state.embedding_client = AsyncClient(
+            api_key=settings.voyage_api_key,
+            max_retries=settings.voyage_max_retries
     )
     try:
         yield
