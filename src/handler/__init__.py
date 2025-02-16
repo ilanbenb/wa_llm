@@ -12,7 +12,7 @@ from .base_handler import BaseHandler
 class MessageHandler(BaseHandler):
     def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_function: VoyageEmbeddingFunction):
         self.router = Router(session, whatsapp, embedding_function)
-        super().__init__(session, whatsapp)
+        super().__init__(session, whatsapp, embedding_function)
 
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
