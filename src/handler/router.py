@@ -5,7 +5,7 @@ from pydantic import BaseModel, TypeAdapter
 from pydantic_ai import Agent
 from sqlmodel import desc, select
 
-from models import Message, Discussion
+from models import Message, KBTopic
 from .base_handler import BaseHandler
 
 
@@ -85,8 +85,8 @@ class Router(BaseHandler):
         # self.embedding_function.
         # query for user query
         relevant_conversations = self.session.exec(
-            select(Discussion)
-            .order_by(Discussion.embedding.l2_distance(embeded_question))
+            select(KBTopic)
+            .order_by(KBTopic.embedding.l2_distance(embeded_question))
             .limit(5)
         )
         

@@ -1,5 +1,4 @@
 from typing import List, Optional
-from pydantic import BaseModel
 from sqlmodel import Field, SQLModel, Index, Relationship
 from pgvector.sqlalchemy import Vector
 from .group import Group
@@ -7,7 +6,7 @@ from datetime import datetime
 
 
 
-class DiscussionBase(SQLModel):
+class KBTopicBase(SQLModel):
     content: str = Field(index=True)
     group_jid: Optional[str] = Field(
         max_length=255,
@@ -19,25 +18,25 @@ class DiscussionBase(SQLModel):
     subject: str
     summary: str
 
-# class DiscussionCreate(DiscussionBase):
+# class KBTIPICCreate(KBTopicBase):
 #     id: str
 #     embedding: List[float]
 
-class Discussion(DiscussionBase, table=True):
+class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
     embedding:  List[float] = Field(sa_type=Vector(1024))
 
     # Add pgvector index
     __table_args__ = (
         Index(
-            'discussions_embedding_idx',
+            'kb_topic_embedding_idx',
             'embedding',
             postgresql_using='ivfflat',
             postgresql_with={'lists': 100},
             postgresql_ops={'embedding': 'vector_cosine_ops'}
         ),
     )
-    # group: Group = Relationship(sa_relationship_kwargs={'lazy': 'selectin'})
-# Discussion.model_rebuild()
+    group: Group = Relationship(sa_relationship_kwargs={'lazy': 'selectin'})
+KBTopic.model_rebuild()
 
 
