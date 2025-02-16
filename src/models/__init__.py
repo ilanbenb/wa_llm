@@ -3,6 +3,7 @@ from .message import Message, BaseMessage
 from .sender import Sender, BaseSender
 from .webhook import WhatsAppWebhookPayload
 from .upsert import upsert
+from .discussion import Discussion
 
 __all__ = [
     "Group",
@@ -13,4 +14,5 @@ __all__ = [
     "BaseSender",
     "WhatsAppWebhookPayload",
     "upsert",
+    "Discussion"
 ]

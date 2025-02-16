@@ -21,6 +21,12 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str
 
+    # Voyage settings
+    voyage_api_key: str
+    voyage_model_name: str = "voyage-3"
+    voyage_batch_size: int = 128
+    voyage_max_retries: int = 5
+
     # Optional settings
     debug: bool = False
     log_level: str = "INFO"

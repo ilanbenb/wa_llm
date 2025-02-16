@@ -1,15 +1,15 @@
 # docker-compose.base.yml
 services:
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: webhook_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/psql/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: ["postgres", "-c", "log_statement=all"]
 
   whatsapp:

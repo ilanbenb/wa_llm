@@ -13,6 +13,8 @@ dependencies = [
     "pydantic-ai>=0.0.21",
     "asyncpg>=0.30.0",
     "sqlalchemy[asyncio]>=2.0.37",
+    "pgvector>=0.3.6",
+    "voyageai>=0.3.2",
 ]
 [tool.pyright.reportMissingTypeStubs]
 sqlmodel = false

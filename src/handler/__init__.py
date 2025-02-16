@@ -5,12 +5,13 @@ from models import (
     WhatsAppWebhookPayload,
 )
 from whatsapp import WhatsAppClient
+from text_embeding import VoyageEmbeddingFunction
 from .base_handler import BaseHandler
 
 
 class MessageHandler(BaseHandler):
-    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient):
-        self.router = Router(session, whatsapp)
+    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_function: VoyageEmbeddingFunction):
+        self.router = Router(session, whatsapp, embedding_function)
         super().__init__(session, whatsapp)
 
     async def __call__(self, payload: WhatsAppWebhookPayload):

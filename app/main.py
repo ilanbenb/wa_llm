@@ -4,7 +4,7 @@ from typing import Annotated
 from warnings import warn
 
 from fastapi import Depends, FastAPI
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 import models  # noqa
@@ -13,7 +13,7 @@ from deps import get_handler
 from handler import MessageHandler
 from whatsapp import WhatsAppClient
 from whatsapp.init_groups import gather_groups
-
+from text_embeding import VoyageEmbeddingFunction
 settings = Settings()  # pyright: ignore [reportCallIssue]
 
 
@@ -39,11 +39,20 @@ async def lifespan(app: FastAPI):
         future=True,
     )
     async with engine.begin() as conn:
+        
+        # Enable pgvector extension
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        
         await conn.run_sync(SQLModel.metadata.create_all)
     asyncio.create_task(gather_groups(engine, app.state.whatsapp))
 
     app.state.db_engine = engine
-
+    app.state.embedding_function = VoyageEmbeddingFunction(
+        settings.voyage_api_key,
+        settings.voyage_max_retries,
+        settings.voyage_model_name,
+        settings.voyage_batch_size
+    )
     try:
         yield
     finally:
