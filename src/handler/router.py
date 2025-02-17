@@ -6,8 +6,8 @@ from pydantic import BaseModel, TypeAdapter, Field
 from pydantic_ai import Agent
 from sqlmodel import desc, select
 
-from models import Message, KBTopic, KBTopicCreate
-from utils.Voyage_embed_text import voyage_embed_text
+from models import Message, KBTopic
+from utils.voyage_embed_text import voyage_embed_text
 from .base_handler import BaseHandler
 
 # Creating an object
@@ -26,16 +26,6 @@ class RouteModel(BaseModel):
 class Router(BaseHandler):
     async def __call__(self, message: Message):
         route = await self._route(message.text)
-<<<<<<< HEAD
-        logging.warning(f"Routing decision: {route}")
-        match route:
-            case RouteEnum.summarize:
-                await self.summarize(message.chat_jid)
-            case RouteEnum.ask_question:
-                await self.ask_question(message.text)
-            case RouteEnum.other:
-                logging.warning(f"OTHER route was chosen Lets see why: {message.text}, {message.chat_jid}")
-=======
         logger.warning(f"Route: {route}")
         await self.ask_question(message.text, message.chat_jid)
         
@@ -46,7 +36,6 @@ class Router(BaseHandler):
         #         await self.ask_question(message.text)
         #     case RouteEnum.other:
         #         logging.warning(f"OTHER route was chosen Lets see why: {message.text}, {message.chat_jid}")
->>>>>>> origin/main
 
     async def _route(self, message: str) -> RouteEnum:
         agent = Agent(

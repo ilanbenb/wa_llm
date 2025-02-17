@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 from models.knowledge_base_topic import KBTopic
 from models.message import Message
 from utils.voyage_embed_text import voyage_embed_text
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
 import uuid
 
 class Topic(BaseModel):
@@ -18,27 +20,6 @@ class Topic(BaseModel):
 
 
 class topicsLoader():
-
-    # will be used for the historical data
-    def _create_user_mapping(self, wa_df: pd.DataFrame) -> Dict[str, str]:
-        """
-        Creates a mapping of usernames to shortened names (@user_[id]),
-        where more frequent speakers get lower IDs.
-        
-        Parameters:
-        df (pandas.DataFrame): DataFrame containing WhatsApp chat data with 'username' column
-        
-        Returns:
-        Dict[str, str]: Mapping of original usernames to shortened names
-        """
-        # Count messages per user and sort by frequency (descending)
-        user_counts = wa_df['username'].value_counts()
-        
-        # Create mapping with lower IDs for more frequent speakers
-        user_mapping = {username: f"@user_{i+1}" 
-                    for i, (username, _) in enumerate(user_counts.items())}
-        
-        return user_mapping
 
     def _swap_numbers_tags_in_messages_to_user_tags(self, message: str, user_mapping: Dict[str, str]) -> str:
         for k, v in user_mapping.items():
@@ -94,9 +75,8 @@ class topicsLoader():
             .where(Message.group_jid == group_jid)
             .order_by(desc(Message.timestamp))
         )
-        res = await db_session.execute(stmt)
-        # messages: list[Message] = res.all()
-        messages = [row[0] for row in res.all()]  # Unpack the Message objects from the result tuples
+        res = await db_session.exec(stmt)
+        messages: list[Message] = res.all()
 
         if len(messages) == 0:
             print("No messages found for group", group_jid)
@@ -131,7 +111,7 @@ class topicsLoader():
         db_session.add_all([KBTopic(**doc.dict()) for doc in doc_models])
         await db_session.commit()
 
-
+# TODO: This is a test entrypoint, remove it when we have a proper way to run the daily ingest
 if __name__ == "__main__":
     DB_URI="postgresql+asyncpg://user:password@localhost:5432/webhook_db"
     VOYAGE_API_KEY="pa-Zjvv5hZ7QCG52rvGoLVbyRoXQjSuj3w-W96iX6-6Sjb"
