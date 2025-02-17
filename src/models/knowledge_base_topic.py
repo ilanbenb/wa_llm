@@ -7,7 +7,6 @@ from datetime import datetime
 
 
 class KBTopicBase(SQLModel):
-    content: str = Field(index=True)
     group_jid: Optional[str] = Field(
         max_length=255,
         foreign_key="group.group_jid",
