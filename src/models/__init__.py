@@ -3,7 +3,7 @@ from .message import Message, BaseMessage
 from .sender import Sender, BaseSender
 from .webhook import WhatsAppWebhookPayload
 from .upsert import upsert
-from .knowledge_base_topic import KBTopic
+from .knowledge_base_topic import KBTopic, KBTopicCreate
 
 __all__ = [
     "Group",
@@ -14,5 +14,6 @@ __all__ = [
     "BaseSender",
     "WhatsAppWebhookPayload",
     "upsert",
-    "KBTopic"
+    "KBTopic",
+    "KBTopicCreate"
 ]

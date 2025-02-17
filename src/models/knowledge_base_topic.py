@@ -17,9 +17,9 @@ class KBTopicBase(SQLModel):
     subject: str
     summary: str
 
-# class KBTIPICCreate(KBTopicBase):
-#     id: str
-#     embedding: List[float]
+class KBTopicCreate(KBTopicBase):
+    id: str
+    embedding: List[float]
 
 class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
