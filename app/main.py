@@ -6,6 +6,8 @@ from warnings import warn
 from fastapi import Depends, FastAPI
 from sqlmodel import SQLModel, text
 from sqlalchemy.ext.asyncio import create_async_engine
+import logging
+
 
 import models  # noqa
 from config import Settings
@@ -21,6 +23,13 @@ settings = Settings()  # pyright: ignore [reportCallIssue]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global settings
+    # Create and configure logger
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=settings.log_level,
+    )
+
     app.state.settings = settings
     app.state.whatsapp = WhatsAppClient(
         settings.whatsapp_host,

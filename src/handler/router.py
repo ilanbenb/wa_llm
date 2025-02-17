@@ -11,6 +11,8 @@ from voyageai.client_async import AsyncClient
 from models import Message, KBTopic, KBTopicCreate
 from .base_handler import BaseHandler
 
+# Creating an object
+logger = logging.getLogger(__name__)
 
 class RouteEnum(str, Enum):
     summarize = "SUMMARIZE"
@@ -25,6 +27,7 @@ class RouteModel(BaseModel):
 class Router(BaseHandler):
     async def __call__(self, message: Message):
         route = await self._route(message.text)
+<<<<<<< HEAD
         logging.warning(f"Routing decision: {route}")
         match route:
             case RouteEnum.summarize:
@@ -33,6 +36,18 @@ class Router(BaseHandler):
                 await self.ask_question(message.text)
             case RouteEnum.other:
                 logging.warning(f"OTHER route was chosen Lets see why: {message.text}, {message.chat_jid}")
+=======
+        logger.warning(f"Route: {route}")
+        await self.ask_question(message.text, message.chat_jid)
+        
+        # match route:
+        #     case RouteEnum.summarize:
+        #         await self.summarize(message.chat_jid)
+        #     case RouteEnum.ask_question:
+        #         await self.ask_question(message.text)
+        #     case RouteEnum.other:
+        #         logging.warning(f"OTHER route was chosen Lets see why: {message.text}, {message.chat_jid}")
+>>>>>>> origin/main
 
     async def _route(self, message: str) -> RouteEnum:
         agent = Agent(
@@ -43,6 +58,7 @@ class Router(BaseHandler):
 
         result = await agent.run(message)
         return result.data
+    
     async def summarize(self, chat_jid: str):
         time_24_hours_ago = datetime.utcnow() - timedelta(hours=24)
         stmt = (
@@ -82,7 +98,7 @@ class Router(BaseHandler):
             total_tokens += res.total_tokens
         return embeddings
     
-    async def ask_question(self, question: str):
+    async def ask_question(self, question: str, chat_jid: str):
         
         rephrased_agent = Agent(
             model="anthropic:claude-3-5-haiku-latest",
@@ -103,7 +119,7 @@ class Router(BaseHandler):
         
         similar_topics = []
         for result in retrieved_topics:
-            similar_topics.append(result.content)
+            similar_topics.append(f"{result.subject} \n {result.summary}")
 
         generation_agent = Agent(
             model="anthropic:claude-3-5-sonnet-latest",
@@ -122,8 +138,15 @@ class Router(BaseHandler):
         '''
         
         generation_response = await generation_agent.run(prompt_template)
-        logging.info(f"retreival: {similar_topics}, generation {generation_response.data}")
-        return generation_response.data
+        logger.info(
+            "RAG Query Results:\n"
+            f"Question: {question}\n"
+            f"Chat JID: {chat_jid}\n"
+            f"Retrieved Topics: {len(similar_topics)}\n"
+            "Topics:\n" + "\n".join(f"- {topic[:100]}..." for topic in similar_topics) + "\n"
+            f"Generated Response: {generation_response.data}"
+        )
+        await self.send_message(chat_jid, generation_response.data)
 
 
     class Discussion(BaseModel):

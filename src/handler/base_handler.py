@@ -25,7 +25,7 @@ class BaseHandler:
         self,
         message: Message | BaseMessage | WhatsAppWebhookPayload,
         sender_pushname: str | None = None,
-    ) -> Message:
+    ) -> Message|None:
         """
         Store a message in the database
         :param message:  Message to store - can be a Message, BaseMessage or WhatsAppWebhookPayload
@@ -37,6 +37,9 @@ class BaseHandler:
             message = Message.from_webhook(message)
         if isinstance(message, BaseMessage):
             message = Message(**message.model_dump())
+        
+        if not message.text:
+            return message # Don't store messages without text
 
         async with self.session.begin_nested():
             # Ensure sender exists and is committed
