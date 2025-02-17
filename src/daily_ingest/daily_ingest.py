@@ -4,10 +4,9 @@ from typing import Dict, List
 from pydantic_ai import Agent
 from voyageai.client_async import AsyncClient
 from sqlmodel import desc, select
-from models import KBTopicCreate
+from models import KBTopicCreate, Group, Message
 from pydantic import BaseModel, Field
 from models.knowledge_base_topic import KBTopic
-from models.message import Message
 from utils.voyage_embed_text import voyage_embed_text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -85,8 +84,6 @@ class topicsLoader():
         # The result is ordered by timestamp, so the first message is the oldest
         start_time = messages[0].timestamp
         daily_topics = await self._get_conversation_topics(messages)
-        print(daily_topics)
-
         documents = [f"# {topic.subject}\n{topic.summary}" for topic in daily_topics]
         daily_topics_embeddings = await voyage_embed_text(embedding_client, documents)
 
@@ -108,7 +105,7 @@ class topicsLoader():
                 )
             ]
         # Once we give a meaningfull ID, we should migrate to upsert! 
-        db_session.add_all([KBTopic(**doc.dict()) for doc in doc_models])
+        db_session.add_all([KBTopic(**doc.model_dump()) for doc in doc_models])
         await db_session.commit()
 
 # TODO: This is a test entrypoint, remove it when we have a proper way to run the daily ingest
@@ -125,10 +122,14 @@ if __name__ == "__main__":
     topics_loader = topicsLoader()
     
     async def main():
-        await topics_loader.load_topics(
-            db_session=db_session,
-            group_jid="120363129163784940@g.us",
-            embedding_client=embedding_client
-        )
+        groups = (await db_session.exec(select(Group))).all()
+        for group in groups:
+            if not group.managed:
+                continue
+            await topics_loader.load_topics(
+                db_session=db_session,
+                group_jid=group.group_jid,
+                embedding_client=embedding_client
+            )
         
     asyncio.run(main())
