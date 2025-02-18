@@ -15,6 +15,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.37",
     "pgvector>=0.3.6",
     "voyageai>=0.3.2",
+    "tenacity>=9.0.0",
 ]
 [tool.pyright.reportMissingTypeStubs]
 sqlmodel = false

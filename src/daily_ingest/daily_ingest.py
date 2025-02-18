@@ -7,11 +7,15 @@ from sqlmodel import desc, select
 from models import KBTopicCreate, Group, Message
 from pydantic import BaseModel, Field
 from models.knowledge_base_topic import KBTopic
+from models.upsert import bulk_upsert
 from utils.voyage_embed_text import voyage_embed_text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
-import uuid
+import hashlib 
+from tenacity import retry, wait_random_exponential, stop_after_attempt, after_log
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Topic(BaseModel):
     subject: str = Field(description="The subject of the summary")
@@ -40,9 +44,17 @@ def _remap_user_mapping_to_tagged_users(
 
 
 async def get_conversation_topics(messages: list[Message]) -> List[Topic]:
-    sender_test = {msg.sender_jid for msg in messages}
+    @retry(
+        wait=wait_random_exponential(min=1, max=30),
+        stop=stop_after_attempt(6),
+        after=after_log(logger, logging.ERROR),
+    )
+    async def _run_agent(content):
+        return await agent.run(content)
+
+    sender_jids = {msg.sender_jid for msg in messages}
     speaker_mapping = {
-        sender_jid: f"@user_{i+1}" for i, sender_jid in enumerate(sender_test)
+        sender_jid: f"@user_{i+1}" for i, sender_jid in enumerate(sender_jids)
     }
 
     # Create the reverse mapping: enumerated number -> original username
@@ -67,7 +79,7 @@ Break the conversation into a list of topics.
         retries=5,
     )
 
-    result = await agent.run(conversation_content)
+    result = await _run_agent(conversation_content)
     for topic in result.data:
         # If for some reason the speaker is not in the mapping, keep the original speaker
         # This case was needed when the speaker is not in the mapping because the user was not in the chat
@@ -95,7 +107,7 @@ async def load_topics(
     doc_models = [
         KBTopicCreate(
             #  TODO: decide on a meaningfull ID to allow upserts. Probably group_jid + subject and start_time to allow for multiple topics with the same subject
-            id=str(uuid.uuid4()),
+            id=str(hashlib.sha256(f'{group_jid}_{start_time}_{topic.subject}'.encode()) ),
             embedding=emb,
             group_jid=group_jid,
             start_time=start_time,
@@ -107,7 +119,7 @@ async def load_topics(
         for topic, emb in zip(topics, topics_embeddings)
     ]
     # Once we give a meaningfull ID, we should migrate to upsert!
-    db_session.add_all([KBTopic(**doc.model_dump()) for doc in doc_models])
+    await bulk_upsert(db_session, [KBTopic(**doc.model_dump()) for doc in doc_models])
     await db_session.commit()
 
 

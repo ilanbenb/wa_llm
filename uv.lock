@@ -2642,6 +2642,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "sqlmodel" },
+    { name = "tenacity" },
     { name = "uvicorn" },
     { name = "voyageai" },
 ]
@@ -2669,6 +2670,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.7.1" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.37" },
     { name = "sqlmodel", specifier = ">=0.0.22" },
+    { name = "tenacity", specifier = ">=9.0.0" },
     { name = "uvicorn", specifier = ">=0.34.0" },
     { name = "voyageai", specifier = ">=0.3.2" },
 ]
