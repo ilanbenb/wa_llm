@@ -6,8 +6,10 @@ from warnings import warn
 from fastapi import Depends, FastAPI
 from sqlmodel import SQLModel, text
 from sqlalchemy.ext.asyncio import create_async_engine
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import logging
-
+from daily_ingest.daily_ingest import topicsLoader
+from datetime import datetime, timezone
 
 import models  # noqa
 from config import Settings
@@ -61,9 +63,35 @@ async def lifespan(app: FastAPI):
             api_key=settings.voyage_api_key,
             max_retries=settings.voyage_max_retries
     )
+
+    # Initialize scheduler
+    scheduler = AsyncIOScheduler()
+    
+    async def ingest_job():
+        try:
+            logging.info("Starting daily ingest job")
+            # Add your ingest logic here
+            # await topicsLoader().load_topics_for_all_groups( app.state.db_engine, app.state.embedding_client)
+        except Exception as e:
+            logging.error(f"Error in daily ingest job: {e}")
+
+    # Schedule the job to run daily at midnight UTC
+    scheduler.add_job(
+        ingest_job,
+        'cron',
+        hour=0,
+        minute=0,
+        timezone=timezone.utc
+    )
+    
+    scheduler.start()
+    
     try:
         yield
     finally:
+        # Cancel the ingest task
+    
+        scheduler.shutdown()
         await engine.dispose()
 
 

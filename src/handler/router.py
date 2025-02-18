@@ -8,7 +8,7 @@ from sqlmodel import desc, select
 
 from models import Message, KBTopic
 from utils.voyage_embed_text import voyage_embed_text
-from .base_handler import BaseHandler
+from handler.base_handler import BaseHandler
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ class Router(BaseHandler):
         similar_topics = []
         for result in retrieved_topics:
             similar_topics.append(f"{result.subject} \n {result.summary}")
-
+        similar_topics_str = "\n---\n".join(similar_topics)
         generation_agent = Agent(
             model="anthropic:claude-3-5-sonnet-latest",
             system_prompt="""Based on the topics attached, write a response to the query.
@@ -104,9 +104,8 @@ class Router(BaseHandler):
 
         prompt_template = f'''
         question: {rephrased_response.data}
-
         topics related to the query:
-        {"\n---\n".join(similar_topics)}
+        {similar_topics_str}
         '''
         
         generation_response = await generation_agent.run(prompt_template)

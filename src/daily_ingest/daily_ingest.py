@@ -107,11 +107,19 @@ class topicsLoader():
         # Once we give a meaningfull ID, we should migrate to upsert! 
         db_session.add_all([KBTopic(**doc.model_dump()) for doc in doc_models])
         await db_session.commit()
+    async def load_topics_for_all_groups(self, db_session: AsyncSession, embedding_client: AsyncClient):
+        groups = (await db_session.exec(select(Group))).all()
+        for group in groups:
+            if not group.managed:
+                continue
+            await self.load_topics(db_session, group.group_jid, embedding_client)
 
 # TODO: This is a test entrypoint, remove it when we have a proper way to run the daily ingest
 if __name__ == "__main__":
-    DB_URI="postgresql+asyncpg://user:password@localhost:5432/webhook_db"
-    VOYAGE_API_KEY="pa-Zjvv5hZ7QCG52rvGoLVbyRoXQjSuj3w-W96iX6-6Sjb"
+    import os
+    
+    DB_URI= os.getenv("DB_URI")
+    VOYAGE_API_KEY= os.getenv("VOYAGE_API_KEY")
 
     engine = create_async_engine(DB_URI)
     db_session = AsyncSession(engine)
@@ -122,14 +130,6 @@ if __name__ == "__main__":
     topics_loader = topicsLoader()
     
     async def main():
-        groups = (await db_session.exec(select(Group))).all()
-        for group in groups:
-            if not group.managed:
-                continue
-            await topics_loader.load_topics(
-                db_session=db_session,
-                group_jid=group.group_jid,
-                embedding_client=embedding_client
-            )
+        await topics_loader.load_topics_for_all_groups(db_session, embedding_client)
         
     asyncio.run(main())
