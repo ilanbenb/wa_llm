@@ -11,11 +11,12 @@ from models.upsert import bulk_upsert
 from utils.voyage_embed_text import voyage_embed_text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
-import hashlib 
+import hashlib
 from tenacity import retry, wait_random_exponential, stop_after_attempt, after_log
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class Topic(BaseModel):
     subject: str = Field(description="The subject of the summary")
@@ -106,16 +107,18 @@ async def load_topics(
 
     doc_models = [
         KBTopicCreate(
-            #  TODO: decide on a meaningfull ID to allow upserts. Probably group_jid + subject and start_time to allow for multiple topics with the same subject
-            id=str(hashlib.sha256(f'{group_jid}_{start_time}_{topic.subject}'.encode()) ),
+            id=str(
+                hashlib.sha256(
+                    f"{group_jid}_{start_time}_{topic.subject}".encode()
+                ).hexdigest()
+            ),
             embedding=emb,
             group_jid=group_jid,
             start_time=start_time,
-            # TODO: migrate speakers to a list
             speakers=",".join(topic.speakers),
             summary=topic.summary,
             subject=topic.subject,
-        )  # type: ignore
+        )
         for topic, emb in zip(topics, topics_embeddings)
     ]
     # Once we give a meaningfull ID, we should migrate to upsert!

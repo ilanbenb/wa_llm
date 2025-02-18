@@ -28,16 +28,16 @@ async def upsert(session: AsyncSession, entity: SQLModel):
 async def bulk_upsert(session: AsyncSession, entities: List[SQLModel]):
     if not entities:
         return None
-    
+
     # Get the first entity to determine the model class and structure
     entity_class = entities[0].__class__
-    
+
     # Extract all values for bulk insert
     values_list = []
     # Get structure from first entity
     first_entity = entities[0]
     pkeys = {f.name for f in first_entity.__table__.columns if f.primary_key}
-    
+
     for entity in entities:
         row_data = {}
         for f in entity.__table__.columns:
