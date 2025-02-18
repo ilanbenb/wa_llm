@@ -57,8 +57,12 @@ class BaseMessage(SQLModel):
 
 
 class Message(BaseMessage, table=True):
-    sender: Optional["Sender"] = Relationship(back_populates="messages", sa_relationship_kwargs={'lazy': 'selectin'})
-    group: Optional["Group"] = Relationship(back_populates="messages", sa_relationship_kwargs={'lazy': 'selectin'})
+    sender: Optional["Sender"] = Relationship(
+        back_populates="messages", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    group: Optional["Group"] = Relationship(
+        back_populates="messages", sa_relationship_kwargs={"lazy": "selectin"}
+    )
     replies: List["Message"] = Relationship(
         sa_relationship_kwargs={
             "primaryjoin": "Message.message_id==foreign(Message.reply_to_id)",

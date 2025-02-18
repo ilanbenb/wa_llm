@@ -13,6 +13,7 @@ from .base_handler import BaseHandler
 # Creating an object
 logger = logging.getLogger(__name__)
 
+
 class RouteEnum(str, Enum):
     summarize = "SUMMARIZE"
     ask_question = "ASK_QUESTION"
@@ -28,7 +29,7 @@ class Router(BaseHandler):
         route = await self._route(message.text)
         logger.warning(f"Route: {route}")
         await self.ask_question(message.text, message.chat_jid)
-        
+
         # match route:
         #     case RouteEnum.summarize:
         #         await self.summarize(message.chat_jid)
@@ -46,7 +47,7 @@ class Router(BaseHandler):
 
         result = await agent.run(message)
         return result.data
-    
+
     async def summarize(self, chat_jid: str):
         time_24_hours_ago = datetime.utcnow() - timedelta(hours=24)
         stmt = (
@@ -71,24 +72,25 @@ class Router(BaseHandler):
         await self.send_message(chat_jid, response.data)
 
     async def ask_question(self, question: str, chat_jid: str):
-        
         rephrased_agent = Agent(
             model="anthropic:claude-3-5-haiku-latest",
-            system_prompt="Phrase the following sentence to retrieve information for the knowledge base. ONLY answer with the new phrased query, no other text"
+            system_prompt="Phrase the following sentence to retrieve information for the knowledge base. ONLY answer with the new phrased query, no other text",
         )
 
         # We obviously need to translate the question and turn the question vebality to a title / summary text to make it closer to the questions in the rag
         rephrased_response = await rephrased_agent.run(question)
         # Get query embedding
-        embedded_question = (await voyage_embed_text(self.embedding_client, [rephrased_response.data]))[0]
-        
+        embedded_question = (
+            await voyage_embed_text(self.embedding_client, [rephrased_response.data])
+        )[0]
+
         # query for user query
         retrieved_topics = await self.session.exec(
             select(KBTopic)
             .order_by(KBTopic.embedding.l2_distance(embedded_question))
             .limit(5)
         )
-        
+
         similar_topics = []
         for result in retrieved_topics:
             similar_topics.append(f"{result.subject} \n {result.summary}")
@@ -99,23 +101,25 @@ class Router(BaseHandler):
             - Write a casual direct response to the query. no need to repeat the query.
             - Answer in the same language as the query.
             - Only answer from the topics attached, no other text.
-            - Please do tag users while talking about them (e.g., @972536150150). ONLY answer with the new phrased query, no other text."""
+            - Please do tag users while talking about them (e.g., @972536150150). ONLY answer with the new phrased query, no other text.""",
         )
 
-        prompt_template = f'''
+        prompt_template = f"""
         question: {rephrased_response.data}
 
         topics related to the query:
         {"\n---\n".join(similar_topics)}
-        '''
-        
+        """
+
         generation_response = await generation_agent.run(prompt_template)
         logger.info(
             "RAG Query Results:\n"
             f"Question: {question}\n"
             f"Chat JID: {chat_jid}\n"
             f"Retrieved Topics: {len(similar_topics)}\n"
-            "Topics:\n" + "\n".join(f"- {topic[:100]}..." for topic in similar_topics) + "\n"
+            "Topics:\n"
+            + "\n".join(f"- {topic[:100]}..." for topic in similar_topics)
+            + "\n"
             f"Generated Response: {generation_response.data}"
         )
         await self.send_message(chat_jid, generation_response.data)

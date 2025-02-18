@@ -6,7 +6,6 @@ from pgvector.sqlalchemy import Vector
 from datetime import datetime
 
 
-
 class KBTopicBase(SQLModel):
     group_jid: Optional[str] = Field(
         max_length=255,
@@ -21,23 +20,23 @@ class KBTopicBase(SQLModel):
     subject: str
     summary: str
 
+
 class KBTopicCreate(KBTopicBase):
     id: str
     embedding: List[float]
 
+
 class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
-    embedding:  List[float] = Field(sa_type=Vector(1024))
+    embedding: List[float] = Field(sa_type=Vector(1024))
 
     # Add pgvector index
     __table_args__ = (
         Index(
-            'kb_topic_embedding_idx',
-            'embedding',
-            postgresql_using='ivfflat',
-            postgresql_with={'lists': 100},
-            postgresql_ops={'embedding': 'vector_cosine_ops'}
+            "kb_topic_embedding_idx",
+            "embedding",
+            postgresql_using="ivfflat",
+            postgresql_with={"lists": 100},
+            postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
     )
-
-

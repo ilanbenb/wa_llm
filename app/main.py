@@ -25,8 +25,8 @@ async def lifespan(app: FastAPI):
     global settings
     # Create and configure logger
     logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
         level=settings.log_level,
     )
 
@@ -49,17 +49,15 @@ async def lifespan(app: FastAPI):
         future=True,
     )
     async with engine.begin() as conn:
-        
         # Enable pgvector extension
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-        
+
         await conn.run_sync(SQLModel.metadata.create_all)
     asyncio.create_task(gather_groups(engine, app.state.whatsapp))
 
     app.state.db_engine = engine
     app.state.embedding_client = AsyncClient(
-            api_key=settings.voyage_api_key,
-            max_retries=settings.voyage_max_retries
+        api_key=settings.voyage_api_key, max_retries=settings.voyage_max_retries
     )
     try:
         yield

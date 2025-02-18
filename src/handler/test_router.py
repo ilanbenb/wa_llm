@@ -13,6 +13,8 @@ from whatsapp import SendMessageRequest
 from test_utils.mock_session import mock_session  # noqa
 from voyageai.object.embeddings import EmbeddingsObject
 from voyageai.api_resources.response import VoyageResponse
+
+
 @pytest.fixture
 def mock_whatsapp():
     client = AsyncMock()
@@ -20,18 +22,19 @@ def mock_whatsapp():
     client.get_my_jid = AsyncMock(return_value="bot@s.whatsapp.net")
     return client
 
+
 @pytest.fixture
 def mock_embedding_client():
     client = AsyncMock()
     client.embed = AsyncMock(
         return_value=EmbeddingsObject(
             response=VoyageResponse(
-                embeddings=[[0.1, 0.2, 0.3, 0.4, 0.5]],
-                usage={"total_tokens": 4}
+                embeddings=[[0.1, 0.2, 0.3, 0.4, 0.5]], usage={"total_tokens": 4}
             )
         )
     )
     return client
+
 
 @pytest.fixture
 def test_message():
@@ -52,7 +55,9 @@ def MockAgent(return_value: Any):
 
 @pytest.mark.asyncio
 @pytest.mark.skip(reason="Skipping For now until I fix the mock..")
-async def test_router_ask_question_route(mock_session, mock_whatsapp, mock_embedding_client, test_message, monkeypatch):
+async def test_router_ask_question_route(
+    mock_session, mock_whatsapp, mock_embedding_client, test_message, monkeypatch
+):
     # Mock the Agent class
     mock_agent = MockAgent(RouteEnum.ask_question)
 
@@ -78,6 +83,7 @@ async def test_router_ask_question_route(mock_session, mock_whatsapp, mock_embed
             message="cool response",
         )
     )
+
 
 @pytest.mark.asyncio
 async def test_router_summarize_route(
@@ -131,7 +137,7 @@ async def test_router_summarize_route(
 
 @pytest.mark.asyncio
 async def test_router_other_route(
-    mock_session, mock_whatsapp, mock_embedding_client,test_message, monkeypatch
+    mock_session, mock_whatsapp, mock_embedding_client, test_message, monkeypatch
 ):
     # Mock the Agent class
     mock_agent = MockAgent(RouteEnum.other)

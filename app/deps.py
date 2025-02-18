@@ -24,9 +24,11 @@ def get_whatsapp(request: Request) -> WhatsAppClient:
     assert request.app.state.whatsapp, "WhatsApp client not initialized"
     return request.app.state.whatsapp
 
+
 def get_text_embebedding(request: Request) -> AsyncClient:
     assert request.app.state.embedding_client, "text embedding not initialized"
     return request.app.state.embedding_client
+
 
 async def get_handler(
     session: Annotated[AsyncSession, Depends(get_db_async_session)],

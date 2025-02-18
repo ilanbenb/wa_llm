@@ -15,5 +15,5 @@ __all__ = [
     "WhatsAppWebhookPayload",
     "upsert",
     "KBTopic",
-    "KBTopicCreate"
+    "KBTopicCreate",
 ]

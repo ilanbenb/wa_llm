@@ -40,6 +40,7 @@ async def test_message_mentions(mock_session):
     assert message.has_mentioned("1234567890@s.whatsapp.net")
     assert not message.has_mentioned("9876543210@s.whatsapp.net")
 
+
 async def test_message_with_image(mock_session):
     # {'from': '972546610050:33@s.whatsapp.net in 972546610050@s.whatsapp.net',
     #  'image': {'media_path': 'statics/media/1739707428-82e94149-f7bf-4300-9621-70af93bda5a4.jpeg',

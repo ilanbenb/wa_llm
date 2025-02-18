@@ -16,7 +16,12 @@ from voyageai.client_async import AsyncClient
 
 
 class BaseHandler:
-    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_client: AsyncClient):
+    def __init__(
+        self,
+        session: AsyncSession,
+        whatsapp: WhatsAppClient,
+        embedding_client: AsyncClient,
+    ):
         self.session = session
         self.whatsapp = whatsapp
         self.embedding_client = embedding_client
@@ -25,7 +30,7 @@ class BaseHandler:
         self,
         message: Message | BaseMessage | WhatsAppWebhookPayload,
         sender_pushname: str | None = None,
-    ) -> Message|None:
+    ) -> Message | None:
         """
         Store a message in the database
         :param message:  Message to store - can be a Message, BaseMessage or WhatsAppWebhookPayload
@@ -37,9 +42,9 @@ class BaseHandler:
             message = Message.from_webhook(message)
         if isinstance(message, BaseMessage):
             message = Message(**message.model_dump())
-        
+
         if not message.text:
-            return message # Don't store messages without text
+            return message  # Don't store messages without text
 
         async with self.session.begin_nested():
             # Ensure sender exists and is committed

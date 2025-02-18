@@ -10,7 +10,12 @@ from .base_handler import BaseHandler
 
 
 class MessageHandler(BaseHandler):
-    def __init__(self, session: AsyncSession, whatsapp: WhatsAppClient, embedding_client: AsyncClient):
+    def __init__(
+        self,
+        session: AsyncSession,
+        whatsapp: WhatsAppClient,
+        embedding_client: AsyncClient,
+    ):
         self.router = Router(session, whatsapp, embedding_client)
         super().__init__(session, whatsapp, embedding_client)
 
