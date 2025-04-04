@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import httpx
 from pydantic import BaseModel
 
-from models.jid import JID, parse_jid
+from .jid import JID, parse_jid
 from .models import (
     LoginResponse,
     LoginWithCodeResponse,
@@ -103,7 +103,14 @@ class WhatsAppClient:
             httpx.HTTPError: If the request fails
         """
         response = await self.client.get(path, params=params)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if response.content:
+                exc.args = (
+                    f"{exc.args[0]}. Response content: {response.text}",
+                ) + exc.args[1:]
+            raise
         return response
 
     async def _post(
@@ -141,7 +148,14 @@ class WhatsAppClient:
         response = await self.client.post(
             path, json=json, data=data, files=files, headers=headers
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if response.content:
+                exc.args = (
+                    f"{exc.args[0]}. Response content: {response.text}",
+                ) + exc.args[1:]
+            raise
         return response
 
     # App Operations

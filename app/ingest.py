@@ -28,20 +28,23 @@ async def main():
     )
 
     embedding_client = AsyncClient(api_key=settings.voyage_api_key, max_retries=5)
-    
+
     # Create async engine using settings
     engine = create_async_engine(settings.db_uri)
     async_session = async_sessionmaker(
         engine, expire_on_commit=False, class_=AsyncSession
     )
-    
+
     # Create session with the async engine
     async with async_session() as session:
         topics_loader = topicsLoader()
-        await topics_loader.load_topics_for_all_groups(session, embedding_client, whatsapp)
-    
+        await topics_loader.load_topics_for_all_groups(
+            session, embedding_client, whatsapp
+        )
+
     # Clean up
     await engine.dispose()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

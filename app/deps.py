@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import Depends, Request
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config import Settings
 from handler import MessageHandler
 from whatsapp import WhatsAppClient
 from voyageai.client_async import AsyncClient

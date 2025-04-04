@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 from pydantic_ai import Agent
-from pydantic_ai.result import RunResult
+from pydantic_ai.agent import AgentRunResult
 from sqlmodel import select, cast, String
 from tenacity import (
     retry,
@@ -12,7 +12,7 @@ from tenacity import (
 )
 
 from models import Message, KBTopic
-from models.jid import parse_jid
+from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from utils.voyage_embed_text import voyage_embed_text
 from .base_handler import BaseHandler
@@ -94,9 +94,9 @@ class KnowledgeBaseAnswers(BaseHandler):
     )
     async def generation_agent(
         self, query: str, topics: list[str], sender: str, history: List[Message]
-    ) -> RunResult[str]:
+    ) -> AgentRunResult[str]:
         agent = Agent(
-            model="anthropic:claude-3-5-sonnet-latest",
+            model="anthropic:claude-3-7-sonnet-latest",
             system_prompt="""Based on the topics attached, write a response to the query.
             - Write a casual direct response to the query. no need to repeat the query.
             - Answer in the same language as the query.
@@ -108,7 +108,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         )
 
         prompt_template = f"""
-        {f'@{sender}'}: {query}
+        {f"@{sender}"}: {query}
         
         # Recent chat history:
         {chat2text(history)}
@@ -127,9 +127,9 @@ class KnowledgeBaseAnswers(BaseHandler):
     )
     async def rephrasing_agent(
         self, my_jid: str, message: Message, history: List[Message]
-    ) -> RunResult[str]:
+    ) -> AgentRunResult[str]:
         rephrased_agent = Agent(
-            model="anthropic:claude-3-5-haiku-latest",
+            model="anthropic:claude-3-7-sonnet-latest",
             system_prompt=f"""Phrase the following message as a short paragraph describing a query from the knowledge base.
             - Use English only!
             - Ensure only to include the query itself. The message that includes a lot of information - focus on what the user asks you.

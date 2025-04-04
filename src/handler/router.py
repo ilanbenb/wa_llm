@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 from enum import Enum
 
-from pydantic import BaseModel, TypeAdapter, Field
+from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -10,7 +10,7 @@ from voyageai.client_async import AsyncClient
 
 from handler.knowledge_base_answers import KnowledgeBaseAnswers
 from models import Message
-from models.jid import parse_jid
+from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from whatsapp import WhatsAppClient
 from .base_handler import BaseHandler
@@ -58,7 +58,7 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model="anthropic:claude-3-5-haiku-latest",
+            model="anthropic:claude-3-7-sonnet-latest",
             system_prompt="What is the intent of the message? What does the user want us to help with?",
             result_type=Intent,
         )
@@ -79,9 +79,10 @@ class Router(BaseHandler):
         messages: list[Message] = res.all()
 
         agent = Agent(
-            model="anthropic:claude-3-5-sonnet-latest",
+            model="anthropic:claude-3-7-sonnet-latest",
             system_prompt="""Summarize the following group chat messages in a few words.
             
+            - You MUST state that this is a summary of TODAY's messages. even if the user asked for a summary of a different time period (in this case, also state this you can only do today's summary)
             - Always personalize the summary to user request
             - Keep it short and conversational
             - Tag users when mentioning them
@@ -97,4 +98,7 @@ class Router(BaseHandler):
         await self.send_message(message.chat_jid, response.data)
 
     async def default_response(self, message):
-        await self.send_message(message.chat_jid, "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help with catching up on the chat messages or answering questions based on the group's knowledge.")
+        await self.send_message(
+            message.chat_jid,
+            "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help with catching up on the chat messages or answering questions based on the group's knowledge.",
+        )

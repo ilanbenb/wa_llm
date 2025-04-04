@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List, Optional
 from pydantic import field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
-from .jid import normalize_jid, parse_jid, JID
+from whatsapp.jid import normalize_jid, parse_jid, JID
 from .webhook import WhatsAppWebhookPayload, Message as PayloadMessage
 
 if TYPE_CHECKING:

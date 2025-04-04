@@ -11,7 +11,7 @@ from models import (
     BaseMessage,
     upsert,
 )
-from models.jid import normalize_jid
+from whatsapp.jid import normalize_jid
 from whatsapp import WhatsAppClient, SendMessageRequest
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from models.jid import (
+from whatsapp.jid import (
     JID,
     JIDParseError,
     new_ad_jid,

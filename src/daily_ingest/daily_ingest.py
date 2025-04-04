@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Field, PrivateAttr
 from pydantic_ai import Agent
-from pydantic_ai.result import RunResult
+from pydantic_ai.agent import AgentRunResult
 from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import (
@@ -45,9 +45,9 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
     before_sleep=before_sleep_log(logger, logging.DEBUG),
     reraise=True,
 )
-async def conversation_splitter_agent(content: str) -> RunResult[List[Topic]]:
+async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic]]:
     agent = Agent(
-        model="anthropic:claude-3-5-sonnet-latest",
+        model="anthropic:claude-3-7-sonnet-latest",
         system_prompt="""Attached is a snapshot from a group chat conversation. The conversation is a mix of different topics. Your task is to:
 - Break the conversation into a list of topics, each topic have the same theme of subject.
 - For each topic, write a concise summary of the topic. This will help me to understand the group dynamics and the topics discussed.
@@ -73,7 +73,7 @@ def _get_speaker_mapping(messages: List[Message]) -> Dict[str, str]:
 
     for message in messages:
         # extract all regex @d+ from message.text and add them to speaker_mapping
-        for speaker in message.text.split():
+        for speaker in (message.text or "").split():
             if speaker.startswith("@") and speaker[1:].isdigit():
                 if speaker[1:] not in speaker_mapping:
                     speaker_mapping[speaker[1:]] = f"user_{i}"

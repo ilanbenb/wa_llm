@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     def apply_env(self) -> Self:
         if self.anthropic_api_key:
             environ["ANTHROPIC_API_KEY"] = self.anthropic_api_key
-        
+
         if self.logfire_token:
             environ["LOGFIRE_TOKEN"] = self.logfire_token
 
