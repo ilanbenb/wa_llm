@@ -11,9 +11,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d webhook_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   whatsapp:
-    image: aldinokemal2104/go-whatsapp-web-multidevice:v5.2.0
+    image: aldinokemal2104/go-whatsapp-web-multidevice:v5.4.0
     container_name: whatsapp
     ports:
       - "3000:3000"
@@ -30,11 +35,6 @@ services:
       - DB_URI=postgres://user:password@postgres:5432/webhook_db?sslmode=disable
       - APP_BASIC_AUTH=admin:admin
       - WHATSAPP_CHAT_STORAGE=false
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d webhook_db" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
 volumes:
   whatsapp:
