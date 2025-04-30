@@ -99,7 +99,7 @@ class Router(BaseHandler):
         response = await agent.run(
             f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(messages)}"
         )
-        await self.send_message(message.chat_jid, response.data)
+        await self.send_message(message.chat_jid, response.data, message.message_id,)
 
     async def about(self, message):
         await self.send_message(
@@ -108,10 +108,12 @@ class Router(BaseHandler):
             I can help you catch up on the chat messages and answer questions based on the group's knowledge.
             Check out the project on github: https://github.com/ilanbenb/wa_llm
             """,
+            message.message_id,
         )
 
     async def default_response(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help with catching up on the chat messages or answering questions based on the group's knowledge.",
+            message.message_id,
         )
