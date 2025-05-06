@@ -11,6 +11,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d webhook_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   whatsapp:
     image: aldinokemal2104/go-whatsapp-web-multidevice:v5.2.0
