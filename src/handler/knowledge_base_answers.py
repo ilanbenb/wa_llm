@@ -84,7 +84,7 @@ class KnowledgeBaseAnswers(BaseHandler):
             f"Generated Response: {generation_response.data}"
         )
 
-        await self.send_message(message.chat_jid, generation_response.data)
+        await self.send_message(message.chat_jid, generation_response.data, message.message_id,)
 
     @retry(
         wait=wait_random_exponential(min=1, max=30),

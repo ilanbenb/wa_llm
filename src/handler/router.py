@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class IntentEnum(str, Enum):
     summarize = "summarize"
     ask_question = "ask_question"
+    about = "about"
     other = "other"
 
 
@@ -30,6 +31,7 @@ class Intent(BaseModel):
         description="""The intent of the message.
 - summarize: The user wants to summarize the chat messages, or to catch up on the chat messages. This will trigger the summarization of the chat messages.
 - ask_question: The user wants to ask a question or learn from the collective knowledge of the group. This will trigger the knowledge base to answer the question.
+- about: The user wants to know more about the bot and its capabilities. This will trigger the about section.
 - other: the user wants to do something else. This will trigger the default response."""
     )
 
@@ -53,6 +55,8 @@ class Router(BaseHandler):
                 await self.summarize(message)
             case IntentEnum.ask_question:
                 await self.ask_knowledge_base(message)
+            case IntentEnum.about:
+                await self.about(message)
             case IntentEnum.other:
                 await self.default_response(message)
 
@@ -95,10 +99,21 @@ class Router(BaseHandler):
         response = await agent.run(
             f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(messages)}"
         )
-        await self.send_message(message.chat_jid, response.data)
+        await self.send_message(message.chat_jid, response.data, message.message_id,)
+
+    async def about(self, message):
+        await self.send_message(
+            message.chat_jid,
+            """Hi! I'm an bot based on an open sourc project that was originally created for the llm.org.il community.
+            I can help you catch up on the chat messages and answer questions based on the group's knowledge.
+            Check out the project on github: https://github.com/ilanbenb/wa_llm
+            """,
+            message.message_id,
+        )
 
     async def default_response(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help with catching up on the chat messages or answering questions based on the group's knowledge.",
+            message.message_id,
         )
