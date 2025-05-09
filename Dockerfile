@@ -25,5 +25,4 @@ ENV PYTHONPATH="/app/src:${PYTHONPATH:-}"
 
 WORKDIR /app
 
-RUN chmod +x /app/start.sh
-CMD ["/app/start.sh"]
+CMD alembic upgrade head && python app/main.py
