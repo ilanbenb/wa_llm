@@ -48,7 +48,7 @@ class AsyncQueryMock:
             return condition.__clause_element__().compare(
                 getattr(item, condition.left.key), condition.right.value
             )
-        except:
+        except Exception:
             return True  # Default to True if we can't evaluate
 
     def all(self):

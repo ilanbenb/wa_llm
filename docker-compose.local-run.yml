@@ -12,7 +12,7 @@ services:
       - WHATSAPP_WEBHOOK=http://host.docker.internal:8000/webhook
 
 volumes:
-  whatsapp:
-    name: whatsapp
-  postgres_data:
-    name: postgres_data
+  wa_llm_whatsapp:
+    name: wa_llm_whatsapp
+  wa_llm_postgres:
+    name: wa_llm_postgres

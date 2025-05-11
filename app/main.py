@@ -4,7 +4,6 @@ from typing import Annotated
 from warnings import warn
 
 from fastapi import Depends, FastAPI
-from sqlmodel import SQLModel, text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 import logging
@@ -54,9 +53,7 @@ async def lifespan(app: FastAPI):
     async_session = async_sessionmaker(
         engine, expire_on_commit=False, class_=AsyncSession
     )
-    async with engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-        await conn.run_sync(SQLModel.metadata.create_all)
+
     asyncio.create_task(gather_groups(engine, app.state.whatsapp))
 
     app.state.db_engine = engine

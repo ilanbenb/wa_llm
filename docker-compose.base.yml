@@ -9,13 +9,14 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - wa_llm_postgres:/var/lib/postgresql/data
     command: ["postgres", "-c", "log_statement=all"]
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d webhook_db" ]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U user -d webhook_db"]
+      interval: 10s
+      timeout: 5s
       retries: 5
+      start_period: 10s
 
   whatsapp:
     image: aldinokemal2104/go-whatsapp-web-multidevice:v5.4.0
@@ -27,7 +28,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - whatsapp:/app/storages
+      - wa_llm_whatsapp:/app/storages
     environment:
       - APP_PORT=3000
       - APP_DEBUG=true
@@ -37,7 +38,7 @@ services:
       - WHATSAPP_CHAT_STORAGE=false
 
 volumes:
-  whatsapp:
-    name: whatsapp
-  postgres_data:
-    name: postgres_data
+  wa_llm_whatsapp:
+    name: wa_llm_whatsapp
+  wa_llm_postgres:
+    name: wa_llm_postgres

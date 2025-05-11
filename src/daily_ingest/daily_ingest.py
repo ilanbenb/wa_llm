@@ -207,6 +207,6 @@ class topicsLoader:
         embedding_client: AsyncClient,
         whatsapp: WhatsAppClient,
     ):
-        groups = await session.exec(select(Group).where(Group.managed == True))
+        groups = await session.exec(select(Group).where(Group.managed is True))
         for group in list(groups.all()):
             await self.load_topics(session, group, embedding_client, whatsapp)

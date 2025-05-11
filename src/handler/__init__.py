@@ -1,7 +1,6 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
-from handler.knowledge_base_answers import KnowledgeBaseAnswers
 from handler.router import Router
 from models import (
     WhatsAppWebhookPayload,
@@ -22,12 +21,12 @@ class MessageHandler(BaseHandler):
 
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
-
-        # ignore messages without text
-        if not message.text:
+        # ignore messages that don't exist or don't have text
+        if not message or not message.text:
             return
 
-        if message.group and not message.group.managed:
+        # ignore messages from unmanaged groups
+        if message and message.group and not message.group.managed:
             return
 
         if not message.has_mentioned(await self.whatsapp.get_my_jid()):

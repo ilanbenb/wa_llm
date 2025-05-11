@@ -31,6 +31,8 @@ WHATSAPP_BASIC_AUTH_PASSWORD=admin
 VOYAGE_API_KEY=your_voyage_api_key
 DB_URI=postgresql+asyncpg://user:password@localhost:5432/webhook_db
 LOG_LEVEL=INFO
+ANTHROPIC_API_KEY=your-key-here # You need to have a real anthropic key here, starts with sk-....
+LOGFIRE_TOKEN=your-key-here # You need to have a real logfire key here
 ```
 
 3. Start the services:
@@ -39,6 +41,12 @@ docker-compose up -d
 ```
 
 4. Initialize the WhatsApp connection by scanning the QR code through the WhatsApp web interface.
+
+## Developing
+
+* install uv tools `uv sync --all-extras --active`
+* run ruff (Python linter and code formatter) `ruff check` and `ruff format`
+* check for types usage 
 
 ## Architecture
 
@@ -64,4 +72,4 @@ The project consists of several key components:
 
 ## License
 
-[Add your license here]
+[LICENCE](CODE_OF_CONDUCT.md)
