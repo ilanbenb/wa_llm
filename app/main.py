@@ -9,9 +9,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 import logging
 import logfire
 
+from api import status
 import models  # noqa
 from config import Settings
-from deps import get_handler
+from api.deps import get_handler
 from handler import MessageHandler
 from whatsapp import WhatsAppClient
 from whatsapp.init_groups import gather_groups
@@ -86,6 +87,7 @@ async def webhook(
 
     return "ok"
 
+app.include_router(status.router)
 
 if __name__ == "__main__":
     import uvicorn
