@@ -30,6 +30,7 @@ class BaseGroup(SQLModel):
         max_length=255, foreign_key="sender.jid", nullable=True, default=None
     )
     managed: bool = Field(default=False)
+    notify_on_spam: bool = Field(default=False)
     community_keys: Optional[List[str]] = Field(
         default=None, sa_column=Column(ARRAY(String))
     )

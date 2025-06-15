@@ -44,6 +44,6 @@ class MessageHandler(BaseHandler):
                     await self.router(message)
 
         # Handle whatsapp links in group 
-        if "https://chat.whatsapp.com/" in message.text:
+        if message.group and message.group.managed and message.group.notify_on_spam and "https://chat.whatsapp.com/" in message.text:
             await self.whatsapp_group_link_spam(message)
 
