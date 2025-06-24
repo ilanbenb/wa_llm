@@ -16,13 +16,14 @@ services:
     volumes:
       - ./src:/app/src
       - ./.env:/app/.env
+      - ./migrations:/app/migrations
     ports:
       - "8000:8000"
     depends_on:
       - postgres
       - whatsapp
     environment:
-      - DB_URI=postgresql+asyncpg://user:password@postgres:5432/webhook_db
+      - DB_URI=postgresql+asyncpg://user:password@postgres:5432/postgres
       - WHATSAPP_HOST=http://whatsapp:3000
 
 volumes:

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from pgvector.sqlalchemy import Vector
 from sqlmodel import Field, SQLModel, Index, Column, DateTime
@@ -27,7 +27,7 @@ class KBTopicCreate(KBTopicBase):
 
 class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
-    embedding: List[float] = Field(sa_type=Vector(1024))
+    embedding: Any = Field(sa_type=Vector(1024))
 
     # Add pgvector index
     __table_args__ = (
@@ -35,6 +35,6 @@ class KBTopic(KBTopicBase, table=True):
             "kb_topic_embedding_idx",
             "embedding",
             postgresql_using="hnsw",
-            postgresql_ops={"embedding": "vector_l2_ops"},
+            postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
     )

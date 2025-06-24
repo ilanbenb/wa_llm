@@ -47,7 +47,7 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
 )
 async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic]]:
     agent = Agent(
-        model="anthropic:claude-3-7-sonnet-latest",
+        model="anthropic:claude-4-sonnet-20250514",
         system_prompt="""Attached is a snapshot from a group chat conversation. The conversation is a mix of different topics. Your task is to:
 - Break the conversation into a list of topics, each topic have the same theme of subject.
 - For each topic, write a concise summary of the topic. This will help me to understand the group dynamics and the topics discussed.
@@ -56,7 +56,7 @@ async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic
 
 My goal is learn the different subject discussed in the group chat. This will be used as a knowledge base for the group, so it should not loose any important information or insights.
 """,
-        result_type=List[Topic],
+        output_type=List[Topic],
         retries=5,
     )
 
@@ -207,6 +207,6 @@ class topicsLoader:
         embedding_client: AsyncClient,
         whatsapp: WhatsAppClient,
     ):
-        groups = await session.exec(select(Group).where(Group.managed == True))
+        groups = await session.exec(select(Group).where(Group.managed == True))  # noqa: E712 https://stackoverflow.com/a/18998106
         for group in list(groups.all()):
             await self.load_topics(session, group, embedding_client, whatsapp)

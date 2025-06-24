@@ -29,7 +29,7 @@ WHATSAPP_HOST=http://localhost:3000
 WHATSAPP_BASIC_AUTH_USER=admin
 WHATSAPP_BASIC_AUTH_PASSWORD=admin
 VOYAGE_API_KEY=your_voyage_api_key
-DB_URI=postgresql+asyncpg://user:password@localhost:5432/webhook_db
+DB_URI=postgresql+asyncpg://user:password@localhost:5432/postgres
 LOG_LEVEL=INFO
 ANTHROPIC_API_KEY=your-key-here # You need to have a real anthropic key here, starts with sk-....
 LOGFIRE_TOKEN=your-key-here # You need to have a real logfire key here
@@ -42,11 +42,13 @@ docker-compose up -d
 
 4. Initialize the WhatsApp connection by scanning the QR code through the WhatsApp web interface.
 
+5. Restart web-server service to get the groups from the number 
+
 ## Developing
 
 * install uv tools `uv sync --all-extras --active`
 * run ruff (Python linter and code formatter) `ruff check` and `ruff format`
-* check for types usage 
+* check for types usage `pyright`
 
 ## Architecture
 

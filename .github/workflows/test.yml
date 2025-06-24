@@ -48,7 +48,7 @@ jobs:
       - name: Test with pytest
         run: |
           uv run coverage run --source=pytest_evals -m pytest --junitxml=junit/test-results.xml
-          uv run coverage xml
+          uv run coverage xml coverage.xml
       - name: Get Cover
         uses: orgoro/coverage@v3
         if: github.event_name == 'pull_request'

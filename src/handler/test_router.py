@@ -10,7 +10,7 @@ from voyageai.object.embeddings import EmbeddingsObject
 
 from handler.router import Router, IntentEnum
 from models import Message
-from test_utils.mock_session import mock_session, AsyncSessionMock
+from test_utils.mock_session import AsyncSessionMock, mock_session  # noqa
 from whatsapp import SendMessageRequest
 
 

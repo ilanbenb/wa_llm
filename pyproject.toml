@@ -10,14 +10,14 @@ dependencies = [
     "pydantic-settings>=2.7.1",
     "sqlmodel>=0.0.22",
     "httpx>=0.28.1",
-    "pydantic-ai[logfire]>=0.0.50",
+    "pydantic-ai[logfire]>=0.2.14",
     "asyncpg>=0.30.0",
     "sqlalchemy[asyncio]>=2.0.37",
     "pgvector>=0.3.6",
     "voyageai>=0.3.2",
     "tenacity>=9.0.0",
     "alembic>=1.14.1",
-    "logfire[fastapi,httpx,sqlalchemy]>=3.12.0",
+    "logfire[fastapi,httpx,sqlalchemy,system-metrics]>=3.12.0",
 ]
 
 [dependency-groups]
@@ -30,7 +30,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.5",
     "pytest-cov>=4.1.0",
-    "pyright>=1.1.400",
+    "pyright>=1.1.401",
     "tqdm>=4.67.1",
 ]
 

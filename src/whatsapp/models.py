@@ -31,6 +31,7 @@ class Participant(BaseModel):
 class Group(BaseModel):
     JID: str
     OwnerJID: str
+    OwnerPN: str | None
     Name: str
     NameSetAt: datetime
     NameSetBy: str

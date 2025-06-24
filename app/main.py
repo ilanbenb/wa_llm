@@ -33,7 +33,6 @@ async def lifespan(app: FastAPI):
 
     app.state.settings = settings
 
-
     app.state.whatsapp = WhatsAppClient(
         settings.whatsapp_host,
         settings.whatsapp_basic_auth_user,
@@ -76,6 +75,8 @@ logfire.configure()
 logfire.instrument_pydantic_ai()
 logfire.instrument_fastapi(app)
 logfire.instrument_httpx(capture_all=True)
+logfire.instrument_system_metrics()
+
 
 @app.post("/webhook")
 async def webhook(

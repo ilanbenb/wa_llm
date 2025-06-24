@@ -9,6 +9,8 @@ Create Date: 2025-02-18 18:37:32.975434
 from typing import Sequence, Union
 
 from alembic import op
+import pgvector
+import pgvector.sqlalchemy
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
@@ -47,6 +49,23 @@ def upgrade() -> None:
         sa.Column("community_keys", sa.ARRAY(sa.String()), nullable=True),
     )
 
+    op.create_table(
+        "message",
+        sa.Column("message_id", sa.String(length=255), primary_key=True),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("text", sa.Text(), nullable=True),
+        sa.Column("media_url", sa.String(length=255), nullable=True),
+        sa.Column("sender_jid", sa.String(length=255), nullable=True),
+        sa.Column("chat_jid", sa.String(length=255), nullable=True),
+        sa.Column(
+            "group_jid",
+            sa.String(length=255),
+            sa.ForeignKey("group.group_jid"),
+            nullable=True,
+        ),
+        sa.Column("reply_to_id", sa.String(length=255), nullable=True),
+    )
+
     # Add GIN index for community_keys
     op.create_index(
         "idx_group_community_keys",
@@ -66,10 +85,20 @@ def upgrade() -> None:
             nullable=True,
         ),
         sa.Column("start_time", sa.DateTime(timezone=True), nullable=False),
+        sa.Column(
+            "embedding", pgvector.sqlalchemy.vector.VECTOR(dim=1024), nullable=False
+        ),
         sa.Column("speakers", sa.Text(), nullable=False),
         sa.Column("subject", sa.Text(), nullable=False),
         sa.Column("summary", sa.Text(), nullable=False),
-        # Add other columns as needed from your model
+    )
+    op.create_index(
+        "kb_topic_embedding_idx",
+        "kbtopic",
+        ["embedding"],
+        unique=False,
+        postgresql_using="hnsw",
+        postgresql_ops={"embedding": "vector_cosine_ops"},
     )
 
     # ### end Alembic commands ###
@@ -80,6 +109,13 @@ def downgrade() -> None:
     op.drop_index(
         "idx_group_community_keys", table_name="group", postgresql_using="gin"
     )
+    op.drop_index(
+        "kb_topic_embedding_idx",
+        table_name="kbtopic",
+        postgresql_using="hnsw",
+        postgresql_ops={"embedding": "vector_l2_ops"},
+    )
+    op.drop_table("message")
     op.drop_table("group")
     op.drop_table("sender")
     op.drop_table("kbtopic")
