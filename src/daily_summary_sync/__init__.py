@@ -87,7 +87,7 @@ async def sync_group(session, whatsapp: WhatsAppClient, group: Group):
 
 
 async def daily_summary_sync(session: AsyncSession, whatsapp: WhatsAppClient):
-    groups = await session.exec(select(Group).where(Group.managed == True)) # noqa: E712 https://stackoverflow.com/a/18998106
+    groups = await session.exec(select(Group).where(Group.managed == True))  # noqa: E712 https://stackoverflow.com/a/18998106
     tasks = [sync_group(session, whatsapp, group) for group in list(groups.all())]
     errs = await asyncio.gather(*tasks, return_exceptions=True)
     for e in errs:

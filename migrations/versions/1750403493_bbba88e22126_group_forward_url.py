@@ -5,6 +5,7 @@ Revises: 5a9be1edde3d
 Create Date: 2025-06-20 10:11:33.663205
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -21,14 +22,11 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.add_column(
         "group",
-        sa.Column(
-            "forward_url",
-            sa.Text(),
-            nullable=True
-        ),
+        sa.Column("forward_url", sa.Text(), nullable=True),
     )
 
     # ### end Alembic commands ###
+
 
 def downgrade() -> None:
     op.drop_column("group", "forward_url")

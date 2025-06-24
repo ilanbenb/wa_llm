@@ -207,6 +207,6 @@ class topicsLoader:
         embedding_client: AsyncClient,
         whatsapp: WhatsAppClient,
     ):
-        groups = await session.exec(select(Group).where(Group.managed == True)) # noqa: E712 https://stackoverflow.com/a/18998106
+        groups = await session.exec(select(Group).where(Group.managed == True))  # noqa: E712 https://stackoverflow.com/a/18998106
         for group in list(groups.all()):
             await self.load_topics(session, group, embedding_client, whatsapp)

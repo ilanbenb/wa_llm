@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 
 class KnowledgeBaseAnswers(BaseHandler):
     async def __call__(self, message: Message):
+        # Ensure message.text is not None before passing to generation_agent
+        if message.text is None:
+            logger.warning(f"Received message with no text from {message.sender_jid}")
+            return
         # get the last 7 messages
         stmt = (
             select(Message)
@@ -31,7 +35,7 @@ class KnowledgeBaseAnswers(BaseHandler):
             .limit(7)
         )
         res = await self.session.exec(stmt)
-        history: list[Message] = res.all()
+        history: list[Message] = list(res.all())
 
         rephrased_response = await self.rephrasing_agent(
             (await self.whatsapp.get_my_jid()).user, message, history
@@ -51,9 +55,14 @@ class KnowledgeBaseAnswers(BaseHandler):
 
         # query for user query
         q = (
-            select(KBTopic)
-            .order_by(KBTopic.embedding.l2_distance(embedded_question))
-            .limit(5)
+            select(
+                KBTopic,
+                KBTopic.embedding.cosine_distance(embedded_question).label(
+                    "cosine_distance"
+                ),
+            )
+            .order_by(KBTopic.embedding.cosine_distance(embedded_question))
+            .limit(10)
         )
         if select_from:
             q = q.where(
@@ -64,8 +73,10 @@ class KnowledgeBaseAnswers(BaseHandler):
         retrieved_topics = await self.session.exec(q)
 
         similar_topics = []
-        for result in retrieved_topics:
-            similar_topics.append(f"{result.subject} \n {result.summary}")
+        similar_topics_distances = []
+        for kb_topic, topic_distance in retrieved_topics:  # Unpack the tuple
+            similar_topics.append(f"{kb_topic.subject} \n {kb_topic.summary}")
+            similar_topics_distances.append(f"topic_distance: {topic_distance}")
 
         sender_number = parse_jid(message.sender_jid).user
         generation_response = await self.generation_agent(
@@ -75,18 +86,19 @@ class KnowledgeBaseAnswers(BaseHandler):
             "RAG Query Results:\n"
             f"Sender: {sender_number}\n"
             f"Question: {message.text}\n"
-            f"Rephrased Question: {rephrased_response.data}\n"
+            f"Rephrased Question: {rephrased_response.output}\n"
             f"Chat JID: {message.chat_jid}\n"
             f"Retrieved Topics: {len(similar_topics)}\n"
+            f"Similarity Scores: {similar_topics_distances}\n"
             "Topics:\n"
             + "\n".join(f"- {topic[:100]}..." for topic in similar_topics)
             + "\n"
-            f"Generated Response: {generation_response.data}"
+            f"Generated Response: {generation_response.output}"
         )
 
         await self.send_message(
             message.chat_jid,
-            generation_response.data,
+            generation_response.output,
             message.message_id,
         )
 

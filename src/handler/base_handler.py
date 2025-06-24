@@ -17,6 +17,7 @@ from whatsapp import WhatsAppClient, SendMessageRequest
 
 logger = logging.getLogger(__name__)
 
+
 class BaseHandler:
     def __init__(
         self,

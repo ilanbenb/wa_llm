@@ -85,7 +85,9 @@ def upgrade() -> None:
             nullable=True,
         ),
         sa.Column("start_time", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("embedding", pgvector.sqlalchemy.vector.VECTOR(dim=1024), nullable=False),
+        sa.Column(
+            "embedding", pgvector.sqlalchemy.vector.VECTOR(dim=1024), nullable=False
+        ),
         sa.Column("speakers", sa.Text(), nullable=False),
         sa.Column("subject", sa.Text(), nullable=False),
         sa.Column("summary", sa.Text(), nullable=False),
@@ -96,7 +98,7 @@ def upgrade() -> None:
         ["embedding"],
         unique=False,
         postgresql_using="hnsw",
-        postgresql_ops={"embedding": "vector_l2_ops"},
+        postgresql_ops={"embedding": "vector_cosine_ops"},
     )
 
     # ### end Alembic commands ###

@@ -35,6 +35,6 @@ class KBTopic(KBTopicBase, table=True):
             "kb_topic_embedding_idx",
             "embedding",
             postgresql_using="hnsw",
-            postgresql_ops={"embedding": "vector_l2_ops"},
+            postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
     )
