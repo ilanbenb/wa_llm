@@ -8,7 +8,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 import logging
 import logfire
 
-from api import status, webhook
+from api import status, webhook, daily_summary
 import models  # noqa
 from config import Settings
 from whatsapp import WhatsAppClient
@@ -77,6 +77,7 @@ logfire.instrument_system_metrics()
 
 app.include_router(webhook.router)
 app.include_router(status.router)
+app.include_router(daily_summary.router)
 
 if __name__ == "__main__":
     import uvicorn
