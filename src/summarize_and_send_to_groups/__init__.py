@@ -44,7 +44,7 @@ async def summarize(group_name: str, messages: list[Message]) -> AgentRunResult[
     return await agent.run(chat2text(messages))
 
 
-async def sync_group(session, whatsapp: WhatsAppClient, group: Group):
+async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: Group):
     resp = await session.exec(
         select(Message)
         .where(Message.group_jid == group.group_jid)
@@ -86,9 +86,12 @@ async def sync_group(session, whatsapp: WhatsAppClient, group: Group):
         await session.commit()
 
 
-async def daily_summary_sync(session: AsyncSession, whatsapp: WhatsAppClient):
+async def summarize_and_send_to_groups(session: AsyncSession, whatsapp: WhatsAppClient):
     groups = await session.exec(select(Group).where(Group.managed == True))  # noqa: E712 https://stackoverflow.com/a/18998106
-    tasks = [sync_group(session, whatsapp, group) for group in list(groups.all())]
+    tasks = [
+        summarize_and_send_to_group(session, whatsapp, group)
+        for group in list(groups.all())
+    ]
     errs = await asyncio.gather(*tasks, return_exceptions=True)
     for e in errs:
         if isinstance(e, BaseException):

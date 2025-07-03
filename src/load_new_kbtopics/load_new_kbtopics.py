@@ -192,13 +192,9 @@ class topicsLoader:
 
             # The result is ordered by timestamp, so the first message is the oldest
             start_time = messages[0].timestamp
-            daily_topics = await get_conversation_topics(messages, my_jid.user)
-            logger.info(
-                f"Loaded {len(daily_topics)} topics for group {group.group_name}"
-            )
-            await load_topics(
-                db_session, group, embedding_client, daily_topics, start_time
-            )
+            topics = await get_conversation_topics(messages, my_jid.user)
+            logger.info(f"Loaded {len(topics)} topics for group {group.group_name}")
+            await load_topics(db_session, group, embedding_client, topics, start_time)
             logger.info(f"topics loaded for group {group.group_name}")
         except Exception as e:
             logger.error(f"Error loading topics for group {group.group_name}: {str(e)}")

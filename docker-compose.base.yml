@@ -19,7 +19,7 @@ services:
       start_period: 10s
 
   whatsapp:
-    image: aldinokemal2104/go-whatsapp-web-multidevice:v6.1.0
+    image: aldinokemal2104/go-whatsapp-web-multidevice:v6.1.2
     container_name: whatsapp
     ports:
       - "3000:3000"
