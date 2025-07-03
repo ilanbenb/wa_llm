@@ -53,6 +53,9 @@ class KnowledgeBaseAnswers(BaseHandler):
                     await message.group.get_related_community_groups(self.session)
                 )
 
+        # Consider adding cosine distance threshold
+        # cosine_distance_threshold = 0.8
+        limit_topics = 10
         # query for user query
         q = (
             select(
@@ -62,7 +65,8 @@ class KnowledgeBaseAnswers(BaseHandler):
                 ),
             )
             .order_by(KBTopic.embedding.cosine_distance(embedded_question))
-            .limit(10)
+            # .where(KBTopic.embedding.cosine_distance(embedded_question) < cosine_distance_threshold)
+            .limit(limit_topics)
         )
         if select_from:
             q = q.where(

@@ -24,4 +24,4 @@ async def webhook(
     if payload.from_:
         await handler(payload)
 
-    return "ok" 
+    return "ok"

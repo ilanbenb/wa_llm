@@ -48,6 +48,9 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
 async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic]]:
     agent = Agent(
         model="anthropic:claude-4-sonnet-20250514",
+        # Set bigger then 1024 max token for this agent, because it's a long conversation
+        # https://github.com/santokalayil/ai_agents/blame/26b51578ef5864b7f4f0c540e89297867c76d8ab/pydantic_ai/models/anthropic.py#L207C1-L208C1
+        model_settings={"max_tokens": 10000},
         system_prompt="""Attached is a snapshot from a group chat conversation. The conversation is a mix of different topics. Your task is to:
 - Break the conversation into a list of topics, each topic have the same theme of subject.
 - For each topic, write a concise summary of the topic. This will help me to understand the group dynamics and the topics discussed.

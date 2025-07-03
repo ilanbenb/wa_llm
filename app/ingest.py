@@ -23,6 +23,7 @@ async def main():
     logfire.instrument_pydantic_ai()
     logfire.instrument_httpx(capture_all=True)
     logfire.instrument_system_metrics()
+    logfire.configure(scrubbing=False)
 
     whatsapp = WhatsAppClient(
         settings.whatsapp_host,
