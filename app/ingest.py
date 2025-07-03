@@ -5,7 +5,7 @@ import logfire
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 from config import Settings
-from daily_ingest.daily_ingest import topicsLoader
+from load_new_kbtopics.load_new_kbtopics import topicsLoader
 from voyageai.client_async import AsyncClient
 
 from whatsapp import WhatsAppClient
