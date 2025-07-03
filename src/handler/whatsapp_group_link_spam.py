@@ -43,9 +43,9 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
 
         # Construct message with validated data
         message_to_send = (
-            f"@{message.group.owner_jid} - A Whatsapp group link was shared in the group. "  # type: ignore
+            f"@{message.group.owner_jid.split('@')[0]} - A Whatsapp group link was shared in the group. "  # type: ignore
             f"This might be a spam. Please check and remove if it is spam.\n\n"
-            f"Spam Confidence Level: (1 not spam - 5 spam) {spam_result.score}\n"
+            f"Spam Confidence Level: *{spam_result.score}*  (1 not spam - 5 spam) \n"
             f"Explanation: {spam_result.explanation}"
         )
 
