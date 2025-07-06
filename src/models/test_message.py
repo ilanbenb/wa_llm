@@ -42,7 +42,7 @@ async def test_message_mentions(mock_session):
 
 
 async def test_message_with_image(mock_session):
-    # {'from': '972546610050:33@s.whatsapp.net in 972546610050@s.whatsapp.net',
+    # {'from': '972546660040:33@s.whatsapp.net in 972546660040@s.whatsapp.net',
     #  'image': {'media_path': 'statics/media/1739707428-82e94149-f7bf-4300-9621-70af93bda5a4.jpeg',
     #   'mime_type': 'image/jpeg',
     #   'caption': 'https://github.com/mongodb-developer/GenAI-Showcase\n\nMongoDB\nמשחררים Repository די מרשים של דוגמאות של agents ו-RAG.\n\n10,000 נקודות למי שמנחש באיזה DB הם משתמשים.'},

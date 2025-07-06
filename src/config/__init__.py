@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     voyage_api_key: str
     voyage_max_retries: int = 5
 
+    # Direct Message settings
+    dm_autoreply_enabled: bool = False
+    dm_autoreply_message: str = "Hello, I am not designed to answer to specific messages."
+
     # Optional settings
     debug: bool = False
     log_level: str = "INFO"
