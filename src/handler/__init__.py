@@ -4,6 +4,7 @@ import httpx
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
+from config import Settings
 from handler.router import Router
 from handler.whatsapp_group_link_spam import WhatsappGroupLinkSpamHandler
 from models import (
@@ -14,6 +15,7 @@ from .base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
 
+settings = Settings()
 
 class MessageHandler(BaseHandler):
     def __init__(
@@ -31,6 +33,7 @@ class MessageHandler(BaseHandler):
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
 
+        # forward messages to the group's configured forward URL
         if (
             message
             and message.group
@@ -43,10 +46,14 @@ class MessageHandler(BaseHandler):
         if not message or not message.text:
             return
 
-        if message.sender_jid.endswith("@lid"):
-            logging.info(
-                f"Received message from {message.sender_jid}: {payload.model_dump_json()}"
+        # autoreply to private messages
+        if message and not message.group and settings.dm_autoreply_enabled:
+            await self.send_message(
+                message.sender_jid,
+                settings.dm_autoreply_message,
+                message.message_id,
             )
+            return
 
         # ignore messages from unmanaged groups
         if message and message.group and not message.group.managed:
@@ -58,7 +65,6 @@ class MessageHandler(BaseHandler):
         # Handle whatsapp links in group
         if (
             message.group
-            and message.group.managed
             and message.group.notify_on_spam
             and "https://chat.whatsapp.com/" in message.text
         ):
