@@ -47,6 +47,7 @@ LOGFIRE_TOKEN=your-key-here
 ```
 
 #### Environment Variables
+<div style="font-size: 10px;">
 
 | Variable                       | Description                          | Default                                                      |
 | ------------------------------ | ------------------------------------ | ------------------------------------------------------------ |
@@ -58,7 +59,7 @@ LOGFIRE_TOKEN=your-key-here
 | `LOG_LEVEL`                    | Log level (`DEBUG`, `INFO`, `ERROR`) | `INFO`                                                       |
 | `ANTHROPIC_API_KEY`            | Anthropic API key. You need to have a real anthropic key here, starts with sk-....                    | –                                                            |
 | `LOGFIRE_TOKEN`                | Logfire monitoring key, You need to have a real logfire key here               | –                                                            |
-
+</div>
 
 ### 3. starting the services
 ```docker compose up -d```
