@@ -52,5 +52,5 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
         await self.send_message(
             message.chat_jid,
             message_to_send,
-            message.message_id,
+            # message.message_id,
         )
