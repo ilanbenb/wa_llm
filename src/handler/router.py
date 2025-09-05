@@ -101,19 +101,19 @@ class Router(BaseHandler):
         await self.send_message(
             message.chat_jid,
             response.output,
-            # message.message_id,
+            in_reply_to=message.message_id,
         )
 
     async def about(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm an open-source bot created for the GenAI Israel community - https://llm.org.il.\nI can help you catch up on the chat messages and answer questions based on the group's knowledge.\nPlease send me PRs and star me at https://github.com/ilanbenb/wa_llm ⭐️",
-            # message.message_id,
+            in_reply_to=message.message_id,
         )
 
     async def default_response(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help catch up on the chat messages or answer questions based on the group's knowledge.",
-            # message.message_id,
+            in_reply_to=message.message_id,
         )

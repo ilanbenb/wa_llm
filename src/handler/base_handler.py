@@ -1,4 +1,5 @@
 import logging
+
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
@@ -12,8 +13,8 @@ from models import (
     BaseMessage,
     upsert,
 )
-from whatsapp.jid import normalize_jid
 from whatsapp import WhatsAppClient, SendMessageRequest
+from whatsapp.jid import normalize_jid
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +104,7 @@ class BaseHandler:
             text=message,
             sender_jid=my_number,
             chat_jid=to_jid,
+            reply_to_id=in_reply_to,
         )
         return await self.store_message(Message(**new_message.model_dump()))
 

@@ -1,5 +1,6 @@
 import logging
 import httpx
+from sqlmodel import select
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
@@ -43,6 +44,11 @@ class MessageHandler(BaseHandler):
         if not message or not message.text:
             return
 
+        # Ignore messages sent by the bot itself
+        my_jid = await self.whatsapp.get_my_jid()
+        if message.sender_jid == my_jid.normalize_str():
+            return
+
         if message.sender_jid.endswith("@lid"):
             logging.info(
                 f"Received message from {message.sender_jid}: {payload.model_dump_json()}"
@@ -52,7 +58,22 @@ class MessageHandler(BaseHandler):
         if message and message.group and not message.group.managed:
             return
 
-        if message.has_mentioned(await self.whatsapp.get_my_jid()):
+        # Idempotency: if we've already replied to this message, skip processing
+        if message.message_id:
+            stmt = (
+                select(type(message))
+                .where(type(message).reply_to_id == message.message_id)
+                .where(type(message).sender_jid == my_jid)
+                .limit(1)
+            )
+            existing_reply = (await self.session.exec(stmt)).first()
+            if existing_reply is not None:
+                logging.info(
+                    f"Already replied to message {message.message_id}; skipping."
+                )
+                return
+
+        if message.has_mentioned(my_jid):
             await self.router(message)
 
         # Handle whatsapp links in group
