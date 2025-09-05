@@ -1,7 +1,9 @@
+import asyncio
 import logging
-import httpx
-from sqlmodel import select
 
+import httpx
+from cachetools import TTLCache
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
@@ -14,6 +16,10 @@ from whatsapp import WhatsAppClient
 from .base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
+
+# In-memory processing guard: 4 minutes TTL to prevent duplicate handling
+_processing_cache = TTLCache(maxsize=1000, ttl=4 * 60)
+_processing_lock = asyncio.Lock()
 
 
 class MessageHandler(BaseHandler):
@@ -31,6 +37,16 @@ class MessageHandler(BaseHandler):
 
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
+
+        # In-memory dedupe: if this message is already being processed/recently processed, skip
+        if message and message.message_id:
+            async with _processing_lock:
+                if message.message_id in _processing_cache:
+                    logging.info(
+                        f"Message {message.message_id} already in processing cache; skipping."
+                    )
+                    return
+                _processing_cache[message.message_id] = True
 
         if (
             message
@@ -57,21 +73,6 @@ class MessageHandler(BaseHandler):
         # ignore messages from unmanaged groups
         if message and message.group and not message.group.managed:
             return
-
-        # Idempotency: if we've already replied to this message, skip processing
-        if message.message_id:
-            stmt = (
-                select(type(message))
-                .where(type(message).reply_to_id == message.message_id)
-                .where(type(message).sender_jid == my_jid)
-                .limit(1)
-            )
-            existing_reply = (await self.session.exec(stmt)).first()
-            if existing_reply is not None:
-                logging.info(
-                    f"Already replied to message {message.message_id}; skipping."
-                )
-                return
 
         if message.has_mentioned(my_jid):
             await self.router(message)
