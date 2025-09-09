@@ -3,7 +3,6 @@ import logging
 
 import httpx
 from cachetools import TTLCache
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
@@ -24,10 +23,10 @@ _processing_lock = asyncio.Lock()
 
 class MessageHandler(BaseHandler):
     def __init__(
-        self,
-        session: AsyncSession,
-        whatsapp: WhatsAppClient,
-        embedding_client: AsyncClient,
+            self,
+            session: AsyncSession,
+            whatsapp: WhatsAppClient,
+            embedding_client: AsyncClient,
     ):
         self.router = Router(session, whatsapp, embedding_client)
         self.whatsapp_group_link_spam = WhatsappGroupLinkSpamHandler(
@@ -38,21 +37,11 @@ class MessageHandler(BaseHandler):
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
 
-        # In-memory dedupe: if this message is already being processed/recently processed, skip
-        if message and message.message_id:
-            async with _processing_lock:
-                if message.message_id in _processing_cache:
-                    logging.info(
-                        f"Message {message.message_id} already in processing cache; skipping."
-                    )
-                    return
-                _processing_cache[message.message_id] = True
-
         if (
-            message
-            and message.group
-            and message.group.managed
-            and message.group.forward_url
+                message
+                and message.group
+                and message.group.managed
+                and message.group.forward_url
         ):
             await self.forward_message(payload, message.group.forward_url)
 
@@ -74,20 +63,34 @@ class MessageHandler(BaseHandler):
         if message and message.group and not message.group.managed:
             return
 
-        if message.has_mentioned(my_jid):
+        # In-memory dedupe: if this message is already being processed/recently processed, skip
+        if message and message.message_id:
+            async with _processing_lock:
+                if message.message_id in _processing_cache:
+                    logging.info(
+                        f"Message {message.message_id} already in processing cache; skipping."
+                    )
+                    return
+                _processing_cache[message.message_id] = True
+
+        mentioned = message.has_mentioned(my_jid)
+        logging.info(
+            f"Mention check: msg={message.message_id} my={my_jid.user} contains=@{my_jid.user}? {mentioned}"
+        )
+        if mentioned:
             await self.router(message)
 
         # Handle whatsapp links in group
         if (
-            message.group
-            and message.group.managed
-            and message.group.notify_on_spam
-            and "https://chat.whatsapp.com/" in message.text
+                message.group
+                and message.group.managed
+                and message.group.notify_on_spam
+                and "https://chat.whatsapp.com/" in message.text
         ):
             await self.whatsapp_group_link_spam(message)
 
     async def forward_message(
-        self, payload: WhatsAppWebhookPayload, forward_url: str
+            self, payload: WhatsAppWebhookPayload, forward_url: str
     ) -> None:
         """
         Forward a message to the group's configured forward URL using HTTP POST.
