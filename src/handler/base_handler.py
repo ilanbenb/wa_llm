@@ -88,8 +88,6 @@ class BaseHandler:
         assert to_jid, "to_jid is required"
         assert message, "message is required"
         to_jid = normalize_jid(to_jid)
-        if in_reply_to:
-            in_reply_to = normalize_jid(in_reply_to)
 
         resp = await self.whatsapp.send_message(
             SendMessageRequest(
