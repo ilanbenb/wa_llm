@@ -32,20 +32,11 @@ AI-powered WhatsApp bot that **joins any group, tracks conversations, and genera
 cd wa_llm`
 
 ### 2. Create .env file
+- Copy `.env.example` to `.env` and fill in required values.
 
-Create a `.env` file in the src directory with the following variables:
-
-```env
-WHATSAPP_HOST=http://localhost:3000
-WHATSAPP_BASIC_AUTH_USER=admin
-WHATSAPP_BASIC_AUTH_PASSWORD=admin
-VOYAGE_API_KEY=your_voyage_api_key
-DB_URI=postgresql+asyncpg://user:password@localhost:5432/postgres
-LOG_LEVEL=INFO
-ANTHROPIC_API_KEY=your-key-here  
-LOGFIRE_TOKEN=your-key-here 
 ```
-
+cp .env.example .env
+```
 #### Environment Variables
 <div style="font-size: 10px;">
 
