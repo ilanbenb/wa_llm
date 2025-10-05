@@ -15,8 +15,9 @@ services:
     build: .
     volumes:
       - ./src:/app/src
-      - ./.env:/app/.env
       - ./migrations:/app/migrations
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     depends_on:

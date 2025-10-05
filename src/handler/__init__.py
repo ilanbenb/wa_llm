@@ -23,10 +23,10 @@ _processing_lock = asyncio.Lock()
 
 class MessageHandler(BaseHandler):
     def __init__(
-            self,
-            session: AsyncSession,
-            whatsapp: WhatsAppClient,
-            embedding_client: AsyncClient,
+        self,
+        session: AsyncSession,
+        whatsapp: WhatsAppClient,
+        embedding_client: AsyncClient,
     ):
         self.router = Router(session, whatsapp, embedding_client)
         self.whatsapp_group_link_spam = WhatsappGroupLinkSpamHandler(
@@ -38,10 +38,10 @@ class MessageHandler(BaseHandler):
         message = await self.store_message(payload)
 
         if (
-                message
-                and message.group
-                and message.group.managed
-                and message.group.forward_url
+            message
+            and message.group
+            and message.group.managed
+            and message.group.forward_url
         ):
             await self.forward_message(payload, message.group.forward_url)
 
@@ -82,15 +82,15 @@ class MessageHandler(BaseHandler):
 
         # Handle whatsapp links in group
         if (
-                message.group
-                and message.group.managed
-                and message.group.notify_on_spam
-                and "https://chat.whatsapp.com/" in message.text
+            message.group
+            and message.group.managed
+            and message.group.notify_on_spam
+            and "https://chat.whatsapp.com/" in message.text
         ):
             await self.whatsapp_group_link_spam(message)
 
     async def forward_message(
-            self, payload: WhatsAppWebhookPayload, forward_url: str
+        self, payload: WhatsAppWebhookPayload, forward_url: str
     ) -> None:
         """
         Forward a message to the group's configured forward URL using HTTP POST.
