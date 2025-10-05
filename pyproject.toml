@@ -77,3 +77,6 @@ typeCheckingMode = "basic"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 log_cli = true
+
+[tool.logfire]
+pydantic_plugin_record = "failure"
