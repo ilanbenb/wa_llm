@@ -21,7 +21,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
 
     async def __call__(self, message: Message):
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt="""You are a spam whatsapp link spam detector. You are given a message and you need to return a score of 1-5 and a SHORT 7 words explanation of why you gave that score.
             """,
             output_type=self.SpamCheckResult,

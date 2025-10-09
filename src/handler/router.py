@@ -62,7 +62,7 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt="What is the intent of the message? What does the user want us to help with?",
             output_type=Intent,
         )
@@ -83,7 +83,7 @@ class Router(BaseHandler):
         messages: list[Message] = res.all()
 
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt="""Summarize the following group chat messages in a few words.
             
             - You MUST state that this is a summary of TODAY's messages. Even if the user asked for a summary of a different time period (in that case, state that you can only summarize today's messages)

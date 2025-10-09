@@ -116,7 +116,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         self, query: str, topics: list[str], sender: str, history: List[Message]
     ) -> AgentRunResult[str]:
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt="""Based on the topics attached, write a response to the query.
             - Write a casual direct response to the query. no need to repeat the query.
             - Answer in the same language as the query.
@@ -149,7 +149,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         self, my_jid: str, message: Message, history: List[Message]
     ) -> AgentRunResult[str]:
         rephrased_agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt=f"""Phrase the following message as a short paragraph describing a query from the knowledge base.
             - Use English only!
             - Ensure only to include the query itself. The message that includes a lot of information - focus on what the user asks you.
