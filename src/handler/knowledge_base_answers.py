@@ -37,12 +37,12 @@ class KnowledgeBaseAnswers(BaseHandler):
         res = await self.session.exec(stmt)
         history: list[Message] = list(res.all())
 
-        rephrased_response = await self.rephrasing_agent(
+        rephrased_result = await self.rephrasing_agent(
             (await self.whatsapp.get_my_jid()).user, message, history
         )
         # Get query embedding
         embedded_question = (
-            await voyage_embed_text(self.embedding_client, [rephrased_response.output])
+            await voyage_embed_text(self.embedding_client, [rephrased_result.output])
         )[0]
 
         select_from = None
@@ -83,26 +83,26 @@ class KnowledgeBaseAnswers(BaseHandler):
             similar_topics_distances.append(f"topic_distance: {topic_distance}")
 
         sender_number = parse_jid(message.sender_jid).user
-        generation_response = await self.generation_agent(
+        generation_result = await self.generation_agent(
             message.text, similar_topics, message.sender_jid, history
         )
         logger.info(
             "RAG Query Results:\n"
             f"Sender: {sender_number}\n"
             f"Question: {message.text}\n"
-            f"Rephrased Question: {rephrased_response.output}\n"
+            f"Rephrased Question: {rephrased_result.output}\n"
             f"Chat JID: {message.chat_jid}\n"
             f"Retrieved Topics: {len(similar_topics)}\n"
             f"Similarity Scores: {similar_topics_distances}\n"
             "Topics:\n"
             + "\n".join(f"- {topic[:100]}..." for topic in similar_topics)
             + "\n"
-            f"Generated Response: {generation_response.output}"
+            f"Generated Response: {generation_result.output}"
         )
 
         await self.send_message(
             message.chat_jid,
-            generation_response.output,
+            generation_result.output,
             in_reply_to=message.message_id,
         )
 

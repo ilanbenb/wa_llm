@@ -28,7 +28,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
             output_retries=3,
         )
 
-        response = await agent.run(
+        result = await agent.run(
             (
                 f"@{parse_jid(message.sender_jid).user}:"
                 f"{message.text}"
@@ -36,7 +36,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
             )
         )
 
-        spam_result = response.output
+        spam_result = result.output
 
         if message and message.group and not message.group.owner_jid:
             raise ValueError("Group owner JID is required")

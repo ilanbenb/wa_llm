@@ -121,7 +121,7 @@ async def get_conversation_topics(
 
     result = await conversation_splitter_agent(conversation_content)
     return [
-        _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.data
+        _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.output
     ]
 
 

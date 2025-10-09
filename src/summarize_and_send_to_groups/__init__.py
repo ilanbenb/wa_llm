@@ -59,21 +59,21 @@ async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: 
         return
 
     try:
-        response = await summarize(group.group_name or "group", messages)
+        result = await summarize(group.group_name or "group", messages)
     except Exception as e:
         logging.error("Error summarizing group %s: %s", group.group_name, e)
         return
 
     try:
         await whatsapp.send_message(
-            SendMessageRequest(phone=group.group_jid, message=response.data)
+            SendMessageRequest(phone=group.group_jid, message=result.output)
         )
 
         # Send the summary to the community groups
         community_groups = await group.get_related_community_groups(session)
         for cg in community_groups:
             await whatsapp.send_message(
-                SendMessageRequest(phone=cg.group_jid, message=response.data)
+                SendMessageRequest(phone=cg.group_jid, message=result.output)
             )
 
     except Exception as e:
