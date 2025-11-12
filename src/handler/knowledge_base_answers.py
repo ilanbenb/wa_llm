@@ -103,7 +103,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         await self.send_message(
             message.chat_jid,
             generation_result.output,
-            in_reply_to=message.message_id,
+            # in_reply_to=message.message_id,
         )
 
     @retry(
