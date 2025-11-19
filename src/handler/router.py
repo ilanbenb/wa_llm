@@ -13,7 +13,11 @@ from models import Message
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from whatsapp import WhatsAppClient
+from config import Settings
 from .base_handler import BaseHandler
+from services.prompt_manager import prompt_manager
+
+settings = Settings()
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -62,8 +66,8 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model="anthropic:claude-sonnet-4-5-20250929",
-            system_prompt="What is the intent of the message? What does the user want us to help with?",
+            model=settings.model_name,
+            system_prompt=prompt_manager.render("intent.j2"),
             output_type=Intent,
         )
 
@@ -83,15 +87,8 @@ class Router(BaseHandler):
         messages: list[Message] = res.all()
 
         agent = Agent(
-            model="anthropic:claude-sonnet-4-5-20250929",
-            system_prompt="""Summarize the following group chat messages in a few words.
-            
-            - You MUST state that this is a summary of TODAY's messages. Even if the user asked for a summary of a different time period (in that case, state that you can only summarize today's messages)
-            - Always personalize the summary to the user's request
-            - Keep it short and conversational
-            - Tag users when mentioning them
-            - You MUST respond with the same language as the request
-            """,
+            model=settings.model_name,
+            system_prompt=prompt_manager.render("summarize.j2"),
             output_type=str,
         )
 
