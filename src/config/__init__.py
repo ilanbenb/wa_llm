@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     voyage_api_key: str
     voyage_max_retries: int = 5
 
+    # Model settings
+    model_name: str = "anthropic:claude-sonnet-4-5-20250929"
+
     # Optional settings
     debug: bool = False
     log_level: str = "INFO"
@@ -46,3 +49,11 @@ class Settings(BaseSettings):
             environ["LOGFIRE_TOKEN"] = self.logfire_token
 
         return self
+
+
+from functools import lru_cache
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

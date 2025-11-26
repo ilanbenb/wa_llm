@@ -6,6 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from handler import MessageHandler
 from whatsapp import WhatsAppClient
 from voyageai.client_async import AsyncClient
+from config import Settings, get_settings
 
 
 async def get_db_async_session(request: Request) -> AsyncSession:
@@ -33,5 +34,6 @@ async def get_handler(
     session: Annotated[AsyncSession, Depends(get_db_async_session)],
     whatsapp: Annotated[WhatsAppClient, Depends(get_whatsapp)],
     embedding_client: Annotated[AsyncClient, Depends(get_text_embebedding)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> MessageHandler:
-    return MessageHandler(session, whatsapp, embedding_client)
+    return MessageHandler(session, whatsapp, embedding_client, settings)

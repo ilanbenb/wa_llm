@@ -10,6 +10,7 @@ dependencies = [
     "fastapi>=0.115.6",
     "httpx>=0.28.1",
     "logfire[fastapi,httpx,sqlalchemy,system-metrics]>=4.11.0",
+    "jinja2>=3.1.0",
     "pgvector>=0.3.6",
     "pydantic-ai>=1.0.15",
     "pydantic-settings>=2.7.1",

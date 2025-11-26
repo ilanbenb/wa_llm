@@ -10,17 +10,16 @@ import logfire
 
 from api import load_new_kbtopics_api, status, summarize_and_send_to_group_api, webhook
 import models  # noqa
-from config import Settings
+from config import get_settings
 from whatsapp import WhatsAppClient
 from whatsapp.init_groups import gather_groups
 from voyageai.client_async import AsyncClient
 
-settings = Settings()  # pyright: ignore [reportCallIssue]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global settings
+    settings = get_settings()
     # Create and configure logger
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -83,6 +82,7 @@ app.include_router(load_new_kbtopics_api.router)
 if __name__ == "__main__":
     import uvicorn
 
+    settings = get_settings()
     print(f"Running on {settings.host}:{settings.port}")
 
     uvicorn.run("main:app", host=settings.host, port=settings.port, reload=True)
