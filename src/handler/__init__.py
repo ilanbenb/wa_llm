@@ -39,14 +39,6 @@ class MessageHandler(BaseHandler):
     async def __call__(self, payload: WhatsAppWebhookPayload):
         message = await self.store_message(payload)
 
-        if (
-            message
-            and message.group
-            and message.group.managed
-            and message.group.forward_url
-        ):
-            await self.forward_message(payload, message.group.forward_url)
-
         # ignore messages that don't exist or don't have text
         if not message or not message.text:
             return
@@ -90,35 +82,3 @@ class MessageHandler(BaseHandler):
             and "https://chat.whatsapp.com/" in message.text
         ):
             await self.whatsapp_group_link_spam(message)
-
-    async def forward_message(
-        self, payload: WhatsAppWebhookPayload, forward_url: str
-    ) -> None:
-        """
-        Forward a message to the group's configured forward URL using HTTP POST.
-
-        :param payload: The WhatsApp webhook payload to forward
-        :param forward_url: The URL to forward the message to
-        """
-        # Ensure we have a forward URL
-        if not forward_url:
-            return
-
-        try:
-            # Create an async HTTP client and forward the message
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    forward_url,
-                    json=payload.model_dump(
-                        mode="json"
-                    ),  # Convert Pydantic model to dict for JSON serialization
-                    headers={"Content-Type": "application/json"},
-                )
-                response.raise_for_status()
-
-        except httpx.HTTPError as exc:
-            # Log the error but don't raise it to avoid breaking message processing
-            logger.error(f"Failed to forward message to {forward_url}: {exc}")
-        except Exception as exc:
-            # Catch any other unexpected errors
-            logger.error(f"Unexpected error forwarding message to {forward_url}: {exc}")
