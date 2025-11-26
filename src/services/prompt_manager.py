@@ -5,8 +5,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 class PromptManager:
-    def __init__(self, template_dir: str | Path = "src/templates"):
-        self.template_dir = Path(template_dir)
+    def __init__(self, template_dir: str | Path | None = None):
+        if template_dir is None:
+            self.template_dir = Path(__file__).parent.parent / "templates"
+        else:
+            self.template_dir = Path(template_dir)
         self.env = Environment(
             loader=FileSystemLoader(self.template_dir),
             autoescape=select_autoescape(),
