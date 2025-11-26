@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-import httpx
 from cachetools import TTLCache
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient

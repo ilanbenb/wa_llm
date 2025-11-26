@@ -16,7 +16,6 @@ from whatsapp.init_groups import gather_groups
 from voyageai.client_async import AsyncClient
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
