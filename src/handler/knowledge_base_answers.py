@@ -4,14 +4,17 @@ from typing import List
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from sqlmodel import select, cast, String, desc
+from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import (
     retry,
     wait_random_exponential,
     stop_after_attempt,
     before_sleep_log,
 )
+from voyageai.client_async import AsyncClient
 
 from models import Message, KBTopic
+from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from utils.voyage_embed_text import voyage_embed_text
@@ -19,13 +22,22 @@ from .base_handler import BaseHandler
 from config import Settings
 from services.prompt_manager import prompt_manager
 
-settings = Settings()
 
 # Creating an object
 logger = logging.getLogger(__name__)
 
 
 class KnowledgeBaseAnswers(BaseHandler):
+    def __init__(
+        self,
+        session: AsyncSession,
+        whatsapp: WhatsAppClient,
+        embedding_client: AsyncClient,
+        settings: Settings,
+    ):
+        self.settings = settings
+        super().__init__(session, whatsapp, embedding_client)
+
     async def __call__(self, message: Message):
         # Ensure message.text is not None before passing to generation_agent
         if message.text is None:
@@ -120,7 +132,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         self, query: str, topics: list[str], sender: str, history: List[Message]
     ) -> AgentRunResult[str]:
         agent = Agent(
-            model=settings.model_name,
+            model=self.settings.model_name,
             system_prompt=prompt_manager.render("rag.j2"),
         )
 
@@ -146,7 +158,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         self, my_jid: str, message: Message, history: List[Message]
     ) -> AgentRunResult[str]:
         rephrased_agent = Agent(
-            model=settings.model_name,
+            model=self.settings.model_name,
             system_prompt=prompt_manager.render("rephrase.j2", my_jid=my_jid),
         )
 

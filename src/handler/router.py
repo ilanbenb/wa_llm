@@ -49,7 +49,7 @@ class Router(BaseHandler):
     ):
         self.settings = settings
         self.ask_knowledge_base = KnowledgeBaseAnswers(
-            session, whatsapp, embedding_client
+            session, whatsapp, embedding_client, settings
         )
         super().__init__(session, whatsapp, embedding_client)
 
