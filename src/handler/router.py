@@ -17,7 +17,6 @@ from config import Settings
 from .base_handler import BaseHandler
 from services.prompt_manager import prompt_manager
 
-settings = Settings()
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -46,7 +45,9 @@ class Router(BaseHandler):
         session: AsyncSession,
         whatsapp: WhatsAppClient,
         embedding_client: AsyncClient,
+        settings: Settings,
     ):
+        self.settings = settings
         self.ask_knowledge_base = KnowledgeBaseAnswers(
             session, whatsapp, embedding_client
         )
@@ -66,7 +67,7 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model=settings.model_name,
+            model=self.settings.model_name,
             system_prompt=prompt_manager.render("intent.j2"),
             output_type=Intent,
         )
@@ -87,7 +88,7 @@ class Router(BaseHandler):
         messages: list[Message] = res.all()
 
         agent = Agent(
-            model=settings.model_name,
+            model=self.settings.model_name,
             system_prompt=prompt_manager.render("summarize.j2"),
             output_type=str,
         )

@@ -49,3 +49,11 @@ class Settings(BaseSettings):
             environ["LOGFIRE_TOKEN"] = self.logfire_token
 
         return self
+
+
+from functools import lru_cache
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
