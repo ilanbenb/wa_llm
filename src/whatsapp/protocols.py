@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Protocol, runtime_checkable
 from pydantic import BaseModel
 import httpx
 
+
 @runtime_checkable
 class WhatsAppClientProtocol(Protocol):
     async def _get(

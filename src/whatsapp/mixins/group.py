@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from ..protocols import WhatsAppClientProtocol
 
 from ..models import (
@@ -11,14 +10,9 @@ from ..models import (
     GenericResponse,
 )
 
-if TYPE_CHECKING:
-    from ..base_client import BaseWhatsAppClient
-
 
 class GroupMixin(WhatsAppClientProtocol):
-    async def create_group(
-        self, request: CreateGroupRequest
-    ) -> CreateGroupResponse:
+    async def create_group(self, request: CreateGroupRequest) -> CreateGroupResponse:
         response = await self._post("/group", json=request)
         return CreateGroupResponse.model_validate_json(response.content)
 
@@ -46,9 +40,7 @@ class GroupMixin(WhatsAppClientProtocol):
         response = await self._post("/group/participants/demote", json=request)
         return ManageParticipantResponse.model_validate_json(response.content)
 
-    async def join_group_with_link(
-        self, link: str
-    ) -> GenericResponse:
+    async def join_group_with_link(self, link: str) -> GenericResponse:
         response = await self._post(
             "/group/join-with-link", json=JoinGroupRequest(link=link)
         )

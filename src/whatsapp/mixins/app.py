@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from ..protocols import WhatsAppClientProtocol
 
 from ..models import (
@@ -10,9 +9,6 @@ from ..models import (
 from ..jid import JID, parse_jid
 from typing import Optional
 
-if TYPE_CHECKING:
-    from ..base_client import BaseWhatsAppClient
-
 
 class AppMixin(WhatsAppClientProtocol):
     async def login(self) -> LoginResponse:
@@ -20,9 +16,7 @@ class AppMixin(WhatsAppClientProtocol):
         response = await self._get("/app/login")
         return LoginResponse.model_validate_json(response.content)
 
-    async def login_with_code(
-        self, phone: str
-    ) -> LoginWithCodeResponse:
+    async def login_with_code(self, phone: str) -> LoginWithCodeResponse:
         """Login with pairing code"""
         response = await self._get("/app/login-with-code", params={"phone": phone})
         return LoginWithCodeResponse.model_validate_json(response.content)

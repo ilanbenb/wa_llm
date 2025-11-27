@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from ..protocols import WhatsAppClientProtocol
 
 from ..models import (
@@ -8,9 +7,6 @@ from ..models import (
     GroupResponse,
     NewsletterResponse,
 )
-
-if TYPE_CHECKING:
-    from ..base_client import BaseWhatsAppClient
 
 
 class UserMixin(WhatsAppClientProtocol):
