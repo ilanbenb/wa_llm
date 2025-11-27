@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends, Request
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -9,7 +9,7 @@ from voyageai.client_async import AsyncClient
 from config import Settings, get_settings
 
 
-async def get_db_async_session(request: Request) -> AsyncSession:
+async def get_db_async_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
     assert request.app.state.async_session, "AsyncSession generator not initialized"
     async with request.app.state.async_session() as session:
         try:

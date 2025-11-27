@@ -12,7 +12,7 @@ class BaseWhatsAppClient:
         base_url: str = "http://localhost:3000",
         username: Optional[str] = None,
         password: Optional[str] = None,
-        timeout: float = httpx.Timeout(300.0),
+        timeout: float | httpx.Timeout = httpx.Timeout(300.0),
     ):
         """
         Initialize WhatsApp Client
@@ -108,18 +108,19 @@ class BaseWhatsAppClient:
         Raises:
             httpx.HTTPError: If the request fails
         """
-        headers = None
-        if isinstance(json, BaseModel) or isinstance(data, BaseModel):
-            data = (
-                json.model_dump_json()
-                if isinstance(json, BaseModel)
-                else data.model_dump_json()
-            )
+        request_data: Any = data
+        request_json: Any = json
+
+        if isinstance(json, BaseModel):
+            request_data = json.model_dump_json()
             headers = {"Content-Type": "application/json"}
-            json = None
+            request_json = None
+        elif isinstance(data, BaseModel):
+            request_data = data.model_dump_json()
+            headers = {"Content-Type": "application/json"}
 
         response = await self.client.post(
-            path, json=json, data=data, files=files, headers=headers
+            path, json=request_json, data=request_data, files=files, headers=headers
         )
         try:
             response.raise_for_status()

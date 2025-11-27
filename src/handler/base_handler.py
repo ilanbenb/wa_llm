@@ -96,15 +96,18 @@ class BaseHandler:
                 reply_message_id=in_reply_to,
             )
         )
+        assert resp.results, "Failed to send message"
         my_number = await self.whatsapp.get_my_jid()
         new_message = BaseMessage(
             message_id=resp.results.message_id,
             text=message,
-            sender_jid=my_number,
+            sender_jid=str(my_number),
             chat_jid=to_jid,
             reply_to_id=in_reply_to,
         )
-        return await self.store_message(Message(**new_message.model_dump()))
+        stored_message = await self.store_message(Message(**new_message.model_dump()))
+        assert stored_message, "Failed to store message"
+        return stored_message
 
     async def upsert(self, model):
         return await upsert(self.session, model)

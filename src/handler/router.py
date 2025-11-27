@@ -1,4 +1,5 @@
 import logging
+from typing import Sequence
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -54,6 +55,8 @@ class Router(BaseHandler):
         super().__init__(session, whatsapp, embedding_client)
 
     async def __call__(self, message: Message):
+        if not message.text:
+            return
         route = await self._route(message.text)
         match route:
             case IntentEnum.summarize:
@@ -85,7 +88,7 @@ class Router(BaseHandler):
             .limit(30)
         )
         res = await self.session.exec(stmt)
-        messages: list[Message] = res.all()
+        messages: Sequence[Message] = res.all()
 
         agent = Agent(
             model=self.settings.model_name,
@@ -94,7 +97,7 @@ class Router(BaseHandler):
         )
 
         response = await agent.run(
-            f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(messages)}"
+            f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(list(messages))}"
         )
         await self.send_message(
             message.chat_jid,

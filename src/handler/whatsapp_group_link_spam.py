@@ -32,7 +32,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
             (
                 f"@{parse_jid(message.sender_jid).user}:"
                 f"{message.text}"
-                f"The message is from a group chat. The group name is {message.group.group_name} and the group description is {message.group.group_topic}"
+                f"The message is from a group chat. The group name is {message.group.group_name if message.group else 'Unknown'} and the group description is {message.group.group_topic if message.group else 'Unknown'}"
             )
         )
 

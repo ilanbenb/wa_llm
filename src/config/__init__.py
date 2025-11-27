@@ -54,4 +54,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    # Use model_validate({}) to trigger Pydantic's validation and environment variable loading
+    # without passing arguments directly, which satisfies type checkers that would otherwise
+    # complain about missing required fields in __init__.
+    return Settings.model_validate({})

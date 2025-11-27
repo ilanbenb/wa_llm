@@ -1,4 +1,4 @@
-from typing import Dict, List, Type, Any
+from typing import Dict, List, Type, Any, cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -11,7 +11,7 @@ class AsyncQueryMock:
     def __init__(self, storage):
         self._storage = storage
         self._filter_conditions = []
-        self._model = None
+        self._model: Type[SQLModel] | None = None
         self._offset_val = None
         self._limit_val = None
         self._order_by = []
@@ -130,7 +130,9 @@ class AsyncSessionMock(MagicMock):
         if isinstance(statement, Select):  # Changed from select to Select
             query = AsyncQueryMock(self._storage)
             try:
-                query._model = statement._raw_columns[0].entity_namespace
+                query._model = cast(
+                    Type[SQLModel], statement._raw_columns[0].entity_namespace
+                )
             except (AttributeError, IndexError):
                 # Fallback for when we can't get the model from raw columns
                 pass

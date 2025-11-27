@@ -1,0 +1,38 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python:
+    name: Validate Python (python)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: ".python-version"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install Dependencies
+        run: |
+          uv sync  --all-extras --dev
+
+      - name: Run Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Run Ruff (format)
+        run: uv run ruff format --check .
+
+      - name: Run Python type checker
+        run: uv run pyright
