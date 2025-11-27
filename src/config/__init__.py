@@ -3,6 +3,7 @@ from typing import Optional, Self
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
 
 
 class Settings(BaseSettings):
@@ -49,9 +50,6 @@ class Settings(BaseSettings):
             environ["LOGFIRE_TOKEN"] = self.logfire_token
 
         return self
-
-
-from functools import lru_cache
 
 
 @lru_cache
