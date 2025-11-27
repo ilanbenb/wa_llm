@@ -4,7 +4,8 @@ import pytest
 
 from models import Message
 from models.webhook import WhatsAppWebhookPayload, ExtractedMedia
-from test_utils.mock_session import mock_session  # noqa
+
+pytest_plugins = ["test_utils.mock_session"]
 
 
 @pytest.mark.asyncio

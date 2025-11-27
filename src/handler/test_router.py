@@ -10,9 +10,11 @@ from voyageai.object.embeddings import EmbeddingsObject
 
 from handler.router import Router, IntentEnum
 from models import Message
-from test_utils.mock_session import AsyncSessionMock, mock_session  # noqa
+from test_utils.mock_session import AsyncSessionMock
 from whatsapp import SendMessageRequest
 from config import Settings
+
+pytest_plugins = ["test_utils.mock_session"]
 
 
 @pytest.fixture
@@ -73,9 +75,6 @@ async def test_router_ask_question_route(
 
     monkeypatch.setattr(Agent, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Agent, "run", mock_agent.run)
-
-    # Mock the Agent class for summarization
-    mock_summarize_agent = MockAgent("cool response")
 
     # Set up mock response for send_message
     mock_whatsapp.send_message.return_value.results.message_id = "response_id"
