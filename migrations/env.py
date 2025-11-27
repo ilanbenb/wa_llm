@@ -77,6 +77,8 @@ async def run_async_migrations():
 
     """
     configuration = config.get_section(config.config_ini_section)
+    if configuration is None:
+        configuration = {}
     if not configuration.get("sqlalchemy.url"):
         configuration["sqlalchemy.url"] = Settings().db_uri
 

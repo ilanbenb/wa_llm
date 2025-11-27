@@ -11,7 +11,7 @@ class AsyncQueryMock:
     def __init__(self, storage):
         self._storage = storage
         self._filter_conditions = []
-        self._model = None
+        self._model: Type[SQLModel] | None = None
         self._offset_val = None
         self._limit_val = None
         self._order_by = []

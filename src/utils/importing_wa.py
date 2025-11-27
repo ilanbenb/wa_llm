@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import cast, Dict
 
 import pandas as pd
 from pandas import DataFrame
@@ -105,25 +106,28 @@ def match_and_rename_users(
     contacts_df.fillna("", inplace=True)
 
     for index, row in contacts_df.iterrows():
-        phone_number = row["their_jid"].split("@")[0]
+        row = cast(pd.Series, row)
+        phone_number = str(row["their_jid"]).split("@")[0]
         # Using standard hyphen and handling variable length numbers
         long_number = f"+{phone_number[0:3]} {phone_number[3:5]}-{phone_number[5:8]}-{phone_number[8:]}"
         dict_of_users[phone_number].extend([long_number])
 
-        if row["full_name"]:
-            dict_of_users[phone_number].extend(
-                [row["full_name"], f"~ {row['full_name']}"]
-            )
+        full_name = str(row["full_name"])
+        push_name = str(row["push_name"])
 
-        elif row["push_name"]:
-            dict_of_users[phone_number].extend(
-                [row["push_name"], f"~ {row['push_name']}"]
-            )
+        if full_name:
+            dict_of_users[phone_number].extend([full_name, f"~ {full_name}"])
 
-    dict_of_users = {k: list(set(v)) for k, v in dict_of_users.items()}
+        elif push_name:
+            dict_of_users[phone_number].extend([push_name, f"~ {push_name}"])
 
-    swapped_names = wa_chat.rename_users(mapping=dict_of_users)
-    return swapped_names
+    dict_of_users_final = {k: list(set(v)) for k, v in dict_of_users.items()}
+
+    # Cast to Dict[str, str] to satisfy Pyright, assuming library supports list of aliases
+    swapped_names = wa_chat.rename_users(
+        mapping=cast(Dict[str, str], dict_of_users_final)
+    )
+    return cast(WhatsAppChat, swapped_names)
 
 
 def split_chats(df, time_column, gap_hours=2, overlap=5, min_size=25, max_size=200):

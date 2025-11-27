@@ -3,22 +3,25 @@ from datetime import datetime, timezone
 import pytest
 
 from models import Message
-from models.webhook import WhatsAppWebhookPayload, ExtractedMedia
+from models.webhook import WhatsAppWebhookPayload
 
 pytest_plugins = ["test_utils.mock_session"]
 
 
 @pytest.mark.asyncio
 async def test_webhook_to_message():
-    payload = WhatsAppWebhookPayload(
-        from_="1234567890@s.whatsapp.net in 123456789-123456@g.us",
-        timestamp=datetime.now(timezone.utc),
-        pushname="Test User",
-        message={
-            "id": "test_message_id",
-            "text": "Hello @bot how are you?",
-            "replied_id": None,
-        },
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "1234567890@s.whatsapp.net in 123456789-123456@g.us",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "Test User",
+            "message": {
+                "id": "test_message_id",
+                "text": "Hello @bot how are you?",
+                "replied_id": None,
+                "quoted_message": None,
+            },
+        }
     )
 
     message = Message.from_webhook(payload)
@@ -49,15 +52,17 @@ async def test_message_with_image(mock_session):
     #   'caption': 'https://github.com/mongodb-developer/GenAI-Showcase\n\nMongoDB\nמשחררים Repository די מרשים של דוגמאות של agents ו-RAG.\n\n10,000 נקודות למי שמנחש באיזה DB הם משתמשים.'},
     #  'pushname': 'Ilan Benborhoum',
     #  'timestamp': '2025-02-16T12:03:48Z'}
-    payload = WhatsAppWebhookPayload(
-        from_="1234567890@s.whatsapp.net in 123456789-123456@g.us",
-        timestamp=datetime.now(timezone.utc),
-        pushname="Test User",
-        image=ExtractedMedia(
-            caption="This is an image",
-            media_path="https://example.com/image.jpg",
-            mime_type="image/jpeg",
-        ),
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "1234567890@s.whatsapp.net in 123456789-123456@g.us",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "Test User",
+            "image": {
+                "caption": "This is an image",
+                "media_path": "https://example.com/image.jpg",
+                "mime_type": "image/jpeg",
+            },
+        }
     )
 
     message = Message.from_webhook(payload)
