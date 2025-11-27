@@ -47,7 +47,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url") or Settings().db_uri
+    url = config.get_main_option("sqlalchemy.url") or Settings.model_validate({}).db_uri
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -80,7 +80,7 @@ async def run_async_migrations():
     if configuration is None:
         configuration = {}
     if not configuration.get("sqlalchemy.url"):
-        configuration["sqlalchemy.url"] = Settings().db_uri
+        configuration["sqlalchemy.url"] = Settings.model_validate({}).db_uri
 
     connectable = async_engine_from_config(
         configuration,
