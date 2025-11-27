@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from ..protocols import WhatsAppClientProtocol
 
 from ..models import (
     UnfollowNewsletterRequest,
@@ -9,9 +10,9 @@ if TYPE_CHECKING:
     from ..base_client import BaseWhatsAppClient
 
 
-class NewsletterMixin:
+class NewsletterMixin(WhatsAppClientProtocol):
     async def unfollow_newsletter(
-        self: "BaseWhatsAppClient", newsletter_id: str
+        self, newsletter_id: str
     ) -> GenericResponse:
         response = await self._post(
             "/newsletter/unfollow",

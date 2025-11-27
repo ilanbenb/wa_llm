@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Optional
+from ..protocols import WhatsAppClientProtocol
 
 from ..models import (
     SendMessageRequest,
@@ -14,15 +15,15 @@ if TYPE_CHECKING:
     from ..base_client import BaseWhatsAppClient
 
 
-class MessageMixin:
+class MessageMixin(WhatsAppClientProtocol):
     async def send_message(
-        self: "BaseWhatsAppClient", request: SendMessageRequest
+        self, request: SendMessageRequest
     ) -> MessageSendResponse:
         response = await self._post("/send/message", json=request)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_image(
-        self: "BaseWhatsAppClient",
+        self,
         phone: str,
         image: bytes,
         caption: Optional[str] = None,
@@ -42,7 +43,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_audio(
-        self: "BaseWhatsAppClient", phone: str, audio: bytes
+        self, phone: str, audio: bytes
     ) -> MessageSendResponse:
         response = await self._post(
             "/send/audio", data={"phone": phone}, files={"audio": audio}
@@ -50,7 +51,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_file(
-        self: "BaseWhatsAppClient",
+        self,
         phone: str,
         file: bytes,
         caption: Optional[str] = None,
@@ -63,7 +64,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_video(
-        self: "BaseWhatsAppClient",
+        self,
         phone: str,
         video: bytes,
         caption: Optional[str] = None,
@@ -82,32 +83,32 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_contact(
-        self: "BaseWhatsAppClient", request: SendContactRequest
+        self, request: SendContactRequest
     ) -> MessageSendResponse:
         response = await self._post("/send/contact", json=request)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_link(
-        self: "BaseWhatsAppClient", request: SendLinkRequest
+        self, request: SendLinkRequest
     ) -> MessageSendResponse:
         response = await self._post("/send/link", json=request)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_location(
-        self: "BaseWhatsAppClient", request: SendLocationRequest
+        self, request: SendLocationRequest
     ) -> MessageSendResponse:
         response = await self._post("/send/location", json=request)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_poll(
-        self: "BaseWhatsAppClient", request: SendPollRequest
+        self, request: SendPollRequest
     ) -> MessageSendResponse:
         response = await self._post("/send/poll", json=request)
         return MessageSendResponse.model_validate_json(response.content)
 
     # Message Operations
     async def revoke_message(
-        self: "BaseWhatsAppClient", message_id: str, phone: str
+        self, message_id: str, phone: str
     ) -> MessageSendResponse:
         response = await self._post(
             f"/message/{message_id}/revoke",
@@ -116,7 +117,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def delete_message(
-        self: "BaseWhatsAppClient", message_id: str, phone: str
+        self, message_id: str, phone: str
     ) -> MessageSendResponse:
         response = await self._post(
             f"/message/{message_id}/delete",
@@ -125,7 +126,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def react_to_message(
-        self: "BaseWhatsAppClient", message_id: str, phone: str, emoji: str
+        self, message_id: str, phone: str, emoji: str
     ) -> MessageSendResponse:
         response = await self._post(
             f"/message/{message_id}/reaction", json={"phone": phone, "emoji": emoji}
@@ -133,7 +134,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def update_message(
-        self: "BaseWhatsAppClient", message_id: str, phone: str, message: str
+        self, message_id: str, phone: str, message: str
     ) -> MessageSendResponse:
         response = await self._post(
             f"/message/{message_id}/update", json={"phone": phone, "message": message}
@@ -141,7 +142,7 @@ class MessageMixin:
         return MessageSendResponse.model_validate_json(response.content)
 
     async def read_message(
-        self: "BaseWhatsAppClient", message_id: str, phone: str
+        self, message_id: str, phone: str
     ) -> MessageSendResponse:
         response = await self._post(
             f"/message/{message_id}/read", json=MessageActionRequest(phone=phone)
