@@ -110,17 +110,26 @@ class BaseWhatsAppClient:
         """
         request_data: Any = data
         request_json: Any = json
+        content: Any = None
+        headers: Dict[str, str] = {}
 
         if isinstance(json, BaseModel):
-            request_data = json.model_dump_json()
+            content = json.model_dump_json()
             headers = {"Content-Type": "application/json"}
             request_json = None
+            request_data = None
         elif isinstance(data, BaseModel):
-            request_data = data.model_dump_json()
+            content = data.model_dump_json()
             headers = {"Content-Type": "application/json"}
+            request_data = None
 
         response = await self.client.post(
-            path, json=request_json, data=request_data, files=files, headers=headers
+            path,
+            json=request_json,
+            data=request_data,
+            content=content,
+            files=files,
+            headers=headers,
         )
         try:
             response.raise_for_status()
