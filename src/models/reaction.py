@@ -40,6 +40,7 @@ class BaseReaction(SQLModel):
         return normalize_jid(value)
 
 
+
 class Reaction(BaseReaction, table=True):
     """Reaction model for database storage."""
 
@@ -75,7 +76,7 @@ class Reaction(BaseReaction, table=True):
 
         return cls(
             message_id=payload.reaction.id,
-            sender_jid=sender_jid,
+            sender_jid=normalize_jid(sender_jid),
             emoji=payload.reaction.message,
             timestamp=payload.timestamp,
         )

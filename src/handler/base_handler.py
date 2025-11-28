@@ -133,42 +133,6 @@ class BaseHandler:
             logger.error(f"Error storing reaction: {e}")
             return None
 
-    async def remove_reaction(self, message_id: str, sender_jid: str) -> bool:
-        """
-        Remove a reaction from a message
-        :param message_id: ID of the message
-        :param sender_jid: JID of the sender who made the reaction
-        :return: True if reaction was removed, False if not found
-        """
-        try:
-            from sqlmodel import select
-
-            async with self.session.begin_nested():
-                # Find the reaction to remove
-                result = await self.session.exec(
-                    select(Reaction).where(
-                        Reaction.message_id == message_id,
-                        Reaction.sender_jid == normalize_jid(sender_jid),
-                    )
-                )
-
-                reaction = result.first()
-                if reaction:
-                    await self.session.delete(reaction)
-                    await self.session.flush()
-                    logger.info(
-                        f"Removed reaction from {sender_jid} on message {message_id}"
-                    )
-                    return True
-                else:
-                    logger.warning(
-                        f"No reaction found from {sender_jid} on message {message_id}"
-                    )
-                    return False
-
-        except Exception as e:
-            logger.error(f"Error removing reaction: {e}")
-            return False
 
     async def send_message(
         self, to_jid: str, message: str, in_reply_to: str | None = None
