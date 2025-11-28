@@ -14,7 +14,6 @@ from whatsapp.jid import JID
 from config import Settings
 
 
-
 @pytest.fixture
 def mock_whatsapp():
     client = AsyncMock()
