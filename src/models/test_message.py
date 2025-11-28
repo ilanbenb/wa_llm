@@ -2,10 +2,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from models import Message
-from models.webhook import WhatsAppWebhookPayload
-
-pytest_plugins = ["test_utils.mock_session"]
+from models import Message, WhatsAppWebhookPayload
+from test_utils.mock_session import AsyncSessionMock
 
 
 @pytest.mark.asyncio
