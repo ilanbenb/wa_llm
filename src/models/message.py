@@ -33,7 +33,7 @@ class BaseMessage(SQLModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_chat_jid(self, data) -> dict:
+    def validate_chat_jid(cls, data) -> dict:
         if "chat_jid" not in data:
             return data
 
@@ -54,7 +54,9 @@ class BaseMessage(SQLModel):
         if isinstance(jid, str):
             jid = parse_jid(jid)
 
-        return f"@{jid.user}" in (self.text or "")
+        if not self.text:
+            return False
+        return f"@{jid.user}" in self.text
 
 
 class Message(BaseMessage, table=True):
@@ -84,7 +86,7 @@ class Message(BaseMessage, table=True):
             payload.message = PayloadMessage(
                 id=f"na-{payload.timestamp.timestamp()}",
                 replied_id=None,
-                quoted_message=None
+                quoted_message=None,
             )
         assert payload.message, "Missing message"
         assert payload.message.id, "Missing message ID"

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 )
 async def summarize(group_name: str, messages: list[Message]) -> AgentRunResult[str]:
     agent = Agent(
-        model="anthropic:claude-4-sonnet-20250514",
+        model="anthropic:claude-sonnet-4-5-20250929",
         system_prompt=f""""
         Write a quick summary of what happened in the chat group since the last summary.
         
@@ -54,26 +54,26 @@ async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: 
     )
     messages: list[Message] = resp.all()
 
-    if len(messages) < 7:
+    if len(messages) < 15:
         logging.info("Not enough messages to summarize in group %s", group.group_name)
         return
 
     try:
-        response = await summarize(group.group_name or "group", messages)
+        result = await summarize(group.group_name or "group", messages)
     except Exception as e:
         logging.error("Error summarizing group %s: %s", group.group_name, e)
         return
 
     try:
         await whatsapp.send_message(
-            SendMessageRequest(phone=group.group_jid, message=response.data)
+            SendMessageRequest(phone=group.group_jid, message=result.output)
         )
 
         # Send the summary to the community groups
         community_groups = await group.get_related_community_groups(session)
         for cg in community_groups:
             await whatsapp.send_message(
-                SendMessageRequest(phone=cg.group_jid, message=response.data)
+                SendMessageRequest(phone=cg.group_jid, message=result.output)
             )
 
     except Exception as e:

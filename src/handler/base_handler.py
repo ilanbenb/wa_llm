@@ -1,4 +1,5 @@
 import logging
+
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
@@ -14,8 +15,8 @@ from models import (
     BaseReaction,
     upsert,
 )
-from whatsapp.jid import normalize_jid
 from whatsapp import WhatsAppClient, SendMessageRequest
+from whatsapp.jid import normalize_jid
 
 logger = logging.getLogger(__name__)
 
@@ -175,8 +176,6 @@ class BaseHandler:
         assert to_jid, "to_jid is required"
         assert message, "message is required"
         to_jid = normalize_jid(to_jid)
-        if in_reply_to:
-            in_reply_to = normalize_jid(in_reply_to)
 
         resp = await self.whatsapp.send_message(
             SendMessageRequest(
@@ -185,16 +184,17 @@ class BaseHandler:
                 reply_message_id=in_reply_to,
             )
         )
+        assert resp.results, "Failed to send message"
         my_number = await self.whatsapp.get_my_jid()
         new_message = BaseMessage(
             message_id=resp.results.message_id if resp.results else "unknown",
             text=message,
-            sender_jid=str(my_number),  # Convert JID to string
+            sender_jid=str(my_number),
             chat_jid=to_jid,
+            reply_to_id=in_reply_to,
         )
         stored_message = await self.store_message(Message(**new_message.model_dump()))
-        if stored_message is None:
-            raise RuntimeError("Failed to store sent message")
+        assert stored_message, "Failed to store message"
         return stored_message
 
     async def upsert(self, model):

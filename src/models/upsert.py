@@ -1,14 +1,20 @@
-from typing import List
+from typing import List, TypeVar, cast
+from sqlalchemy import inspect
 
 from sqlalchemy.dialects.postgresql import insert
 from sqlmodel import SQLModel, select
+from sqlmodel.sql.expression import SelectOfScalar
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-async def upsert(session: AsyncSession, entity: SQLModel):
+T = TypeVar("T", bound=SQLModel)
+
+
+async def upsert(session: AsyncSession, entity: T) -> T:
     # Split fields into primary keys and values
     pkeys, vals = {}, {}
-    for f in entity.__table__.columns:
+    mapper = inspect(entity.__class__)
+    for f in mapper.columns:
         (pkeys if f.primary_key else vals)[f.name] = getattr(entity, f.name)
 
     # Create insert statement
@@ -23,7 +29,7 @@ async def upsert(session: AsyncSession, entity: SQLModel):
         },
     )
 
-    await session.exec(stmt)
+    await session.execute(stmt)
 
     # Query for the updated instance
     select_stmt = select(entity.__class__).where(
@@ -33,6 +39,9 @@ async def upsert(session: AsyncSession, entity: SQLModel):
     result = db_instance.first()
 
     # Merge the instance into the session
+    if result is None:
+        # Should not happen after upsert, but for type safety
+        return entity
     return result
 
 
@@ -47,11 +56,12 @@ async def bulk_upsert(session: AsyncSession, entities: List[SQLModel]):
     values_list = []
     # Get structure from first entity
     first_entity = entities[0]
-    pkeys = {f.name for f in first_entity.__table__.columns if f.primary_key}
+    mapper = inspect(first_entity.__class__)
+    pkeys = {f.name for f in mapper.columns if f.primary_key}
 
     for entity in entities:
         row_data = {}
-        for f in entity.__table__.columns:
+        for f in mapper.columns:
             row_data[f.name] = getattr(entity, f.name)
         values_list.append(row_data)
 
@@ -63,9 +73,9 @@ async def bulk_upsert(session: AsyncSession, entities: List[SQLModel]):
         index_elements=list(pkeys),
         set_={
             col.name: stmt.excluded[col.name]
-            for col in entity_class.__table__.columns
+            for col in mapper.columns
             if not col.primary_key
         },
     )
 
-    return await session.exec(stmt)
+    return await session.exec(cast(SelectOfScalar[SQLModel], stmt))

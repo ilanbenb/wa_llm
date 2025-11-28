@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Sequence
 
 from pydantic import field_validator
 from sqlmodel import (
@@ -30,7 +30,6 @@ class BaseGroup(SQLModel):
         max_length=255, foreign_key="sender.jid", nullable=True, default=None
     )
     managed: bool = Field(default=False)
-    forward_url: Optional[str] = Field(default=None, nullable=True)
     notify_on_spam: bool = Field(default=False)
     community_keys: Optional[List[str]] = Field(
         default=None, sa_column=Column(ARRAY(String))
@@ -41,7 +40,7 @@ class BaseGroup(SQLModel):
 
     @field_validator("group_jid", "owner_jid", mode="before")
     @classmethod
-    def normalize(cls, value: Optional[str]) -> str:
+    def normalize(cls, value: Optional[str]) -> str | None:
         return normalize_jid(value) if value else None
 
 
@@ -55,7 +54,7 @@ class Group(BaseGroup, table=True):
 
     async def get_related_community_groups(
         self, session: AsyncSession
-    ) -> List["Group"]:
+    ) -> Sequence["Group"]:
         """
         Fetches all other groups that share at least one community key with this group.
 

@@ -1,4 +1,5 @@
 import logging
+from typing import Sequence
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -13,7 +14,10 @@ from models import Message
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from whatsapp import WhatsAppClient
+from config import Settings
 from .base_handler import BaseHandler
+from services.prompt_manager import prompt_manager
+
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -42,13 +46,17 @@ class Router(BaseHandler):
         session: AsyncSession,
         whatsapp: WhatsAppClient,
         embedding_client: AsyncClient,
+        settings: Settings,
     ):
+        self.settings = settings
         self.ask_knowledge_base = KnowledgeBaseAnswers(
-            session, whatsapp, embedding_client
+            session, whatsapp, embedding_client, settings
         )
         super().__init__(session, whatsapp, embedding_client)
 
     async def __call__(self, message: Message):
+        if not message.text:
+            return
         route = await self._route(message.text)
         match route:
             case IntentEnum.summarize:
@@ -62,13 +70,13 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
-            system_prompt="What is the intent of the message? What does the user want us to help with?",
+            model=self.settings.model_name,
+            system_prompt=prompt_manager.render("intent.j2"),
             output_type=Intent,
         )
 
         result = await agent.run(message)
-        return result.data.intent
+        return result.output.intent
 
     async def summarize(self, message: Message):
         time_24_hours_ago = datetime.now() - timedelta(hours=24)
@@ -80,40 +88,33 @@ class Router(BaseHandler):
             .limit(30)
         )
         res = await self.session.exec(stmt)
-        messages: list[Message] = res.all()
+        messages: Sequence[Message] = res.all()
 
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
-            system_prompt="""Summarize the following group chat messages in a few words.
-            
-            - You MUST state that this is a summary of TODAY's messages. Even if the user asked for a summary of a different time period (in that case, state that you can only summarize today's messages)
-            - Always personalize the summary to the user's request
-            - Keep it short and conversational
-            - Tag users when mentioning them
-            - You MUST respond with the same language as the request
-            """,
+            model=self.settings.model_name,
+            system_prompt=prompt_manager.render("summarize.j2"),
             output_type=str,
         )
 
         response = await agent.run(
-            f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(messages)}"
+            f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(list(messages))}"
         )
         await self.send_message(
             message.chat_jid,
-            response.data,
-            message.message_id,
+            response.output,
+            # in_reply_to=message.message_id,
         )
 
     async def about(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm an open-source bot created for the GenAI Israel community - https://llm.org.il.\nI can help you catch up on the chat messages and answer questions based on the group's knowledge.\nPlease send me PRs and star me at https://github.com/ilanbenb/wa_llm ⭐️",
-            message.message_id,
+            # in_reply_to=message.message_id,
         )
 
     async def default_response(self, message):
         await self.send_message(
             message.chat_jid,
             "I'm sorry, but I dont think this is something I can help with right now 😅.\n I can help catch up on the chat messages or answer questions based on the group's knowledge.",
-            message.message_id,
+            # in_reply_to=message.message_id,
         )

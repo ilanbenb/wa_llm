@@ -21,22 +21,22 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
 
     async def __call__(self, message: Message):
         agent = Agent(
-            model="anthropic:claude-4-sonnet-20250514",
+            model="anthropic:claude-sonnet-4-5-20250929",
             system_prompt="""You are a spam whatsapp link spam detector. You are given a message and you need to return a score of 1-5 and a SHORT 7 words explanation of why you gave that score.
             """,
             output_type=self.SpamCheckResult,
             output_retries=3,
         )
 
-        response = await agent.run(
+        result = await agent.run(
             (
                 f"@{parse_jid(message.sender_jid).user}:"
                 f"{message.text}"
-                f"The message is from a group chat. The group name is {message.group.group_name} and the group description is {message.group.group_topic}"
+                f"The message is from a group chat. The group name is {message.group.group_name if message.group else 'Unknown'} and the group description is {message.group.group_topic if message.group else 'Unknown'}"
             )
         )
 
-        spam_result = response.output
+        spam_result = result.output
 
         if message and message.group and not message.group.owner_jid:
             raise ValueError("Group owner JID is required")
@@ -52,5 +52,5 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
         await self.send_message(
             message.chat_jid,
             message_to_send,
-            message.message_id,
+            # message.message_id,
         )
