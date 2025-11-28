@@ -8,6 +8,7 @@ from whatsapp.jid import normalize_jid
 if TYPE_CHECKING:
     from .group import Group
     from .message import Message
+    from .reaction import Reaction
 
 
 class BaseSender(SQLModel):
@@ -23,6 +24,10 @@ class BaseSender(SQLModel):
 class Sender(BaseSender, table=True):
     messages: List["Message"] = Relationship(back_populates="sender")
     groups_owned: List["Group"] = Relationship(back_populates="owner")
+    # Reactions relationship - one sender can have many reactions
+    reactions: List["Reaction"] = Relationship(
+        back_populates="sender", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 Sender.model_rebuild()

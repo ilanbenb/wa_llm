@@ -10,6 +10,7 @@ from .webhook import WhatsAppWebhookPayload, Message as PayloadMessage
 if TYPE_CHECKING:
     from .group import Group
     from .sender import Sender
+    from .reaction import Reaction
 
 
 class BaseMessage(SQLModel):
@@ -72,6 +73,10 @@ class Message(BaseMessage, table=True):
             "backref": "replied_to",
         }
     )
+    # Reactions relationship - one message can have many reactions
+    reactions: List["Reaction"] = Relationship(
+        back_populates="message", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
     @classmethod
     def from_webhook(cls, payload: WhatsAppWebhookPayload) -> "Message":
@@ -97,7 +102,7 @@ class Message(BaseMessage, table=True):
                 message_id=payload.message.id,
                 text=cls._extract_message_text(payload),
                 chat_jid=chat_jid,
-                sender_jid=sender_jid,
+                sender_jid=normalize_jid(sender_jid),
                 timestamp=payload.timestamp,
                 reply_to_id=payload.message.replied_id,
                 media_url=cls._extract_media_url(payload),

@@ -91,9 +91,32 @@ Swagger docs available at: `http://localhost:8000/docs`
 
 ---
 ## Developing
-* install uv tools `uv sync --all-extras --active`
-* run ruff (Python linter and code formatter) `ruff check` and `ruff format`
-* check for types usage `pyright`
+
+### Setup
+Install dependencies using `uv`:
+```bash
+uv sync --all-extras --dev
+```
+
+### Development Commands
+The project uses **Poe the Poet** for task automation with parallel execution:
+
+```bash
+# Run all checks (format, then parallel lint/typecheck/test)
+uv run poe check
+
+# Individual tasks
+uv run poe format     # Format code with ruff
+uv run poe lint       # Lint code with ruff
+uv run poe typecheck  # Type check with pyright
+uv run poe test       # Run tests with pytest
+
+# List all available tasks
+uv run poe
+```
+
+The `check` command runs formatting first, then executes linting, type checking, and testing **in parallel** for faster execution.
+
 
 ### Key Files
 
