@@ -75,8 +75,7 @@ class Message(BaseMessage, table=True):
     )
     # Reactions relationship - one message can have many reactions
     reactions: List["Reaction"] = Relationship(
-        back_populates="message", 
-        sa_relationship_kwargs={"lazy": "selectin"}
+        back_populates="message", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
     @classmethod

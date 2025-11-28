@@ -12,7 +12,6 @@ from models import (
     Group,
     BaseMessage,
     Reaction,
-    BaseReaction,
     upsert,
 )
 from whatsapp import WhatsAppClient, SendMessageRequest
@@ -46,15 +45,15 @@ class BaseHandler:
         # Handle webhook payload - could be message or reaction
         if isinstance(message, WhatsAppWebhookPayload):
             sender_pushname = message.pushname
-            
+
             # Check if this is a reaction payload
             if message.reaction:
                 await self.store_reaction(message)
                 return None  # Reaction stored, no message to return
-            
+
             # Otherwise, treat as regular message
             message = Message.from_webhook(message)
-        
+
         if isinstance(message, BaseMessage):
             message = Message(**message.model_dump())
 
@@ -96,11 +95,11 @@ class BaseHandler:
         if not payload.reaction:
             logger.warning("No reaction found in webhook payload")
             return None
-            
+
         try:
             # Create reaction from webhook payload
             reaction = Reaction.from_webhook(payload)
-            
+
             async with self.session.begin_nested():
                 # Ensure sender exists
                 sender = await self.session.get(Sender, reaction.sender_jid)
@@ -113,19 +112,23 @@ class BaseHandler:
                     )
                     await self.upsert(sender)
                     await self.session.flush()
-                
+
                 # Ensure the message being reacted to exists
                 message = await self.session.get(Message, reaction.message_id)
                 if message is None:
-                    logger.warning(f"Message {reaction.message_id} not found for reaction")
+                    logger.warning(
+                        f"Message {reaction.message_id} not found for reaction"
+                    )
                     # We could still store the reaction, but log it as orphaned
                     # return None  # Uncomment to skip storing orphaned reactions
-                
+
                 # Use custom upsert method for reactions
                 stored_reaction = await Reaction.upsert_reaction(self.session, reaction)
-                logger.info(f"Stored/updated reaction from {reaction.sender_jid} on message {reaction.message_id}")
+                logger.info(
+                    f"Stored/updated reaction from {reaction.sender_jid} on message {reaction.message_id}"
+                )
                 return stored_reaction
-                    
+
         except Exception as e:
             logger.error(f"Error storing reaction: {e}")
             return None
@@ -139,26 +142,30 @@ class BaseHandler:
         """
         try:
             from sqlmodel import select
-            
+
             async with self.session.begin_nested():
                 # Find the reaction to remove
                 result = await self.session.exec(
                     select(Reaction).where(
                         Reaction.message_id == message_id,
-                        Reaction.sender_jid == normalize_jid(sender_jid)
+                        Reaction.sender_jid == normalize_jid(sender_jid),
                     )
                 )
-                
+
                 reaction = result.first()
                 if reaction:
                     await self.session.delete(reaction)
                     await self.session.flush()
-                    logger.info(f"Removed reaction from {sender_jid} on message {message_id}")
+                    logger.info(
+                        f"Removed reaction from {sender_jid} on message {message_id}"
+                    )
                     return True
                 else:
-                    logger.warning(f"No reaction found from {sender_jid} on message {message_id}")
+                    logger.warning(
+                        f"No reaction found from {sender_jid} on message {message_id}"
+                    )
                     return False
-                    
+
         except Exception as e:
             logger.error(f"Error removing reaction: {e}")
             return False

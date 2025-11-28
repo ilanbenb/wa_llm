@@ -26,8 +26,7 @@ class Sender(BaseSender, table=True):
     groups_owned: List["Group"] = Relationship(back_populates="owner")
     # Reactions relationship - one sender can have many reactions
     reactions: List["Reaction"] = Relationship(
-        back_populates="sender",
-        sa_relationship_kwargs={"lazy": "selectin"}
+        back_populates="sender", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
 

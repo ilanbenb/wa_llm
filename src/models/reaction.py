@@ -14,25 +14,25 @@ if TYPE_CHECKING:
 
 class BaseReaction(SQLModel):
     """Base reaction model for WhatsApp message reactions."""
-    
+
     # Primary key - auto-increment ID
     id: Optional[int] = Field(default=None, primary_key=True)
-    
+
     # Foreign key to the message being reacted to
     message_id: str = Field(max_length=255, foreign_key="message.message_id")
-    
+
     # Foreign key to the sender who reacted
     sender_jid: str = Field(max_length=255, foreign_key="sender.jid")
-    
+
     # The actual reaction content (emoji)
     emoji: str = Field(max_length=10)
-    
+
     # Timestamp when the reaction was created
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
-    
+
     @field_validator("sender_jid", mode="before")
     @classmethod
     def normalize_sender_jid(cls, value: str) -> str:
@@ -42,15 +42,13 @@ class BaseReaction(SQLModel):
 
 class Reaction(BaseReaction, table=True):
     """Reaction model for database storage."""
-    
+
     # Relationships
     message: Optional["Message"] = Relationship(
-        back_populates="reactions", 
-        sa_relationship_kwargs={"lazy": "selectin"}
+        back_populates="reactions", sa_relationship_kwargs={"lazy": "selectin"}
     )
     sender: Optional["Sender"] = Relationship(
-        back_populates="reactions",
-        sa_relationship_kwargs={"lazy": "selectin"}
+        back_populates="reactions", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
     @classmethod
@@ -58,13 +56,13 @@ class Reaction(BaseReaction, table=True):
         """Create Reaction instance from WhatsApp webhook payload."""
         if not payload.reaction:
             raise ValueError("Missing reaction in webhook payload")
-        
+
         if not payload.reaction.id:
             raise ValueError("Missing reaction message ID")
-            
+
         if not payload.reaction.message:
             raise ValueError("Missing reaction emoji")
-            
+
         if not payload.from_:
             raise ValueError("Missing sender in webhook payload")
 
@@ -90,7 +88,7 @@ class Reaction(BaseReaction, table=True):
         """
         from sqlalchemy.dialects.postgresql import insert
         from sqlmodel import select
-        
+
         # Prepare data for insert (exclude id field)
         insert_data = {
             "message_id": reaction.message_id,
@@ -98,30 +96,29 @@ class Reaction(BaseReaction, table=True):
             "emoji": reaction.emoji,
             "timestamp": reaction.timestamp,
         }
-        
+
         # Create insert statement
         stmt = insert(cls).values(**insert_data)
-        
+
         # Use the unique constraint (message_id, sender_jid) for conflict resolution
         stmt = stmt.on_conflict_do_update(
             index_elements=["message_id", "sender_jid"],
             set_={
                 "emoji": stmt.excluded.emoji,
                 "timestamp": stmt.excluded.timestamp,
-            }
+            },
         )
-        
+
         # Execute the upsert
         await session.exec(stmt)
-        
+
         # Query for the updated/created reaction
         select_stmt = select(cls).where(
-            cls.message_id == reaction.message_id,
-            cls.sender_jid == reaction.sender_jid
+            cls.message_id == reaction.message_id, cls.sender_jid == reaction.sender_jid
         )
         result = await session.exec(select_stmt)
         return result.first()
 
 
 # Build the model to resolve relationships
-Reaction.model_rebuild() 
+Reaction.model_rebuild()
