@@ -133,7 +133,6 @@ class BaseHandler:
             logger.error(f"Error storing reaction: {e}")
             return None
 
-
     async def send_message(
         self, to_jid: str, message: str, in_reply_to: str | None = None
     ) -> Message:

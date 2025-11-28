@@ -40,7 +40,6 @@ class BaseReaction(SQLModel):
         return normalize_jid(value)
 
 
-
 class Reaction(BaseReaction, table=True):
     """Reaction model for database storage."""
 
