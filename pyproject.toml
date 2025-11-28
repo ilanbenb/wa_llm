@@ -30,8 +30,9 @@ dev = [
     "whatstk>=0.7.1",
     "ruff>=0.11.1",
     "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.5",
-    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "pytest-httpx>=0.35.0",
     "pyright>=1.1.407",
     "tqdm>=4.67.1",
 ]

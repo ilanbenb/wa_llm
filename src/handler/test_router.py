@@ -5,36 +5,31 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
-from voyageai.api_resources.response import VoyageResponse
-from voyageai.object.embeddings import EmbeddingsObject
 
-from handler.router import Router, IntentEnum
+from handler.router import Router, IntentEnum, Intent
 from models import Message
 from test_utils.mock_session import AsyncSessionMock
 from whatsapp import SendMessageRequest
+from whatsapp.jid import JID
 from config import Settings
-
-pytest_plugins = ["test_utils.mock_session"]
 
 
 @pytest.fixture
 def mock_whatsapp():
     client = AsyncMock()
     client.send_message = AsyncMock()
-    client.get_my_jid = AsyncMock(return_value="bot@s.whatsapp.net")
+    client.get_my_jid = AsyncMock(return_value=JID(user="bot", server="s.whatsapp.net"))
     return client
 
 
 @pytest.fixture
 def mock_embedding_client():
     client = AsyncMock()
-    client.embed = AsyncMock(
-        return_value=EmbeddingsObject(
-            response=VoyageResponse(
-                embeddings=[[0.1, 0.2, 0.3, 0.4, 0.5]], usage={"total_tokens": 4}
-            )
-        )
-    )
+    # Mock the embed method to return an object with embeddings and total_tokens attributes
+    mock_response = AsyncMock()
+    mock_response.embeddings = [[0.1, 0.2, 0.3, 0.4, 0.5]]
+    mock_response.total_tokens = 4
+    client.embed = AsyncMock(return_value=mock_response)
     return client
 
 
@@ -56,12 +51,11 @@ def mock_settings():
 
 def MockAgent(return_value: Any):
     mock = Mock()
-    mock.run = AsyncMock(return_value=AgentRunResult([], None, return_value, 0))
+    mock.run = AsyncMock(return_value=AgentRunResult(output=return_value))
     return mock
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Skipping For now until I fix the mock..")
 async def test_router_ask_question_route(
     mock_session: AsyncSessionMock,
     mock_whatsapp: AsyncMock,
@@ -70,14 +64,60 @@ async def test_router_ask_question_route(
     mock_settings: Mock,
     monkeypatch: pytest.MonkeyPatch,
 ):
-    # Mock the Agent class
-    mock_agent = MockAgent(IntentEnum.ask_question)
+    # Mock the Agent class for routing
+    mock_route_agent = MockAgent(Intent(intent=IntentEnum.ask_question))
 
-    monkeypatch.setattr(Agent, "__init__", lambda *args, **kwargs: None)
-    monkeypatch.setattr(Agent, "run", mock_agent.run)
+    # Mock the Agent class for rephrasing
+    mock_rephrasing_agent = MockAgent("rephrased question")
+
+    # Mock the Agent class for generation
+    mock_generation_agent = MockAgent("cool response")
+
+    # Setup agent mocks - cycle through agents in order: route, rephrase, generate
+    agents = {
+        "route": mock_route_agent,
+        "rephrase": mock_rephrasing_agent,
+        "generate": mock_generation_agent,
+    }
+    agent_counter = 0
+
+    def mock_agent_init(*args, **kwargs):
+        nonlocal agent_counter
+        return None
+
+    def mock_agent_run(*args, **kwargs):
+        nonlocal agent_counter
+        agent = list(agents.values())[agent_counter]
+        agent_counter = (agent_counter + 1) % len(agents)
+        return agent.run(*args, **kwargs)
+
+    monkeypatch.setattr(Agent, "__init__", mock_agent_init)
+    monkeypatch.setattr(Agent, "run", mock_agent_run)
+
+    # Mock session.exec() to handle all database queries
+    def mock_exec_side_effect(*args, **kwargs):
+        mock_result = AsyncMock()
+        mock_result.all = Mock(return_value=[])  # Return empty by default
+        mock_result.first = Mock(return_value=None)  # Return None for first()
+        mock_result.__aiter__ = AsyncMock(return_value=iter([]))  # For iteration
+        return mock_result
+
+    mock_session.exec.side_effect = mock_exec_side_effect
+    mock_session.get = AsyncMock(return_value=None)  # No existing records
+    mock_session.add = AsyncMock()  # Mock add operation
+    mock_session.flush = AsyncMock()  # Mock flush operation
+    mock_session.execute = AsyncMock()  # Mock execute operation for upsert
+
+    # Mock begin_nested for nested transactions
+    mock_nested = AsyncMock()
+    mock_nested.__aenter__ = AsyncMock(return_value=mock_nested)
+    mock_nested.__aexit__ = AsyncMock(return_value=None)
+    mock_session.begin_nested = Mock(return_value=mock_nested)
 
     # Set up mock response for send_message
-    mock_whatsapp.send_message.return_value.results.message_id = "response_id"
+    mock_response = AsyncMock()
+    mock_response.results.message_id = "response_id"
+    mock_whatsapp.send_message.return_value = mock_response
 
     # Create router instance
     router = Router(mock_session, mock_whatsapp, mock_embedding_client, mock_settings)
@@ -95,7 +135,6 @@ async def test_router_ask_question_route(
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Skipping For now until I fix the mock..")
 async def test_router_summarize_route(
     mock_session: AsyncSessionMock,
     mock_whatsapp: AsyncMock,
@@ -105,7 +144,7 @@ async def test_router_summarize_route(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # Mock the Agent class for routing
-    mock_route_agent = MockAgent(IntentEnum.summarize)
+    mock_route_agent = MockAgent(Intent(intent=IntentEnum.summarize))
 
     # Mock the Agent class for summarization
     mock_summarize_agent = MockAgent("Summary of messages")
@@ -133,7 +172,9 @@ async def test_router_summarize_route(
     mock_session.exec.return_value = mock_exec
 
     # Set up mock response for send_message
-    mock_whatsapp.send_message.return_value.results.message_id = "response_id"
+    mock_response = AsyncMock()
+    mock_response.results.message_id = "response_id"
+    mock_whatsapp.send_message.return_value = mock_response
 
     # Create router instance
     router = Router(mock_session, mock_whatsapp, mock_embedding_client, mock_settings)
@@ -151,7 +192,6 @@ async def test_router_summarize_route(
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Skipping For now until I fix the mock..")
 async def test_router_other_route(
     mock_session: AsyncSessionMock,
     mock_whatsapp: AsyncMock,
@@ -161,9 +201,14 @@ async def test_router_other_route(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # Mock the Agent class
-    mock_agent = MockAgent(IntentEnum.other)
+    mock_agent = MockAgent(Intent(intent=IntentEnum.other))
     monkeypatch.setattr(Agent, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Agent, "run", mock_agent.run)
+
+    # Set up mock response for send_message
+    mock_response = AsyncMock()
+    mock_response.results.message_id = "response_id"
+    mock_whatsapp.send_message.return_value = mock_response
 
     # Create router instance
     router = Router(mock_session, mock_whatsapp, mock_embedding_client, mock_settings)
@@ -171,8 +216,8 @@ async def test_router_other_route(
     # Test the route
     await router(test_message)
 
-    # Verify no message was sent
-    mock_whatsapp.send_message.assert_not_called()
+    # Verify the default response message was sent
+    mock_whatsapp.send_message.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -183,7 +228,9 @@ async def test_send_message(
     mock_settings: Mock,
 ):
     # Set up mock response
-    mock_whatsapp.send_message.return_value.results.message_id = "response_id"
+    mock_response = AsyncMock()
+    mock_response.results.message_id = "response_id"
+    mock_whatsapp.send_message.return_value = mock_response
     mock_session.get.return_value = None  # Simulate sender doesn't exist
 
     # Create router instance
