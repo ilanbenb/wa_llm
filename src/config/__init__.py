@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     # Model settings
     model_name: str = "anthropic:claude-sonnet-4-5-20250929"
 
+    # Direct Message settings
+    dm_autoreply_enabled: bool = False
+    dm_autoreply_message: str = (
+        "Hello, I am not designed to answer to personal messages."
+    )
+
     # Optional settings
     debug: bool = False
     log_level: str = "INFO"
