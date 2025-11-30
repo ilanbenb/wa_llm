@@ -13,6 +13,7 @@ from handler.knowledge_base_answers import KnowledgeBaseAnswers
 from models import Message
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
+from utils.opt_out import get_opt_out_map
 from whatsapp import WhatsAppClient
 from config import Settings
 from .base_handler import BaseHandler
@@ -90,14 +91,22 @@ class Router(BaseHandler):
         res = await self.session.exec(stmt)
         messages: Sequence[Message] = res.all()
 
+        # Get opt-out map for all senders in the history + current sender
+        all_jids = {m.sender_jid for m in messages}
+        all_jids.add(message.sender_jid)
+        opt_out_map = await get_opt_out_map(self.session, list(all_jids))
+
         agent = Agent(
             model=self.settings.model_name,
             system_prompt=prompt_manager.render("summarize.j2"),
             output_type=str,
         )
 
+        sender_user = parse_jid(message.sender_jid).user
+        sender_display = opt_out_map.get(sender_user, f"@{sender_user}")
+
         response = await agent.run(
-            f"@{parse_jid(message.sender_jid).user}: {message.text}\n\n # History:\n {chat2text(list(messages))}"
+            f"{sender_display}: {message.text}\n\n # History:\n {chat2text(list(messages), opt_out_map)}"
         )
         await self.send_message(
             message.chat_jid,

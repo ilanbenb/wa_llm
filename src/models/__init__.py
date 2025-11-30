@@ -5,6 +5,7 @@ from .sender import Sender, BaseSender
 from .reaction import Reaction, BaseReaction
 from .upsert import upsert, bulk_upsert
 from .webhook import WhatsAppWebhookPayload
+from .opt_out import OptOut
 
 __all__ = [
     "Group",
@@ -20,4 +21,5 @@ __all__ = [
     "bulk_upsert",
     "KBTopic",
     "KBTopicCreate",
+    "OptOut",
 ]
