@@ -17,6 +17,7 @@ from models import Message, KBTopic
 from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
+from utils.opt_out import get_opt_out_map
 from utils.voyage_embed_text import voyage_embed_text
 from .base_handler import BaseHandler
 from config import Settings
@@ -53,8 +54,13 @@ class KnowledgeBaseAnswers(BaseHandler):
         res = await self.session.exec(stmt)
         history: list[Message] = list(res.all())
 
+        # Get opt-out map
+        all_jids = {m.sender_jid for m in history}
+        all_jids.add(message.sender_jid)
+        opt_out_map = await get_opt_out_map(self.session, list(all_jids))
+
         rephrased_result = await self.rephrasing_agent(
-            (await self.whatsapp.get_my_jid()).user, message, history
+            (await self.whatsapp.get_my_jid()).user, message, history, opt_out_map
         )
         # Get query embedding
         embedded_question = (
@@ -100,7 +106,7 @@ class KnowledgeBaseAnswers(BaseHandler):
 
         sender_number = parse_jid(message.sender_jid).user
         generation_result = await self.generation_agent(
-            message.text, similar_topics, message.sender_jid, history
+            message.text, similar_topics, message.sender_jid, history, opt_out_map
         )
         logger.info(
             "RAG Query Results:\n"
@@ -129,18 +135,26 @@ class KnowledgeBaseAnswers(BaseHandler):
         reraise=True,
     )
     async def generation_agent(
-        self, query: str, topics: list[str], sender: str, history: List[Message]
+        self,
+        query: str,
+        topics: list[str],
+        sender: str,
+        history: List[Message],
+        opt_out_map: dict[str, str],
     ) -> AgentRunResult[str]:
         agent = Agent(
             model=self.settings.model_name,
             system_prompt=prompt_manager.render("rag.j2"),
         )
 
+        sender_user = parse_jid(sender).user
+        sender_display = opt_out_map.get(sender_user, f"@{sender_user}")
+
         prompt_template = f"""
-        {f"@{sender}"}: {query}
+        {sender_display}: {query}
         
         # Recent chat history:
-        {chat2text(history)}
+        {chat2text(history, opt_out_map)}
         
         # Related Topics:
         {"\n---\n".join(topics) if len(topics) > 0 else "No related topics found."}
@@ -155,7 +169,11 @@ class KnowledgeBaseAnswers(BaseHandler):
         reraise=True,
     )
     async def rephrasing_agent(
-        self, my_jid: str, message: Message, history: List[Message]
+        self,
+        my_jid: str,
+        message: Message,
+        history: List[Message],
+        opt_out_map: dict[str, str],
     ) -> AgentRunResult[str]:
         rephrased_agent = Agent(
             model=self.settings.model_name,
@@ -164,5 +182,5 @@ class KnowledgeBaseAnswers(BaseHandler):
 
         # We obviously need to translate the question and turn the question vebality to a title / summary text to make it closer to the questions in the rag
         return await rephrased_agent.run(
-            f"{message.text}\n\n## Recent chat history:\n {chat2text(history)}"
+            f"{message.text}\n\n## Recent chat history:\n {chat2text(history, opt_out_map)}"
         )
