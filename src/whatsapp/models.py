@@ -163,7 +163,7 @@ class ManageParticipantResult(BaseModel):
 
 # Request Models
 class SendMessageRequest(BaseModel):
-    phone: str = Field(..., example="6289685028129@s.whatsapp.net")
+    phone: str = Field(examples=["6289685028129@s.whatsapp.net"])
     message: str
     reply_message_id: Optional[str] = None
 

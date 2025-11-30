@@ -3,6 +3,7 @@ from typing import Optional, Self
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
 
 
 class Settings(BaseSettings):
@@ -23,6 +24,9 @@ class Settings(BaseSettings):
     # Voyage settings
     voyage_api_key: str
     voyage_max_retries: int = 5
+
+    # Model settings
+    model_name: str = "anthropic:claude-sonnet-4-5-20250929"
 
     # Direct Message settings
     dm_autoreply_enabled: bool = False
@@ -50,3 +54,11 @@ class Settings(BaseSettings):
             environ["LOGFIRE_TOKEN"] = self.logfire_token
 
         return self
+
+
+@lru_cache
+def get_settings() -> Settings:
+    # Use model_validate({}) to trigger Pydantic's validation and environment variable loading
+    # without passing arguments directly, which satisfies type checkers that would otherwise
+    # complain about missing required fields in __init__.
+    return Settings.model_validate({})

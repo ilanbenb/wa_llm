@@ -47,7 +47,7 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
 )
 async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic]]:
     agent = Agent(
-        model="anthropic:claude-4-sonnet-20250514",
+        model="anthropic:claude-sonnet-4-5-20250929",
         # Set bigger then 1024 max token for this agent, because it's a long conversation
         # https://github.com/santokalayil/ai_agents/blame/26b51578ef5864b7f4f0c540e89297867c76d8ab/pydantic_ai/models/anthropic.py#L207C1-L208C1
         model_settings={"max_tokens": 10000},
@@ -121,7 +121,7 @@ async def get_conversation_topics(
 
     result = await conversation_splitter_agent(conversation_content)
     return [
-        _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.data
+        _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.output
     ]
 
 

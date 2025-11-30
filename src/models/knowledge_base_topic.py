@@ -27,7 +27,7 @@ class KBTopicCreate(KBTopicBase):
 
 class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
-    embedding: Any = Field(sa_type=Vector(1024))
+    embedding: Any = Field(sa_column=Column(Vector(1024)))
 
     # Add pgvector index
     __table_args__ = (

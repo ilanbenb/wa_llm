@@ -38,7 +38,6 @@ async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
                         last_summary_sync=og.last_summary_sync
                         if og
                         else datetime.now(),
-                        forward_url=og.forward_url if og else None,
                         notify_on_spam=og.notify_on_spam if og else False,
                     ).model_dump()
                 )
