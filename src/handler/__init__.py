@@ -12,7 +12,6 @@ from models import (
     WhatsAppWebhookPayload,
 )
 from whatsapp import WhatsAppClient
-from config import Settings
 from .base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -34,6 +33,7 @@ class MessageHandler(BaseHandler):
         self.whatsapp_group_link_spam = WhatsappGroupLinkSpamHandler(
             session, whatsapp, embedding_client
         )
+        self.settings = settings
         super().__init__(session, whatsapp, embedding_client)
 
     async def __call__(self, payload: WhatsAppWebhookPayload):
@@ -54,10 +54,10 @@ class MessageHandler(BaseHandler):
             )
 
         # autoreply to private messages
-        if message and not message.group and settings.dm_autoreply_enabled:
+        if message and not message.group and self.settings.dm_autoreply_enabled:
             await self.send_message(
                 message.sender_jid,
-                settings.dm_autoreply_message,
+                self.settings.dm_autoreply_message,
                 message.message_id,
             )
             return
