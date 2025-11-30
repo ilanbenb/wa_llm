@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     # Direct Message settings
     dm_autoreply_enabled: bool = False
     dm_autoreply_message: str = (
-        "Hello, I am not designed to answer to specific messages."
+        "Hello, I am not designed to answer to personal messages."
     )
 
     # Optional settings

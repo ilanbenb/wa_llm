@@ -51,7 +51,7 @@ cp .env.example .env
 | `ANTHROPIC_API_KEY`            | Anthropic API key. You need to have a real anthropic key here, starts with sk-....                    | –                                                            |
 | `LOGFIRE_TOKEN`                | Logfire monitoring key, You need to have a real logfire key here               | –                                                            |
 | `DM_AUTOREPLY_ENABLED`         | Enable auto-reply for direct messages | `False`                                                      |
-| `DM_AUTOREPLY_MESSAGE`         | Message to send as auto-reply        | `Hello, I am not designed to answer to specific messages.`   |
+| `DM_AUTOREPLY_MESSAGE`         | Message to send as auto-reply        | `Hello, I am not designed to answer to personal messages.`   |
 </div>
 
 ### 3. starting the services
