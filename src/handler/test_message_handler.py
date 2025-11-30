@@ -60,12 +60,14 @@ async def test_message_handler_dm_opt_out(
     handler.store_message = AsyncMock(return_value=test_message)
 
     # Create a dummy payload
-    payload = WhatsAppWebhookPayload.model_validate({
-        "from": "user@s.whatsapp.net",
-        "timestamp": datetime.now(timezone.utc),
-        "pushname": "User",
-        "message": {"text": "opt-out"}
-    })
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "user@s.whatsapp.net",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "User",
+            "message": {"text": "opt-out"},
+        }
+    )
 
     # Fix mock response for send_message
     mock_response = AsyncMock()
@@ -107,12 +109,14 @@ async def test_message_handler_dm_opt_in(
     )
     handler.store_message = AsyncMock(return_value=test_message)
 
-    payload = WhatsAppWebhookPayload.model_validate({
-        "from": "user@s.whatsapp.net",
-        "timestamp": datetime.now(timezone.utc),
-        "pushname": "User",
-        "message": {"text": "opt-in"}
-    })
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "user@s.whatsapp.net",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "User",
+            "message": {"text": "opt-in"},
+        }
+    )
 
     # Mock existing opt-out record
     from models import OptOut
@@ -160,12 +164,14 @@ async def test_message_handler_dm_status(
     )
     handler.store_message = AsyncMock(return_value=test_message)
 
-    payload = WhatsAppWebhookPayload.model_validate({
-        "from": "user@s.whatsapp.net",
-        "timestamp": datetime.now(timezone.utc),
-        "pushname": "User",
-        "message": {"text": "status"}
-    })
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "user@s.whatsapp.net",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "User",
+            "message": {"text": "status"},
+        }
+    )
 
     # Mock get to return None (opted in)
     mock_session.get.return_value = None
