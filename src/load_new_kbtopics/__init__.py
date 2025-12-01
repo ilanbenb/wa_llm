@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from pydantic import BaseModel, Field, PrivateAttr
-from pydantic_ai import Agent
+from pydantic_ai import Agent, ModelSettings
 from pydantic_ai.agent import AgentRunResult
 from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -16,9 +16,11 @@ from tenacity import (
 )
 from voyageai.client_async import AsyncClient
 
+from config import Settings, get_settings
 from models import KBTopicCreate, Group, Message
 from models.knowledge_base_topic import KBTopic
 from models.upsert import bulk_upsert
+from services.prompt_manager import prompt_manager
 from utils.voyage_embed_text import voyage_embed_text
 from whatsapp import WhatsAppClient
 
@@ -45,20 +47,14 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
     before_sleep=before_sleep_log(logger, logging.DEBUG),
     reraise=True,
 )
-async def conversation_splitter_agent(content: str) -> AgentRunResult[List[Topic]]:
+async def conversation_splitter_agent(
+    settings: Settings, content: str
+) -> AgentRunResult[List[Topic]]:
     agent = Agent(
-        model="anthropic:claude-sonnet-4-5-20250929",
+        model=settings.model_name,
         # Set bigger then 1024 max token for this agent, because it's a long conversation
-        # https://github.com/santokalayil/ai_agents/blame/26b51578ef5864b7f4f0c540e89297867c76d8ab/pydantic_ai/models/anthropic.py#L207C1-L208C1
-        model_settings={"max_tokens": 10000},
-        system_prompt="""Attached is a snapshot from a group chat conversation. The conversation is a mix of different topics. Your task is to:
-- Break the conversation into a list of topics, each topic have the same theme of subject.
-- For each topic, write a concise summary of the topic. This will help me to understand the group dynamics and the topics discussed.
-- Don't miss any topic! Every subject discussed should be highlighted in the summary, even if it's a small one. You MUST include ALL topics.
-- You MUST respond in English.
-
-My goal is learn the different subject discussed in the group chat. This will be used as a knowledge base for the group, so it should not loose any important information or insights.
-""",
+        model_settings=ModelSettings(max_tokens=10000),
+        system_prompt=prompt_manager.render("conversation_splitter.j2"),
         output_type=List[Topic],
         retries=5,
     )
@@ -101,7 +97,7 @@ def _topic_with_filtered_speakers(
 
 
 async def get_conversation_topics(
-    messages: list[Message], my_number: str
+    settings: Settings, messages: list[Message], my_number: str
 ) -> List[Topic]:
     if len(messages) == 0:
         return []
@@ -119,7 +115,7 @@ async def get_conversation_topics(
         ]
     )
 
-    result = await conversation_splitter_agent(conversation_content)
+    result = await conversation_splitter_agent(settings, conversation_content)
     return [
         _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.output
     ]
@@ -192,7 +188,8 @@ class topicsLoader:
 
             # The result is ordered by timestamp, so the first message is the oldest
             start_time = messages[0].timestamp
-            topics = await get_conversation_topics(messages, my_jid.user)
+            settings = get_settings()
+            topics = await get_conversation_topics(settings, messages, my_jid.user)
             logger.info(f"Loaded {len(topics)} topics for group {group.group_name}")
             await load_topics(db_session, group, embedding_client, topics, start_time)
             logger.info(f"topics loaded for group {group.group_name}")

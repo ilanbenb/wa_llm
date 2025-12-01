@@ -13,7 +13,9 @@ from tenacity import (
     before_sleep_log,
 )
 
+from config import Settings
 from models import Group, Message
+from services.prompt_manager import prompt_manager
 from utils.chat_text import chat2text
 from utils.opt_out import get_opt_out_map
 from whatsapp import WhatsAppClient, SendMessageRequest
@@ -28,19 +30,12 @@ logger = logging.getLogger(__name__)
     reraise=True,
 )
 async def summarize(
-    session: AsyncSession, group_name: str, messages: list[Message]
+    session: AsyncSession, settings: Settings, group_name: str, messages: list[Message]
 ) -> AgentRunResult[str]:
     agent = Agent(
-        model="anthropic:claude-sonnet-4-5-20250929",
-        system_prompt=f""""
-        Write a quick summary of what happened in the chat group since the last summary.
-        
-        - Start by stating this is a quick summary of what happened in "{group_name}" group recently.
-        - Use a casual conversational writing style.
-        - Keep it short and sweet.
-        - Write in the same language as the chat group. You MUST use the same language as the chat group!
-        - Please do tag users while talking about them (e.g., @972536150150). ONLY answer with the new phrased query, no other text.
-        """,
+        model=settings.model_name,
+        # TODO: move to jinja?
+        system_prompt=prompt_manager.render("quick_summary.j2", group_name=group_name),
         output_type=str,
     )
 
@@ -51,7 +46,9 @@ async def summarize(
     return await agent.run(chat2text(messages, opt_out_map))
 
 
-async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: Group):
+async def summarize_and_send_to_group(
+    settings: Settings, session, whatsapp: WhatsAppClient, group: Group
+):
     resp = await session.exec(
         select(Message)
         .where(Message.group_jid == group.group_jid)
@@ -66,7 +63,9 @@ async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: 
         return
 
     try:
-        result = await summarize(session, group.group_name or "group", messages)
+        result = await summarize(
+            session, settings, group.group_name or "group", messages
+        )
     except Exception as e:
         logging.error("Error summarizing group %s: %s", group.group_name, e)
         return
@@ -93,10 +92,12 @@ async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: 
         await session.commit()
 
 
-async def summarize_and_send_to_groups(session: AsyncSession, whatsapp: WhatsAppClient):
+async def summarize_and_send_to_groups(
+    settings: Settings, session: AsyncSession, whatsapp: WhatsAppClient
+):
     groups = await session.exec(select(Group).where(Group.managed == True))  # noqa: E712 https://stackoverflow.com/a/18998106
     tasks = [
-        summarize_and_send_to_group(session, whatsapp, group)
+        summarize_and_send_to_group(settings, session, whatsapp, group)
         for group in list(groups.all())
     ]
     errs = await asyncio.gather(*tasks, return_exceptions=True)
