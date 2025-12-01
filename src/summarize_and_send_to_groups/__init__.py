@@ -15,6 +15,7 @@ from tenacity import (
 
 from models import Group, Message
 from utils.chat_text import chat2text
+from utils.opt_out import get_opt_out_map
 from whatsapp import WhatsAppClient, SendMessageRequest
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,9 @@ logger = logging.getLogger(__name__)
     before_sleep=before_sleep_log(logger, logging.DEBUG),
     reraise=True,
 )
-async def summarize(group_name: str, messages: list[Message]) -> AgentRunResult[str]:
+async def summarize(
+    session: AsyncSession, group_name: str, messages: list[Message]
+) -> AgentRunResult[str]:
     agent = Agent(
         model="anthropic:claude-sonnet-4-5-20250929",
         system_prompt=f""""
@@ -41,7 +44,11 @@ async def summarize(group_name: str, messages: list[Message]) -> AgentRunResult[
         output_type=str,
     )
 
-    return await agent.run(chat2text(messages))
+    # Get opt-out map for all senders in the history
+    all_jids = {m.sender_jid for m in messages}
+    opt_out_map = await get_opt_out_map(session, list(all_jids))
+
+    return await agent.run(chat2text(messages, opt_out_map))
 
 
 async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: Group):
@@ -59,7 +66,7 @@ async def summarize_and_send_to_group(session, whatsapp: WhatsAppClient, group: 
         return
 
     try:
-        result = await summarize(group.group_name or "group", messages)
+        result = await summarize(session, group.group_name or "group", messages)
     except Exception as e:
         logging.error("Error summarizing group %s: %s", group.group_name, e)
         return

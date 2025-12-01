@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Optional, Sequence
 
 from pydantic import field_validator
@@ -12,6 +12,7 @@ from sqlmodel import (
     String,
     select,
     cast,
+    DateTime,
 )
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -37,6 +38,10 @@ class BaseGroup(SQLModel):
 
     last_ingest: datetime = Field(default_factory=datetime.now)
     last_summary_sync: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
 
     @field_validator("group_jid", "owner_jid", mode="before")
     @classmethod
