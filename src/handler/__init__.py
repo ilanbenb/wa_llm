@@ -32,7 +32,7 @@ class MessageHandler(BaseHandler):
     ):
         self.router = Router(session, whatsapp, embedding_client, settings)
         self.whatsapp_group_link_spam = WhatsappGroupLinkSpamHandler(
-            session, whatsapp, embedding_client
+            session, whatsapp, embedding_client, settings
         )
         self.settings = settings
         super().__init__(session, whatsapp, embedding_client)

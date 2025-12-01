@@ -5,7 +5,12 @@ from .base_handler import BaseHandler
 from pydantic_ai import Agent
 from pydantic import BaseModel
 from sqlmodel import Field
+from sqlmodel.ext.asyncio.session import AsyncSession
+from voyageai.client_async import AsyncClient
+
+from config import Settings
 from models import Message
+from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
 
 # Creating an object
@@ -13,6 +18,16 @@ logger = logging.getLogger(__name__)
 
 
 class WhatsappGroupLinkSpamHandler(BaseHandler):
+    def __init__(
+        self,
+        session: AsyncSession,
+        whatsapp: WhatsAppClient,
+        embedding_client: AsyncClient,
+        settings: Settings,
+    ):
+        self.settings = settings
+        super().__init__(session, whatsapp, embedding_client)
+
     class SpamCheckResult(BaseModel):
         score: int = Field(
             ge=1, le=5, description="Spam score from 1-5 1 is not spam, 5 is very hight"
@@ -21,7 +36,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
 
     async def __call__(self, message: Message):
         agent = Agent(
-            model="anthropic:claude-sonnet-4-5-20250929",
+            model=self.settings.model_name,
             system_prompt="""You are a spam whatsapp link spam detector. You are given a message and you need to return a score of 1-5 and a SHORT 7 words explanation of why you gave that score.
             """,
             output_type=self.SpamCheckResult,

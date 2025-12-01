@@ -3,9 +3,10 @@ from typing import Annotated, Dict, Any
 from fastapi import APIRouter, Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from config import Settings
 from whatsapp import WhatsAppClient
 from summarize_and_send_to_groups import summarize_and_send_to_groups
-from .deps import get_db_async_session, get_whatsapp
+from .deps import get_db_async_session, get_whatsapp, get_settings
 
 # Create router for send summaries to groups endpoints
 router = APIRouter()
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 async def trigger_summarize_and_send_to_groups(
     session: Annotated[AsyncSession, Depends(get_db_async_session)],
     whatsapp: Annotated[WhatsAppClient, Depends(get_whatsapp)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> Dict[str, Any]:
     """
     Trigger a send summaries to groups sync for all managed groups.
@@ -36,7 +38,7 @@ async def trigger_summarize_and_send_to_groups(
         logger.info("Starting manual send summaries to groups sync via API")
 
         # Execute the send summaries to groups sync process
-        await summarize_and_send_to_groups(session, whatsapp)
+        await summarize_and_send_to_groups(settings, session, whatsapp)
 
         logger.info("send summaries to groups sync completed successfully")
 
