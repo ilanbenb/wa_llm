@@ -15,6 +15,7 @@ from tenacity import (
 
 from config import Settings
 from models import Group, Message
+from services.prompt_manager import prompt_manager
 from utils.chat_text import chat2text
 from utils.opt_out import get_opt_out_map
 from whatsapp import WhatsAppClient, SendMessageRequest
@@ -33,15 +34,8 @@ async def summarize(
 ) -> AgentRunResult[str]:
     agent = Agent(
         model=settings.model_name,
-        system_prompt=f""""
-        Write a quick summary of what happened in the chat group since the last summary.
-    
-        - Start by stating this is a quick summary of what happened in "{group_name}" group recently.
-        - Use a casual conversational writing style.
-        - Keep it short and sweet.
-        - Write in the same language as the chat group. You MUST use the same language as the chat group!
-        - Please do tag users while talking about them (e.g., @972536150150). ONLY answer with the new phrased query, no other text.
-        """,
+        # TODO: move to jinja?
+        system_prompt=prompt_manager.render("quick_summary.j2", group_name=group_name),
         output_type=str,
     )
 

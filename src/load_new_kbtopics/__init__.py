@@ -20,6 +20,7 @@ from config import Settings, get_settings
 from models import KBTopicCreate, Group, Message
 from models.knowledge_base_topic import KBTopic
 from models.upsert import bulk_upsert
+from services.prompt_manager import prompt_manager
 from utils.voyage_embed_text import voyage_embed_text
 from whatsapp import WhatsAppClient
 
@@ -53,14 +54,7 @@ async def conversation_splitter_agent(
         model=settings.model_name,
         # Set bigger then 1024 max token for this agent, because it's a long conversation
         model_settings=ModelSettings(max_tokens=10000),
-        system_prompt="""Attached is a snapshot from a group chat conversation. The conversation is a mix of different topics. Your task is to:
-- Break the conversation into a list of topics, each topic have the same theme of subject.
-- For each topic, write a concise summary of the topic. This will help me to understand the group dynamics and the topics discussed.
-- Don't miss any topic! Every subject discussed should be highlighted in the summary, even if it's a small one. You MUST include ALL topics.
-- You MUST respond in English.
-
-My goal is learn the different subject discussed in the group chat. This will be used as a knowledge base for the group, so it should not loose any important information or insights.
-""",
+        system_prompt=prompt_manager.render("conversation_splitter.j2"),
         output_type=List[Topic],
         retries=5,
     )

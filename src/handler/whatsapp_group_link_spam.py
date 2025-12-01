@@ -4,7 +4,7 @@ import logging
 from .base_handler import BaseHandler
 from pydantic_ai import Agent
 from pydantic import BaseModel
-from sqlmodel import Field
+from sqlmodel import Field, select, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
@@ -12,6 +12,7 @@ from config import Settings
 from models import Message
 from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
+from services.prompt_manager import prompt_manager
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -37,28 +38,48 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
     async def __call__(self, message: Message):
         agent = Agent(
             model=self.settings.model_name,
-            system_prompt="""You are a spam whatsapp link spam detector. You are given a message and you need to return a score of 1-5 and a SHORT 7 words explanation of why you gave that score.
-            """,
+            system_prompt=prompt_manager.render("link_spam_detector.j2"),
             output_type=self.SpamCheckResult,
             output_retries=3,
         )
+
+        last_messages_text = ""
+        if message.group_jid:
+            stmt = (
+                select(Message)
+                .where(Message.group_jid == message.group_jid)
+                .order_by(desc(Message.timestamp))
+                .limit(10)
+            )
+            result = await self.session.exec(stmt)
+            last_messages = result.all()
+            # Reverse to show in chronological order
+            last_messages = reversed(last_messages)
+
+            last_messages_text = "\n".join(
+                [
+                    f"@{parse_jid(msg.sender_jid).user}: {msg.text}"
+                    for msg in last_messages
+                    if msg.text
+                ]
+            )
 
         result = await agent.run(
             (
                 f"@{parse_jid(message.sender_jid).user}:"
                 f"{message.text}"
                 f"The message is from a group chat. The group name is {message.group.group_name if message.group else 'Unknown'} and the group description is {message.group.group_topic if message.group else 'Unknown'}"
+                f"These are the last 10 messages in the group for context:\n{last_messages_text}"
             )
         )
-
         spam_result = result.output
 
-        if message and message.group and not message.group.owner_jid:
-            raise ValueError("Group owner JID is required")
+        assert message.group is not None, "Group is required"
+        assert message.group.owner_jid is not None, "Group owner JID is required"
 
         # Construct message with validated data
         message_to_send = (
-            f"@{message.group.owner_jid.split('@')[0]} - A Whatsapp group link was shared in the group. "  # type: ignore
+            f"@{message.group.owner_jid.split('@')[0]} - A Whatsapp group link was shared in the group."
             f"This might be a spam. Please check and remove if it is spam.\n\n"
             f"Spam Confidence Level: *{spam_result.score}*  (1 not spam - 5 spam) \n"
             f"Explanation: {spam_result.explanation}"
