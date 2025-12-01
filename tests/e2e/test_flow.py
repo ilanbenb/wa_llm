@@ -1,5 +1,4 @@
-from unittest.mock import AsyncMock, patch, MagicMock
-from pydantic_ai import Agent
+from unittest.mock import AsyncMock, patch
 from pydantic_ai.agent import AgentRunResult
 from handler.router import Intent, IntentEnum
 

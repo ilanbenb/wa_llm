@@ -1,4 +1,3 @@
-import pytest
 from models.knowledge_base_topic import KBTopic
 
 

@@ -1,4 +1,3 @@
-import pytest
 from models.sender import Sender
 
 
