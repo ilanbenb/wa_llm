@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 from models.reaction import Reaction
-from models.webhook import WhatsAppWebhookPayload, Reaction as ReactionPayload
+from models.webhook import WhatsAppWebhookPayload
 from unittest.mock import AsyncMock, MagicMock
 
 
@@ -17,13 +17,13 @@ def test_reaction_normalization():
 
 
 def test_from_webhook():
-    payload = WhatsAppWebhookPayload(
-        from_="1234567890@s.whatsapp.net",
-        timestamp=datetime.now(timezone.utc),
-        pushname="Test",
-        reaction=ReactionPayload(
-            id="msg1", message="👍", participant="1234567890@s.whatsapp.net"
-        ),
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "1234567890@s.whatsapp.net",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "Test",
+            "reaction": {"id": "msg1", "message": "👍"},
+        }
     )
     reaction = Reaction.from_webhook(payload)
     assert reaction.message_id == "msg1"
@@ -32,13 +32,13 @@ def test_from_webhook():
 
 
 def test_from_webhook_in_group():
-    payload = WhatsAppWebhookPayload(
-        from_="1234567890@s.whatsapp.net in group@g.us",
-        timestamp=datetime.now(timezone.utc),
-        pushname="Test",
-        reaction=ReactionPayload(
-            id="msg1", message="👍", participant="1234567890@s.whatsapp.net"
-        ),
+    payload = WhatsAppWebhookPayload.model_validate(
+        {
+            "from": "1234567890@s.whatsapp.net in group@g.us",
+            "timestamp": datetime.now(timezone.utc),
+            "pushname": "Test",
+            "reaction": {"id": "msg1", "message": "👍"},
+        }
     )
     reaction = Reaction.from_webhook(payload)
     assert reaction.sender_jid == "1234567890@s.whatsapp.net"
