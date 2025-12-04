@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 class Topic(BaseModel):
-    subject: str = Field(description="The subject of the summary")
+    subject: str = Field(description="The subject of the topic")
     summary: str = Field(
-        description="A concise summary of the topic discussed. Credit notable insights to the speaker by tagging him (e.g, @user_1)"
+        description="A concise summary of the topic discussed. Credit notable insights to the speaker by tagging them (e.g, @user_1)"
     )
     _speaker_map: Dict[str, str] = PrivateAttr()
 
@@ -127,6 +127,7 @@ async def load_topics(
     embedding_client: AsyncClient,
     topics: List[Topic],
     start_time: datetime,
+    message_ids: List[str],
 ):
     if len(topics) == 0:
         return
@@ -153,6 +154,17 @@ async def load_topics(
     ]
     # Once we give a meaningfull ID, we should migrate to upsert!
     await bulk_upsert(db_session, [KBTopic(**doc.model_dump()) for doc in doc_models])
+
+    # Link topics to their source messages
+    from models.kb_topic_message import KBTopicMessage
+
+    for doc_model in doc_models:
+        for message_id in message_ids:
+            kb_topic_message = KBTopicMessage(
+                kb_topic_id=doc_model.id,
+                message_id=message_id,
+            )
+            db_session.add(kb_topic_message)
 
     # Update the group with the new last_ingest
     group.last_ingest = datetime.now()
@@ -190,8 +202,11 @@ class topicsLoader:
             start_time = messages[0].timestamp
             settings = get_settings()
             topics = await get_conversation_topics(settings, messages, my_jid.user)
-            logger.info(f"Loaded {len(topics)} topics for group {group.group_name}")
-            await load_topics(db_session, group, embedding_client, topics, start_time)
+            logger.info(f"Loading {len(topics)} topics for group {group.group_name}")
+            message_ids = [msg.message_id for msg in messages]
+            await load_topics(
+                db_session, group, embedding_client, topics, start_time, message_ids
+            )
             logger.info(f"topics loaded for group {group.group_name}")
         except Exception as e:
             logger.error(f"Error loading topics for group {group.group_name}: {str(e)}")

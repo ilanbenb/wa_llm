@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
-from sqlmodel import select, cast, String, desc
+from sqlmodel import select, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import (
     retry,
@@ -13,7 +13,7 @@ from tenacity import (
 )
 from voyageai.client_async import AsyncClient
 
-from models import Message, KBTopic
+from models import Message
 from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
@@ -67,46 +67,39 @@ class KnowledgeBaseAnswers(BaseHandler):
             await voyage_embed_text(self.embedding_client, [rephrased_result.output])
         )[0]
 
-        select_from = None
+        # Determine which groups to search
+        group_jids = None
         if message.group:
-            select_from = [message.group]
+            group_jids = [message.group.group_jid]
             if message.group.community_keys:
-                select_from.extend(
-                    await message.group.get_related_community_groups(self.session)
+                related_groups = await message.group.get_related_community_groups(
+                    self.session
                 )
+                group_jids.extend([g.group_jid for g in related_groups])
 
-        # Consider adding cosine distance threshold
-        # cosine_distance_threshold = 0.8
-        limit_topics = 10
-        # query for user query
-        q = (
-            select(
-                KBTopic,
-                KBTopic.embedding.cosine_distance(embedded_question).label(
-                    "cosine_distance"
-                ),
-            )
-            .order_by(KBTopic.embedding.cosine_distance(embedded_question))
-            # .where(KBTopic.embedding.cosine_distance(embedded_question) < cosine_distance_threshold)
-            .limit(limit_topics)
+        # Use hybrid search to get topics with their source messages
+        from search.hybrid_search import hybrid_search, format_search_results_for_prompt
+
+        search_results = await hybrid_search(
+            session=self.session,
+            query=message.text,
+            query_embedding=embedded_question,
+            group_jids=group_jids,
+            vector_limit=10,
+            messages_per_topic=5,
         )
-        if select_from:
-            q = q.where(
-                cast(KBTopic.group_jid, String).in_(
-                    [group.group_jid for group in select_from]
-                )
-            )
-        retrieved_topics = await self.session.exec(q)
 
-        similar_topics = []
-        similar_topics_distances = []
-        for kb_topic, topic_distance in retrieved_topics:  # Unpack the tuple
-            similar_topics.append(f"{kb_topic.subject} \n {kb_topic.summary}")
-            similar_topics_distances.append(f"topic_distance: {topic_distance}")
+        # Format results for the generation agent
+        formatted_topics = format_search_results_for_prompt(search_results, opt_out_map)
+
+        # Also prepare distances for logging
+        similar_topics_distances = [
+            f"topic_distance: {r.vector_distance}" for r in search_results
+        ]
 
         sender_number = parse_jid(message.sender_jid).user
         generation_result = await self.generation_agent(
-            message.text, similar_topics, message.sender_jid, history, opt_out_map
+            message.text, formatted_topics, message.sender_jid, history, opt_out_map
         )
         logger.info(
             "RAG Query Results:\n"
@@ -114,11 +107,9 @@ class KnowledgeBaseAnswers(BaseHandler):
             f"Question: {message.text}\n"
             f"Rephrased Question: {rephrased_result.output}\n"
             f"Chat JID: {message.chat_jid}\n"
-            f"Retrieved Topics: {len(similar_topics)}\n"
+            f"Retrieved Topics: {len(search_results)}\n"
+            f"Total Messages: {sum(len(r.messages) for r in search_results)}\n"
             f"Similarity Scores: {similar_topics_distances}\n"
-            "Topics:\n"
-            + "\n".join(f"- {topic[:100]}..." for topic in similar_topics)
-            + "\n"
             f"Generated Response: {generation_result.output}"
         )
 
@@ -137,7 +128,7 @@ class KnowledgeBaseAnswers(BaseHandler):
     async def generation_agent(
         self,
         query: str,
-        topics: list[str],
+        topics: str,  # receives pre-formatted topics
         sender: str,
         history: List[Message],
         opt_out_map: dict[str, str],
@@ -157,7 +148,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         {chat2text(history, opt_out_map)}
         
         # Related Topics:
-        {"\n---\n".join(topics) if len(topics) > 0 else "No related topics found."}
+        {topics}
         """
 
         return await agent.run(prompt_template)

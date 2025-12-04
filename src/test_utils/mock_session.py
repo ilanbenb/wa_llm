@@ -119,7 +119,7 @@ class AsyncSessionMock(MagicMock):
     async def _commit(self):
         pass
 
-    async def _execute(self, statement):
+    async def _execute(self, statement, *args, **kwargs):
         # Handle different statement types (insert, update, delete)
         if hasattr(statement, "is_insert") and statement.is_insert:
             return MagicMock()

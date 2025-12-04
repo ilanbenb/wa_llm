@@ -1,8 +1,12 @@
 from datetime import datetime, timezone
-from typing import List, Optional, Any
+from typing import TYPE_CHECKING, List, Optional, Any
 
 from pgvector.sqlalchemy import Vector
-from sqlmodel import Field, SQLModel, Index, Column, DateTime
+from sqlmodel import Field, SQLModel, Index, Column, DateTime, Relationship
+from .kb_topic_message import KBTopicMessage
+
+if TYPE_CHECKING:
+    from .message import Message
 
 
 class KBTopicBase(SQLModel):
@@ -28,6 +32,10 @@ class KBTopicCreate(KBTopicBase):
 class KBTopic(KBTopicBase, table=True):
     id: str = Field(primary_key=True)
     embedding: Any = Field(sa_column=Column(Vector(1024)))
+
+    messages: List["Message"] = Relationship(
+        back_populates="kb_topics", link_model=KBTopicMessage
+    )
 
     # Add pgvector index
     __table_args__ = (

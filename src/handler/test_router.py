@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, MagicMock, patch
 
 import pytest
 from pydantic_ai import Agent
@@ -106,7 +106,11 @@ async def test_router_ask_question_route(
     mock_session.get = AsyncMock(return_value=None)  # No existing records
     mock_session.add = AsyncMock()  # Mock add operation
     mock_session.flush = AsyncMock()  # Mock flush operation
-    mock_session.execute = AsyncMock()  # Mock execute operation for upsert
+
+    # Mock execute operation for upsert and search
+    mock_execute_result = MagicMock()
+    mock_execute_result.fetchall.return_value = []
+    mock_session.execute = AsyncMock(return_value=mock_execute_result)
 
     # Mock begin_nested for nested transactions
     mock_nested = AsyncMock()
