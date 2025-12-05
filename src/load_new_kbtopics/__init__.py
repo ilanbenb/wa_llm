@@ -96,6 +96,78 @@ def _topic_with_filtered_speakers(
     return topic
 
 
+def split_messages(
+    messages: List[Message],
+    gap_hours: float = 2.0,
+    min_size: int = 25,
+    max_size: int = 200,
+    overlap: int = 5,
+) -> List[List[Message]]:
+    """
+    Split a list of messages into conversation chunks based on time gaps and size limits.
+    Replicates the logic of split_chats but for Message objects without pandas.
+    """
+    if not messages:
+        return []
+
+    # Ensure sorted by timestamp
+    messages.sort(key=lambda m: m.timestamp)
+
+    # Step 1: Initial Splitting by time gap
+    segments: List[List[Message]] = []
+    current_segment: List[Message] = [messages[0]]
+
+    for i in range(1, len(messages)):
+        prev_msg = messages[i - 1]
+        curr_msg = messages[i]
+        time_diff = (curr_msg.timestamp - prev_msg.timestamp).total_seconds() / 3600
+
+        if time_diff >= gap_hours:
+            segments.append(current_segment)
+            current_segment = []
+
+        current_segment.append(curr_msg)
+
+    if current_segment:
+        segments.append(current_segment)
+
+    # Step 2: Merge small segments
+    merged_segments: List[List[Message]] = []
+    buffer: List[Message] = []
+
+    for segment in segments:
+        if len(buffer) < min_size:
+            buffer.extend(segment)
+        else:
+            merged_segments.append(buffer)
+            buffer = list(segment)  # Start new buffer with current segment
+
+    if buffer:
+        merged_segments.append(buffer)
+
+    # Step 3: Split large segments
+    final_segments: List[List[Message]] = []
+    for segment in merged_segments:
+        while len(segment) > max_size:
+            final_segments.append(segment[:max_size])
+            segment = segment[max_size:]
+        if segment:
+            final_segments.append(segment)
+
+    # Step 4: Add overlap
+    overlapped_segments: List[List[Message]] = []
+    for i, segment in enumerate(final_segments):
+        if i > 0 and overlap > 0:
+            # Get last 'overlap' messages from previous segment
+            prev_overlap = final_segments[i - 1][-overlap:]
+            # Combine with current segment
+            segment = prev_overlap + segment
+
+        overlapped_segments.append(segment)
+
+    return overlapped_segments
+
+
 async def get_conversation_topics(
     settings: Settings, messages: list[Message], my_number: str
 ) -> List[Topic]:
@@ -198,16 +270,40 @@ class topicsLoader:
                 logger.info(f"No messages found for group {group.group_name}")
                 return
 
-            # The result is ordered by timestamp, so the first message is the oldest
-            start_time = messages[0].timestamp
-            settings = get_settings()
-            topics = await get_conversation_topics(settings, messages, my_jid.user)
-            logger.info(f"Loading {len(topics)} topics for group {group.group_name}")
-            message_ids = [msg.message_id for msg in messages]
-            await load_topics(
-                db_session, group, embedding_client, topics, start_time, message_ids
+            # The result from DB is ordered by timestamp descending (see stmt above).
+            # We need them ascending for splitting.
+            messages.sort(key=lambda m: m.timestamp)
+
+            conversation_chunks = split_messages(messages)
+            logger.info(
+                f"Split {len(messages)} messages into {len(conversation_chunks)} conversation chunks for group {group.group_name}"
             )
-            logger.info(f"topics loaded for group {group.group_name}")
+
+            for i, chunk in enumerate(conversation_chunks):
+                if not chunk:
+                    continue
+                start_time = chunk[0].timestamp
+                logger.info(
+                    f"Processing chunk {i + 1}/{len(conversation_chunks)} with {len(chunk)} messages for group {group.group_name}"
+                )
+
+                settings = get_settings()
+                topics = await get_conversation_topics(settings, chunk, my_jid.user)
+                logger.info(
+                    f"Loading {len(topics)} topics from chunk {i + 1} for group {group.group_name}"
+                )
+
+                message_ids = [msg.message_id for msg in chunk]
+                await load_topics(
+                    db_session,
+                    group,
+                    embedding_client,
+                    topics,
+                    start_time,
+                    message_ids,
+                )
+
+            logger.info(f"All topics loaded for group {group.group_name}")
         except Exception as e:
             logger.error(f"Error loading topics for group {group.group_name}: {str(e)}")
             raise
