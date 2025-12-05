@@ -4,13 +4,16 @@ from typing import TYPE_CHECKING, List, Optional
 from pydantic import field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
+
 from whatsapp.jid import normalize_jid, parse_jid, JID
 from .webhook import WhatsAppWebhookPayload, Message as PayloadMessage
+from .kb_topic_message import KBTopicMessage
 
 if TYPE_CHECKING:
     from .group import Group
     from .sender import Sender
     from .reaction import Reaction
+    from .knowledge_base_topic import KBTopic
 
 
 class BaseMessage(SQLModel):
@@ -76,6 +79,10 @@ class Message(BaseMessage, table=True):
     # Reactions relationship - one message can have many reactions
     reactions: List["Reaction"] = Relationship(
         back_populates="message", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
+    kb_topics: List["KBTopic"] = Relationship(
+        back_populates="messages", link_model=KBTopicMessage
     )
 
     @classmethod
