@@ -43,6 +43,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 
+[tool.semantic_release]
+version_toml = [
+    "pyproject.toml:project.version"
+]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install uv && uv build"
+
 [tool.coverage.report]
 exclude_also = [
     "def __repr__",
