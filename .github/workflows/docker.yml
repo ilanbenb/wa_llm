@@ -12,6 +12,7 @@ env:
 jobs:
   quality:
     uses: ./.github/workflows/code-quality.yml
+    secrets: inherit
   
   test:
     uses: ./.github/workflows/test.yml
