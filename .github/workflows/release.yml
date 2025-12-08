@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
 
 permissions:
   contents: write
@@ -31,6 +29,6 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Python Semantic Release
-        uses: python-semantic-release/python-semantic-release@v9.15.2
+        uses: python-semantic-release/python-semantic-release@v10.5.2
         with:
           github_token: ${{ steps.app-token.outputs.token }}
