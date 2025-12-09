@@ -121,7 +121,9 @@ async def test_kb_qa_handler_unauthorized_user(
 
     with patch("handler.kb_qa.logger") as mock_logger:
         await handler(test_message)
-        mock_logger.warning.assert_called_with("Unauthorized /qa attempt from stranger")
+        mock_logger.warning.assert_called_with(
+            "Unauthorized /kb_qa attempt from stranger"
+        )
 
 
 @pytest.mark.asyncio

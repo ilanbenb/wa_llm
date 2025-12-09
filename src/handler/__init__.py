@@ -92,9 +92,6 @@ class MessageHandler(BaseHandler):
                 _processing_cache[message.message_id] = True
 
         mentioned = message.has_mentioned(my_jid)
-        logging.info(
-            f"Mention check: msg={message.message_id} my={my_jid.user} contains=@{my_jid.user}? {mentioned}"
-        )
         if mentioned:
             await self.router(message)
             return

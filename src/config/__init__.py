@@ -34,10 +34,10 @@ class Settings(BaseSettings):
         "Hello, I am not designed to answer to personal messages."
     )
 
-    # QA tester settings (phone numbers allowed to use /qa command)
+    # QA tester settings (phone numbers allowed to use /kb_qa command)
     qa_testers: list[str] = []
 
-    # QA test groups (group JIDs where /qa command is allowed)
+    # QA test groups (group JIDs where /kb_qa command is allowed)
     qa_test_groups: list[str] = []
 
     # Optional settings

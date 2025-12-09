@@ -33,7 +33,7 @@ class KBQAHandler(BaseHandler):
         # but we can add a safety check or just assume usage in MessageHandler controls it.
         # The logic below is adapted from Router._handle_qa_command
 
-        # Check if this group is allowed to run /qa commands
+        # Check if this group is allowed to run /kb_qa commands
         if message.chat_jid not in self.settings.qa_test_groups:
             logger.warning(
                 f"QA command attempted from non-whitelisted group: {message.chat_jid}"
@@ -45,7 +45,7 @@ class KBQAHandler(BaseHandler):
 
         # Check if sender is a QA tester
         if sender_user not in self.settings.qa_testers:
-            logger.warning(f"Unauthorized /qa attempt from {sender_user}")
+            logger.warning(f"Unauthorized /kb_qa attempt from {sender_user}")
             return  # Silent failure
 
         # Parse command: /kb_qa <group_name> <query>
