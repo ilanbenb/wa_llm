@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2025-12-09)
+
+### Bug Fixes
+
+- Call kb_qa works for unmanaged groups as well ([#53](https://github.com/ilanbenb/wa_llm/pull/53),
+  [`58e5fef`](https://github.com/ilanbenb/wa_llm/commit/58e5fefe7730a7bec6a4e44b46444592a0bbf9f9))
+
+
 ## v1.0.1 (2025-12-09)
 
 ### Bug Fixes
