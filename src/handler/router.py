@@ -10,7 +10,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
 from handler.knowledge_base_answers import KnowledgeBaseAnswers
-from models import Message, Group
+from models import Message
 from whatsapp.jid import parse_jid
 from utils.chat_text import chat2text
 from utils.opt_out import get_opt_out_map
@@ -59,11 +59,6 @@ class Router(BaseHandler):
         if not message.text:
             return
 
-        # Check for /qa command (super admin only)
-        if message.text.startswith("/qa "):
-            await self._handle_qa_command(message)
-            return
-
         route = await self._route(message.text)
         match route:
             case IntentEnum.summarize:
@@ -74,86 +69,6 @@ class Router(BaseHandler):
                 await self.about(message)
             case IntentEnum.other:
                 await self.default_response(message)
-
-    async def _handle_qa_command(self, message: Message):
-        """Handle the /qa <group_name> <query> command for cross-group KB search."""
-        # Check if this group is allowed to run /qa commands
-        if message.chat_jid not in self.settings.qa_test_groups:
-            logger.warning(
-                f"QA command attempted from non-whitelisted group: {message.chat_jid}"
-            )
-            return  # Silent failure
-
-        sender_jid = parse_jid(message.sender_jid)
-        sender_user = sender_jid.user
-
-        # Check if sender is a QA tester
-        if sender_user not in self.settings.qa_testers:
-            logger.warning(f"Unauthorized /qa attempt from {sender_user}")
-            return  # Silent failure
-
-        # Parse command: /qa <group_name> <query>
-        # Format: /qa "Group Name" question here
-        # or: /qa GroupName question here
-        assert message.text is not None  # Already checked in __call__
-        text = message.text[4:].strip()  # Remove "/qa "
-
-        if text.startswith('"'):
-            # Quoted group name
-            end_quote = text.find('"', 1)
-            if end_quote == -1:
-                await self.send_message(
-                    message.chat_jid, 'Invalid format. Use: /qa "Group Name" <question>'
-                )
-                return
-            group_name = text[1:end_quote]
-            query = text[end_quote + 1 :].strip()
-        else:
-            # Space-separated
-            parts = text.split(" ", 1)
-            if len(parts) < 2:
-                await self.send_message(
-                    message.chat_jid, "Invalid format. Use: /qa <group_name> <question>"
-                )
-                return
-            group_name = parts[0]
-            query = parts[1]
-
-        # Find the group by name
-        stmt = select(Group).where(Group.group_name.ilike(f"%{group_name}%"))  # type: ignore
-        result = await self.session.exec(stmt)
-        groups = list(result.all())
-
-        if len(groups) == 0:
-            await self.send_message(
-                message.chat_jid, f"No group found matching '{group_name}'"
-            )
-            return
-        elif len(groups) > 1:
-            group_list = "\n".join([f"- {g.group_name}" for g in groups[:5]])
-            await self.send_message(
-                message.chat_jid,
-                f"Multiple groups found matching '{group_name}':\n{group_list}\nPlease be more specific.",
-            )
-            return
-
-        target_group = groups[0]
-        logger.info(
-            f"QA command: querying group '{target_group.group_name}' with: {query}"
-        )
-
-        # Create a synthetic message pointing to the target group
-        qa_message = Message(
-            message_id=message.message_id,
-            timestamp=message.timestamp,
-            text=query,
-            chat_jid=message.chat_jid,  # Reply to original chat
-            sender_jid=message.sender_jid,
-            group_jid=target_group.group_jid,  # But search in target group
-        )
-
-        # Run the knowledge base search
-        await self.ask_knowledge_base(qa_message)
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(

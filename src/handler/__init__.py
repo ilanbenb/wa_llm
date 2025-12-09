@@ -8,6 +8,7 @@ from voyageai.client_async import AsyncClient
 from config import Settings
 from handler.router import Router
 from handler.whatsapp_group_link_spam import WhatsappGroupLinkSpamHandler
+from handler.kb_qa import KBQAHandler
 from models import (
     WhatsAppWebhookPayload,
 )
@@ -34,6 +35,7 @@ class MessageHandler(BaseHandler):
         self.whatsapp_group_link_spam = WhatsappGroupLinkSpamHandler(
             session, whatsapp, embedding_client, settings
         )
+        self.kb_qa_handler = KBQAHandler(session, whatsapp, embedding_client, settings)
         self.settings = settings
         super().__init__(session, whatsapp, embedding_client)
 
@@ -90,19 +92,23 @@ class MessageHandler(BaseHandler):
                 _processing_cache[message.message_id] = True
 
         mentioned = message.has_mentioned(my_jid)
-        logging.info(
-            f"Mention check: msg={message.message_id} my={my_jid.user} contains=@{my_jid.user}? {mentioned}"
-        )
         if mentioned:
             await self.router(message)
+            return
 
-        # Handle whatsapp links in group
         if (
             message.group
             and message.group.notify_on_spam
             and "https://chat.whatsapp.com/" in message.text
         ):
             await self.whatsapp_group_link_spam(message)
+            return
+
+        # Check for /kb_qa command (super admin only)
+        # This does not have to be a managed group
+        if message.group and message.text.startswith("/kb_qa "):
+            await self.kb_qa_handler(message)
+            return
 
     async def handle_opt_out(self, message: Message):
         opt_out = await self.session.get(OptOut, message.sender_jid)

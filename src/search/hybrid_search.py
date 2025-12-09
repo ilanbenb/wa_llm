@@ -11,7 +11,7 @@ import logging
 from typing import List, Tuple
 from dataclasses import dataclass
 
-from sqlmodel import select, text, cast, String
+from sqlmodel import select, text, cast, String, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import KBTopic, Message
@@ -83,20 +83,28 @@ async def keyword_search(
     Returns:
         List of tuples containing (Message, ts_rank score)
     """
-    # Build the full-text search query
+    # Build the full-text search query dynamically
     # We use plainto_tsquery for simple keyword matching
-    search_query = text("""
+    # Note: We build the query conditionally to avoid asyncpg AmbiguousParameterError
+    # when group_jids is None (asyncpg can't infer the type of a NULL array parameter)
+
+    base_query = """
         SELECT m.*, ts_rank(to_tsvector('simple', COALESCE(m.text, '')), plainto_tsquery('simple', :query)) as rank
         FROM message m
         WHERE to_tsvector('simple', COALESCE(m.text, '')) @@ plainto_tsquery('simple', :query)
-        AND (:group_jids IS NULL OR m.group_jid = ANY(:group_jids))
-        ORDER BY rank DESC
-        LIMIT :limit
-    """)
+    """
 
-    result = await session.execute(
-        search_query, {"query": query, "group_jids": group_jids, "limit": limit}
-    )
+    params: dict = {"query": query, "limit": limit}
+
+    if group_jids:
+        base_query += " AND m.group_jid = ANY(:group_jids)"
+        params["group_jids"] = group_jids
+
+    base_query += " ORDER BY rank DESC LIMIT :limit"
+
+    search_query = text(base_query)
+
+    result = await session.execute(search_query, params)
 
     rows = result.fetchall()
     messages = []
@@ -135,8 +143,8 @@ async def get_messages_for_topic(
     """
     q = (
         select(Message)
-        .join(KBTopicMessage, Message.message_id == KBTopicMessage.message_id)  # type: ignore[arg-type]
-        .where(KBTopicMessage.kb_topic_id == topic_id)
+        .join(KBTopicMessage, col(Message.message_id) == col(KBTopicMessage.message_id))
+        .where(col(KBTopicMessage.kb_topic_id) == topic_id)
         .limit(limit)
     )
 
@@ -202,8 +210,8 @@ async def hybrid_search(
         # Find which topics these messages belong to
         q = (
             select(KBTopic, KBTopicMessage.message_id)
-            .join(KBTopicMessage, KBTopic.id == KBTopicMessage.kb_topic_id)  # type: ignore[arg-type]
-            .where(KBTopicMessage.message_id.in_(msg_ids))  # type: ignore
+            .join(KBTopicMessage, col(KBTopic.id) == col(KBTopicMessage.kb_topic_id))
+            .where(col(KBTopicMessage.message_id).in_(msg_ids))
         )
 
         topic_rows = await session.exec(q)
