@@ -4,8 +4,9 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - '**.py'
+    # Bypass path filters because I could not make it work with rulesets branch protection
+    # paths:
+    #   - '**.py'
   workflow_call:
 
 permissions:
