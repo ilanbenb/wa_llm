@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
-from src.load_new_kbtopics import split_messages
+from load_new_kbtopics import split_messages
 
 
 # Mock Message class since strictly typed object creation might be complex depending on deps
