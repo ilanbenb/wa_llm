@@ -39,6 +39,7 @@ async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
                         if og
                         else datetime.now(),
                         notify_on_spam=og.notify_on_spam if og else False,
+                        created_at=og.created_at if og else datetime.now(),
                     ).model_dump()
                 )
                 await upsert(session, group)
