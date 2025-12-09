@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v1.0.1 (2025-12-09)
+
+### Bug Fixes
+
+- Don't have to mention number to get /kb_qa ([#52](https://github.com/ilanbenb/wa_llm/pull/52),
+  [`623be75`](https://github.com/ilanbenb/wa_llm/commit/623be754149395369fb0c501f4dd8ba74b16764a))
+
+- Fix erorr in hybrid search AmbiguousParameterError. could not determine data type of parameter $2
+  ([#52](https://github.com/ilanbenb/wa_llm/pull/52),
+  [`623be75`](https://github.com/ilanbenb/wa_llm/commit/623be754149395369fb0c501f4dd8ba74b16764a))
+
+- Stop mention number in kbqa ([#52](https://github.com/ilanbenb/wa_llm/pull/52),
+  [`623be75`](https://github.com/ilanbenb/wa_llm/commit/623be754149395369fb0c501f4dd8ba74b16764a))
+
+### Documentation
+
+- Prod-ready-docker-compose ([#51](https://github.com/ilanbenb/wa_llm/pull/51),
+  [`3cc8c05`](https://github.com/ilanbenb/wa_llm/commit/3cc8c0541bc70338d85ecb84c62ab8ba14f4942f))
+
+
 ## v1.0.0 (2025-12-08)
 
 - Initial Release
