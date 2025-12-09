@@ -77,6 +77,12 @@ class MessageHandler(BaseHandler):
                 )
             return
 
+        # Check for /kb_qa command (super admin only)
+        # This does not have to be a managed group
+        if message.group and message.text.startswith("/kb_qa "):
+            await self.kb_qa_handler(message)
+            return
+
         # ignore messages from unmanaged groups
         if message and message.group and not message.group.managed:
             return
@@ -102,12 +108,6 @@ class MessageHandler(BaseHandler):
             and "https://chat.whatsapp.com/" in message.text
         ):
             await self.whatsapp_group_link_spam(message)
-            return
-
-        # Check for /kb_qa command (super admin only)
-        # This does not have to be a managed group
-        if message.group and message.text.startswith("/kb_qa "):
-            await self.kb_qa_handler(message)
             return
 
     async def handle_opt_out(self, message: Message):
