@@ -1,0 +1,37 @@
+services:
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+    restart: always
+
+  whatsapp:
+    extends:
+      file: docker-compose.base.yml
+      service: whatsapp
+    environment:
+      - WHATSAPP_WEBHOOK=http://web-server:8000/webhook
+    restart: always
+
+  web-server:
+    image: ghcr.io/ilanbenb/wa_llm:latest
+    env_file:
+      - .env.prod
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      whatsapp:
+        condition: service_started
+    environment:
+      - PORT=8000
+      - DB_URI=postgresql+asyncpg://user:password@postgres:5432/postgres
+      - WHATSAPP_HOST=http://whatsapp:3000
+    restart: always
+
+volumes:
+  wa_llm_whatsapp:
+    name: wa_llm_whatsapp
+  wa_llm_postgres:
+    name: wa_llm_postgres
