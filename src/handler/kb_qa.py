@@ -8,7 +8,6 @@ from handler.base_handler import BaseHandler
 from handler.knowledge_base_answers import KnowledgeBaseAnswers
 from models import Message, Group
 from whatsapp import WhatsAppClient
-from whatsapp.jid import parse_jid
 
 logger = logging.getLogger(__name__)
 
@@ -40,17 +39,13 @@ class KBQAHandler(BaseHandler):
             )
             return  # Silent failure
 
-        sender_jid = parse_jid(message.sender_jid)
-        sender_user = sender_jid.user
-
         # Check if sender is a QA tester
-        if sender_user not in self.settings.qa_testers:
-            logger.warning(f"Unauthorized /kb_qa attempt from {sender_user}")
+        if message.sender_jid not in self.settings.qa_testers:
+            logger.warning(f"Unauthorized /kb_qa attempt from {message.sender_jid}")
             return  # Silent failure
 
-        # Parse command: /kb_qa <group_name> <query>
-        # Format: /kb_qa "Group Name" question here
-        # or: /kb_qa GroupName question here
+        # Parse command: /kb_qa group: <group_name>, question: <query>
+        # Format: /kb_qa group: Tech Support Group, question: How do I reset?
         if not message.text:
             return
 
@@ -61,38 +56,74 @@ class KBQAHandler(BaseHandler):
 
         text = message.text[len(command_prefix) :].strip()
 
-        if text.startswith('"'):
-            # Quoted group name
-            end_quote = text.find('"', 1)
-            if end_quote == -1:
-                await self.send_message(
-                    message.chat_jid,
-                    'Invalid format. Use: /kb_qa "Group Name" <question>',
-                )
-                return
-            group_name = text[1:end_quote]
-            query = text[end_quote + 1 :].strip()
-        else:
-            # Space-separated
-            parts = text.split(" ", 1)
-            if len(parts) < 2:
-                await self.send_message(
-                    message.chat_jid,
-                    "Invalid format. Use: /kb_qa <group_name> <question>",
-                )
-                return
-            group_name = parts[0]
-            query = parts[1]
+        # Handle --help / -h
+        if text in ("--help", "-h", ""):
+            help_text = (
+                "**/kb_qa - Knowledge Base Query**\n\n"
+                "Search the knowledge base of a specific managed group.\n\n"
+                "**Usage:**\n"
+                "`/kb_qa group: <group_name>, question: <question>`\n\n"
+                "**Options:**\n"
+                "• `--help`, `-h` - Show this help message\n\n"
+                "**Examples:**\n"
+                "• `/kb_qa group: TechGroup, question: What is the latest update?`\n"
+                "• `/kb_qa group: Tech Support Group, question: How do I reset my password?`\n\n"
+                "_Note: Only managed groups are searchable._"
+            )
+            await self.send_message(message.chat_jid, help_text)
+            return
 
-        # Find the group by name
+        # Parse named parameters: group: <name>, question: <query>
+        # Using simple string parsing instead of regex
+        text_lower = text.lower()
+
+        # Check for required prefixes
+        if not text_lower.startswith("group:"):
+            await self.send_message(
+                message.chat_jid,
+                "Invalid format. Use: /kb_qa group: <group_name>, question: <question>",
+            )
+            return
+
+        # Find the separator ", question:"
+        separator = ", question:"
+        separator_pos = text_lower.find(separator)
+
+        if separator_pos == -1:
+            await self.send_message(
+                message.chat_jid,
+                "Invalid format. Use: /kb_qa group: <group_name>, question: <question>",
+            )
+            return
+
+        # Extract group name (after "group:" prefix, before separator)
+        group_name = text[len("group:") : separator_pos].strip()
+        # Extract query (after separator)
+        query = text[separator_pos + len(separator) :].strip()
+
+        if not group_name or not query:
+            await self.send_message(
+                message.chat_jid,
+                "Both group name and question are required.\n"
+                "Use: /kb_qa group: <group_name>, question: <question>",
+            )
+            return
+
+        # Find the group by name (only managed groups)
         # Try exact match first (case-insensitive)
-        stmt = select(Group).where(col(Group.group_name).ilike(group_name))
+        stmt = select(Group).where(
+            col(Group.group_name).ilike(group_name),
+            Group.managed == True,  # noqa: E712  https://stackoverflow.com/a/18998106
+        )
         result = await self.session.exec(stmt)
         groups = list(result.all())
 
         if not groups:
             # Fallback to partial match if no exact match found
-            stmt = select(Group).where(col(Group.group_name).ilike(f"%{group_name}%"))
+            stmt = select(Group).where(
+                col(Group.group_name).ilike(f"%{group_name}%"),
+                Group.managed == True,  # noqa: E712  https://stackoverflow.com/a/18998106
+            )
             result = await self.session.exec(stmt)
             groups = list(result.all())
 

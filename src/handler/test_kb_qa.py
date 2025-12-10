@@ -33,7 +33,7 @@ def mock_settings():
     return Mock(
         spec=Settings,
         qa_test_groups={"allowed@g.us"},
-        qa_testers={"tester"},
+        qa_testers={"tester@s.whatsapp.net"},
         model_name="test-model",
     )
 
@@ -42,7 +42,7 @@ def mock_settings():
 def test_message():
     return Message(
         message_id="test_id",
-        text="/kb_qa target_group query",
+        text="/kb_qa group: target_group, question: query",
         chat_jid="allowed@g.us",
         sender_jid="tester@s.whatsapp.net",
         timestamp=Mock(),
@@ -122,7 +122,7 @@ async def test_kb_qa_handler_unauthorized_user(
     with patch("handler.kb_qa.logger") as mock_logger:
         await handler(test_message)
         mock_logger.warning.assert_called_with(
-            "Unauthorized /kb_qa attempt from stranger"
+            "Unauthorized /kb_qa attempt from stranger@s.whatsapp.net"
         )
 
 
