@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.0.3 (2025-12-10)
+
+### Bug Fixes
+
+- * avoid dedupe in /kb_qa ([#54](https://github.com/ilanbenb/wa_llm/pull/54),
+  [`3b1ee6a`](https://github.com/ilanbenb/wa_llm/commit/3b1ee6aeff29b3522df6afc5da0afb81a2bf9cd3))
+
+- Dedupe messages for kb qa ([#54](https://github.com/ilanbenb/wa_llm/pull/54),
+  [`3b1ee6a`](https://github.com/ilanbenb/wa_llm/commit/3b1ee6aeff29b3522df6afc5da0afb81a2bf9cd3))
+
+
 ## v1.0.2 (2025-12-09)
 
 ### Bug Fixes
