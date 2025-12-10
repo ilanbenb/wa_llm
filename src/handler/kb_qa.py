@@ -8,7 +8,6 @@ from handler.base_handler import BaseHandler
 from handler.knowledge_base_answers import KnowledgeBaseAnswers
 from models import Message, Group
 from whatsapp import WhatsAppClient
-from whatsapp.jid import parse_jid
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +97,9 @@ class KBQAHandler(BaseHandler):
             return
 
         # Extract group name (after "group:" prefix, before separator)
-        group_name = text[len("group:"):separator_pos].strip()
+        group_name = text[len("group:") : separator_pos].strip()
         # Extract query (after separator)
-        query = text[separator_pos + len(separator):].strip()
+        query = text[separator_pos + len(separator) :].strip()
 
         if not group_name or not query:
             await self.send_message(

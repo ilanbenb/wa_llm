@@ -99,10 +99,9 @@ class MessageHandler(BaseHandler):
             if message.sender_jid not in self.settings.qa_testers:
                 logger.warning(f"Unauthorized /kb_qa attempt from {message.sender_jid}")
                 return  # Silent failure
-            
+
             await self.kb_qa_handler(message)
             return
-
 
         # ignore messages from unmanaged groups
         if message and message.group and not message.group.managed:

@@ -89,7 +89,9 @@ class Settings(BaseSettings):
                     f"got '{jid.server}'"
                 )
             if not jid.user:
-                raise ValueError(f"Invalid group JID '{jid_str}'. Missing group ID part.")
+                raise ValueError(
+                    f"Invalid group JID '{jid_str}'. Missing group ID part."
+                )
         return v
 
     model_config = SettingsConfigDict(
