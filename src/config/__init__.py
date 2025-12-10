@@ -1,9 +1,17 @@
 from os import environ
 from typing import Optional, Self
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+
+from whatsapp.jid import (
+    parse_jid,
+    JIDParseError,
+    DefaultUserServer,
+    LegacyUserServer,
+    GroupServer,
+)
 
 
 class Settings(BaseSettings):
@@ -34,7 +42,7 @@ class Settings(BaseSettings):
         "Hello, I am not designed to answer to personal messages."
     )
 
-    # QA tester settings (phone numbers allowed to use /kb_qa command)
+    # QA tester settings (user JIDs allowed to use /kb_qa command)
     qa_testers: list[str] = []
 
     # QA test groups (group JIDs where /kb_qa command is allowed)
@@ -44,6 +52,45 @@ class Settings(BaseSettings):
     debug: bool = False
     log_level: str = "INFO"
     logfire_token: str
+
+    @field_validator("qa_testers")
+    @classmethod
+    def validate_qa_testers(cls, v: list[str]) -> list[str]:
+        """Validate that qa_testers contains valid user JIDs."""
+        valid_user_servers = (DefaultUserServer, LegacyUserServer)
+        for jid_str in v:
+            try:
+                jid = parse_jid(jid_str)
+            except JIDParseError as e:
+                raise ValueError(f"Invalid JID '{jid_str}': {e}") from e
+
+            if jid.server not in valid_user_servers:
+                raise ValueError(
+                    f"Invalid user JID '{jid_str}'. Expected server to be one of "
+                    f"{valid_user_servers}, got '{jid.server}'"
+                )
+            if not jid.user:
+                raise ValueError(f"Invalid user JID '{jid_str}'. Missing user part.")
+        return v
+
+    @field_validator("qa_test_groups")
+    @classmethod
+    def validate_qa_test_groups(cls, v: list[str]) -> list[str]:
+        """Validate that qa_test_groups contains valid group JIDs."""
+        for jid_str in v:
+            try:
+                jid = parse_jid(jid_str)
+            except JIDParseError as e:
+                raise ValueError(f"Invalid JID '{jid_str}': {e}") from e
+
+            if not jid.is_group():
+                raise ValueError(
+                    f"Invalid group JID '{jid_str}'. Expected server '{GroupServer}', "
+                    f"got '{jid.server}'"
+                )
+            if not jid.user:
+                raise ValueError(f"Invalid group JID '{jid_str}'. Missing group ID part.")
+        return v
 
     model_config = SettingsConfigDict(
         env_file=".env",

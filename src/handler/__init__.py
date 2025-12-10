@@ -77,16 +77,6 @@ class MessageHandler(BaseHandler):
                 )
             return
 
-        # Check for /kb_qa command (super admin only)
-        # This does not have to be a managed group
-        if message.group and message.text.startswith("/kb_qa "):
-            await self.kb_qa_handler(message)
-            return
-
-        # ignore messages from unmanaged groups
-        if message and message.group and not message.group.managed:
-            return
-
         # In-memory dedupe: if this message is already being processed/recently processed, skip
         if message and message.message_id:
             async with _processing_lock:
@@ -96,6 +86,27 @@ class MessageHandler(BaseHandler):
                     )
                     return
                 _processing_cache[message.message_id] = True
+
+        # Check for /kb_qa command (super admin only)
+        # This does not have to be a managed group
+        if message.group and message.text.startswith("/kb_qa "):
+            if message.chat_jid not in self.settings.qa_test_groups:
+                logger.warning(
+                    f"QA command attempted from non-whitelisted group: {message.chat_jid}"
+                )
+                return  # Silent failure
+            # Check if sender is a QA tester
+            if message.sender_jid not in self.settings.qa_testers:
+                logger.warning(f"Unauthorized /kb_qa attempt from {message.sender_jid}")
+                return  # Silent failure
+            
+            await self.kb_qa_handler(message)
+            return
+
+
+        # ignore messages from unmanaged groups
+        if message and message.group and not message.group.managed:
+            return
 
         mentioned = message.has_mentioned(my_jid)
         if mentioned:
