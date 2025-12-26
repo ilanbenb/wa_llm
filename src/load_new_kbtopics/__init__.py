@@ -23,6 +23,7 @@ from models.upsert import bulk_upsert
 from services.prompt_manager import prompt_manager
 from utils.voyage_embed_text import voyage_embed_text
 from whatsapp import WhatsAppClient
+from utils.model_factory import get_model
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ async def conversation_splitter_agent(
     settings: Settings, content: str
 ) -> AgentRunResult[List[Topic]]:
     agent = Agent(
-        model=settings.model_name,
+        model=get_model(settings),
         # Set bigger then 1024 max token for this agent, because it's a long conversation
         model_settings=ModelSettings(max_tokens=10000),
         system_prompt=prompt_manager.render("conversation_splitter.j2"),

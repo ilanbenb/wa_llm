@@ -1,4 +1,5 @@
 from .group import Group, BaseGroup
+from .group_member import GroupMember
 from .knowledge_base_topic import KBTopic, KBTopicCreate
 from .message import Message, BaseMessage
 from .sender import Sender, BaseSender
@@ -10,6 +11,7 @@ from .opt_out import OptOut
 __all__ = [
     "Group",
     "BaseGroup",
+    "GroupMember",
     "Message",
     "BaseMessage",
     "Sender",

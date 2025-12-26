@@ -17,6 +17,7 @@ AI-powered WhatsApp bot that **joins any group, tracks conversations, and genera
 - 🔗 Support for multiple message types (text, media, links)
 - 👥 Group management & customizable settings
 - 🔕 **Opt-out feature**: Users can opt-out of being tagged in summaries/answers via DM.
+- 🖥️ **Group Management UI**: Web interface to manage groups, participants, and settings (`localhost:8000/group/ui`).
 - ⚡ REST API with Swagger docs (`localhost:8000/docs`)
 
 ---
@@ -99,6 +100,18 @@ docker compose -f docker-compose.prod.yml up -d
 
 ### 5. Activating the Bot for a Group
 
+You can manage groups and activate the bot using the **Group Management UI**:
+
+1. Open **http://localhost:8000/group/ui** in your browser.
+2. Go to the **List Groups** tab.
+3. Click **Refresh List** to see your groups.
+4. Click **Settings** for the group you want to manage.
+5. Set an **Auto Summary Threshold** (e.g., 50 messages) to enable auto-summaries.
+6. Toggle **Enable Web Search** to allow the bot to search the web for answers.
+7. Click **Save Settings**.
+
+Alternatively, you can use SQL directly:
+
 1. open pgAdmin or any other posgreSQL admin tool
 2. connect using
    | Parameter | Value |
@@ -111,9 +124,9 @@ docker compose -f docker-compose.prod.yml up -d
 
 3. run the following update statement:
 
-   ```
+   ```sql
        UPDATE public."group"
-       SET managed = true
+       SET managed = true, enable_web_search = true
        WHERE group_name = 'Your Group Name';
    ```
 

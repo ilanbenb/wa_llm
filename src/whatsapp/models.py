@@ -53,8 +53,8 @@ class Group(BaseModel):
     IsJoinApprovalRequired: bool = False
     GroupCreated: datetime
     ParticipantVersionID: str
-    Participants: List[Participant]
-    MemberAddMode: str
+    Participants: Optional[List[Participant]] = None
+    MemberAddMode: Optional[str] = None
 
 
 class NewsletterPicture(BaseModel):
@@ -200,11 +200,13 @@ class MessageActionRequest(BaseModel):
 class ManageParticipantRequest(BaseModel):
     group_id: str
     participants: List[str]
+    from_: Optional[str] = Field(None, alias="from")
 
 
 class CreateGroupRequest(BaseModel):
     title: str
     participants: List[str]
+    from_: Optional[str] = Field(None, alias="from")
 
 
 class JoinGroupRequest(BaseModel):

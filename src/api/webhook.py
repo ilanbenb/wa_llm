@@ -20,8 +20,12 @@ async def webhook(
     Returns:
         Simple "ok" response to acknowledge receipt
     """
+    print(f"Received webhook payload: {payload}")
     # Only process messages that have a sender (from_ field)
     if payload.from_:
+        print(f"Processing message from: {payload.from_}")
         await handler(payload)
+    else:
+        print("Payload has no 'from' field")
 
     return "ok"

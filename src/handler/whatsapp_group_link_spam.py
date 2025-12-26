@@ -13,6 +13,7 @@ from models import Message
 from whatsapp import WhatsAppClient
 from whatsapp.jid import parse_jid
 from services.prompt_manager import prompt_manager
+from utils.model_factory import get_model
 
 # Creating an object
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class WhatsappGroupLinkSpamHandler(BaseHandler):
 
     async def __call__(self, message: Message):
         agent = Agent(
-            model=self.settings.model_name,
+            model=get_model(self.settings),
             system_prompt=prompt_manager.render("link_spam_detector.j2"),
             output_type=self.SpamCheckResult,
             output_retries=3,

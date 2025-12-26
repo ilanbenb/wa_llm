@@ -27,7 +27,8 @@ class Settings(BaseSettings):
     whatsapp_basic_auth_password: Optional[str] = None
     whatsapp_basic_auth_user: Optional[str] = None
 
-    anthropic_api_key: str
+    anthropic_api_key: Optional[str] = None
+    tavily_api_key: Optional[str] = None
 
     # Voyage settings
     voyage_api_key: str
@@ -35,6 +36,8 @@ class Settings(BaseSettings):
 
     # Model settings
     model_name: str = "anthropic:claude-sonnet-4-5-20250929"
+    use_local_model: bool = False
+    local_model_path: str = "dicta-il/dicta-lm-2.0-instruct"
 
     # Direct Message settings
     dm_autoreply_enabled: bool = False
@@ -106,6 +109,9 @@ class Settings(BaseSettings):
     def apply_env(self) -> Self:
         if self.anthropic_api_key:
             environ["ANTHROPIC_API_KEY"] = self.anthropic_api_key
+        elif not self.use_local_model:
+             # If not using local model, we might need the key, but let pydantic-ai handle the error if missing
+             pass
 
         if self.logfire_token:
             environ["LOGFIRE_TOKEN"] = self.logfire_token
