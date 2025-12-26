@@ -149,3 +149,7 @@ To ensure code quality and prevent errors during automated edits, follow these g
 
 3.  **Testing**:
     *   **Restart Services**: After modifying core API files, restart the relevant services (e.g., `web-server`) to apply changes and check for startup errors.
+
+
+4.  **Sensitive Data Handling**:
+    *   **Squash Commits with Private Data**: If any sensitive or private data (such as user lists, phone numbers, or confidential CSVs) is accidentally committed, you must squash or remove those commits from the branch history before merging or sharing the branch. Always verify that no private information remains in the git history or working directory.
