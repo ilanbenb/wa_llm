@@ -152,4 +152,14 @@ To ensure code quality and prevent errors during automated edits, follow these g
 
 
 4.  **Sensitive Data Handling**:
-    *   **Squash Commits with Private Data**: If any sensitive or private data (such as user lists, phone numbers, or confidential CSVs) is accidentally committed, you must squash or remove those commits from the branch history before merging or sharing the branch. Always verify that no private information remains in the git history or working directory.
+        *   **Squash Commits with Private Data**: If any sensitive or private data (such as user lists, phone numbers, or confidential CSVs) is accidentally committed, you must squash or remove those commits from the branch history before merging or sharing the branch. Always verify that no private information remains in the git history or working directory.
+        *   **Command to Use**: To squash all your branch's commits into one (removing sensitive data from history), use:
+            ```sh
+            git rebase -i main
+            # In the editor, change all but the first 'pick' to 'squash', save, then force-push:
+            git push origin <your-branch> --force
+            ```
+            For Windows PowerShell with a custom SSH key, use:
+            ```powershell
+            $env:GIT_SSH_COMMAND="ssh -i ssh/id_ed25519_copilot"; git push origin <your-branch> --force
+            ```
