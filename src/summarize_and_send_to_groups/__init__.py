@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
@@ -19,6 +19,7 @@ from services.prompt_manager import prompt_manager
 from utils.chat_text import chat2text
 from utils.opt_out import get_opt_out_map
 from whatsapp import WhatsAppClient, SendMessageRequest
+from utils.model_factory import get_model
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ async def summarize(
     session: AsyncSession, settings: Settings, group_name: str, messages: list[Message]
 ) -> AgentRunResult[str]:
     agent = Agent(
-        model=settings.model_name,
+        model=get_model(settings),
         # TODO: move to jinja?
         system_prompt=prompt_manager.render("quick_summary.j2", group_name=group_name),
         output_type=str,
@@ -52,14 +53,18 @@ async def summarize_and_send_to_group(
     resp = await session.exec(
         select(Message)
         .where(Message.group_jid == group.group_jid)
-        .where(Message.timestamp >= group.last_summary_sync)
+        .where(Message.timestamp > group.last_summary_sync)
         .where(Message.sender_jid != (await whatsapp.get_my_jid()).normalize_str())
         .order_by(desc(Message.timestamp))
     )
     messages: list[Message] = resp.all()
 
-    if len(messages) < 15:
-        logging.info("Not enough messages to summarize in group %s", group.group_name)
+    min_messages = 15
+    if group.auto_summary_threshold and group.auto_summary_threshold > 0:
+        min_messages = group.auto_summary_threshold
+
+    if len(messages) < min_messages:
+        logging.info("Not enough messages to summarize in group %s (found %d, needed %d)", group.group_name, len(messages), min_messages)
         return
 
     try:
@@ -87,7 +92,8 @@ async def summarize_and_send_to_group(
 
     finally:
         # Update the group with the new last_summary_sync
-        group.last_summary_sync = datetime.now()
+        # This effectively resets the "count" for the next batch since we query by timestamp > last_summary_sync
+        group.last_summary_sync = datetime.now(timezone.utc)
         session.add(group)
         await session.commit()
 

@@ -10,6 +10,7 @@ from models import (
     Message,
     Sender,
     Group,
+    GroupMember,
     BaseMessage,
     Reaction,
     upsert,
@@ -81,6 +82,15 @@ class BaseHandler:
                     group = Group(**BaseGroup(group_jid=message.group_jid).model_dump())
                     await self.upsert(group)
                     await self.session.flush()
+                
+                # Ensure the sender is recorded as a member of the group
+                # This handles "lazy updates" for active users
+                member = GroupMember(
+                    group_jid=message.group_jid,
+                    sender_jid=message.sender_jid,
+                    role="participant" # Default role, will be updated if we do a full sync
+                )
+                await self.upsert(member)
 
             # Finally add the message
             stored_message = await self.upsert(message)
@@ -117,10 +127,9 @@ class BaseHandler:
                 message = await self.session.get(Message, reaction.message_id)
                 if message is None:
                     logger.warning(
-                        f"Message {reaction.message_id} not found for reaction"
+                        f"Message {reaction.message_id} not found for reaction. Skipping storage."
                     )
-                    # We could still store the reaction, but log it as orphaned
-                    # return None  # Uncomment to skip storing orphaned reactions
+                    return None  # Skip storing orphaned reactions to avoid FK violation
 
                 # Use custom upsert method for reactions
                 stored_reaction = await Reaction.upsert_reaction(self.session, reaction)

@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+.history
 # Distribution / packaging
 .Python
 build/
@@ -175,3 +175,5 @@ cython_debug/
 
 # Ignore files directory
 data/
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

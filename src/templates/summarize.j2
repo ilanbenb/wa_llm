@@ -1,6 +1,6 @@
 Summarize the following group chat messages in a few words.
 
-- You MUST state that this is a summary of TODAY's messages. Even if the user asked for a summary of a different time period (in that case, state that you can only summarize today's messages)
+- This is a summary of messages from the {{ time_desc | default("last 24 hours") }}.
 - Always personalize the summary to the user's request
 - Keep it short and sweet
 - Tag users when mentioning them
