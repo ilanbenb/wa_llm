@@ -35,6 +35,7 @@ async def test_hybrid_search_quality(mock_session: AsyncSession):
         text="We must hit the hard deadline this Friday for the MVP.",
         timestamp=datetime.now(),
         group_jid=group.group_jid,
+        kb_topic_id="topic_1",
     )
 
     # Mock keyword_search execution
@@ -50,6 +51,7 @@ async def test_hybrid_search_quality(mock_session: AsyncSession):
     mock_row.sender_jid = message.sender_jid
     mock_row.group_jid = message.group_jid
     mock_row.reply_to_id = message.reply_to_id
+    mock_row.kb_topic_id = message.kb_topic_id
     mock_row.rank = 0.9
     mock_result.fetchall.return_value = [mock_row]
     cast(MagicMock, mock_session.execute).side_effect = None
@@ -132,6 +134,7 @@ async def test_keyword_search_multi_language(mock_session: AsyncSession):
     mock_row.sender_jid = message.sender_jid
     mock_row.group_jid = message.group_jid
     mock_row.reply_to_id = message.reply_to_id
+    mock_row.kb_topic_id = message.kb_topic_id
     mock_row.rank = 0.8
     mock_result.fetchall.return_value = [mock_row]
     cast(MagicMock, mock_session.execute).side_effect = None

@@ -1,7 +1,7 @@
-"""add kb_topic_message table
+"""refactor topic message 1:N and set null
 
-Revision ID: a1b2c3d4e5f6
-Revises: 8c847c475c9c
+Revision ID: c3d4e5f6g7h8
+Revises: b2c3d4e5f6g7
 Create Date: 2025-12-04
 
 """
@@ -13,13 +13,32 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "8c847c475c9c"
+revision: str = "c3d4e5f6g7h8"
+down_revision: Union[str, None] = "b2c3d4e5f6g7"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # 1. Add kb_topic_id to message
+    op.add_column("message", sa.Column("kb_topic_id", sa.String(), nullable=True))
+    
+    # 2. Add foreign key with ON DELETE SET NULL
+    op.create_foreign_key(
+        "fk_message_kb_topic_id_kbtopic",
+        "message",
+        "kbtopic",
+        ["kb_topic_id"],
+        ["id"],
+        ondelete="SET NULL",
+    )
+
+    # 3. Drop existing many-to-many table
+    op.drop_table("kb_topic_message")
+
+
+def downgrade() -> None:
+    # 1. Recreate kb_topic_message table
     op.create_table(
         "kb_topic_message",
         sa.Column("kb_topic_id", sa.String(), nullable=False),
@@ -36,6 +55,8 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("kb_topic_id", "message_id"),
     )
+    
+    # 2. Recreate indices
     op.create_index(
         "ix_kb_topic_message_kb_topic_id",
         "kb_topic_message",
@@ -48,9 +69,7 @@ def upgrade() -> None:
         ["message_id"],
         unique=False,
     )
-
-
-def downgrade() -> None:
-    op.drop_index("ix_kb_topic_message_message_id", table_name="kb_topic_message")
-    op.drop_index("ix_kb_topic_message_kb_topic_id", table_name="kb_topic_message")
-    op.drop_table("kb_topic_message")
+    
+    # 3. Drop foreign key and column from message
+    op.drop_constraint("fk_message_kb_topic_id_kbtopic", "message", type_="foreignkey")
+    op.drop_column("message", "kb_topic_id")

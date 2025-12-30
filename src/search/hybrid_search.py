@@ -15,7 +15,7 @@ from sqlmodel import select, text, cast, String, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import KBTopic, Message
-from models.kb_topic_message import KBTopicMessage
+from models import KBTopic, Message
 
 
 logger = logging.getLogger(__name__)
@@ -119,6 +119,7 @@ async def keyword_search(
             sender_jid=row.sender_jid,
             group_jid=row.group_jid,
             reply_to_id=row.reply_to_id,
+            kb_topic_id=row.kb_topic_id,
         )
         messages.append((msg, row.rank))
 
@@ -143,8 +144,7 @@ async def get_messages_for_topic(
     """
     q = (
         select(Message)
-        .join(KBTopicMessage, col(Message.message_id) == col(KBTopicMessage.message_id))
-        .where(col(KBTopicMessage.kb_topic_id) == topic_id)
+        .where(col(Message.kb_topic_id) == topic_id)
         .limit(limit)
     )
 
@@ -208,10 +208,21 @@ async def hybrid_search(
         msg_ids = [msg.message_id for msg, _ in keyword_messages]
 
         # Find which topics these messages belong to
+        # Since 1 message has 1 topic, we can just fetch the topic_id from the message.
+        # But wait, keyword_search returned Message objects (reconstructed from rows).
+        # We need to fetch the Topic objects.
+        
+        # We can query KBTopic where id in (select kb_topic_id from message where message_id in msg_ids)
+        # Or since we already have the messages, we might have validity issues if we didn't select kb_topic_id in keyword_search.
+        # keyword_search does `SELECT m.*`. So if we added `kb_topic_id` to `Message` table, it should be in `m.*`.
+        # However, we constructed Message manually in keyword_search:
+        # msg = Message(message_id=row.message_id, ... no kb_topic_id ...)
+        # So we need to update keyword_search as well to include kb_topic_id!
+        
         q = (
-            select(KBTopic, KBTopicMessage.message_id)
-            .join(KBTopicMessage, col(KBTopic.id) == col(KBTopicMessage.kb_topic_id))
-            .where(col(KBTopicMessage.message_id).in_(msg_ids))
+             select(KBTopic, Message.message_id)
+             .join(Message, col(KBTopic.id) == col(Message.kb_topic_id))
+             .where(col(Message.message_id).in_(msg_ids))
         )
 
         topic_rows = await session.exec(q)

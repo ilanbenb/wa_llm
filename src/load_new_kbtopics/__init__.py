@@ -6,7 +6,7 @@ from typing import Dict, List
 from pydantic import BaseModel, Field, PrivateAttr
 from pydantic_ai import Agent, ModelSettings
 from pydantic_ai.agent import AgentRunResult
-from sqlmodel import desc, select
+from sqlmodel import desc, select, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import (
     retry,
@@ -49,13 +49,13 @@ def _deid_text(message: str, user_mapping: Dict[str, str]) -> str:
 )
 async def conversation_splitter_agent(
     settings: Settings, content: str
-) -> AgentRunResult[List[Topic]]:
+) -> AgentRunResult[Topic]:
     agent = Agent(
         model=settings.model_name,
         # Set bigger then 1024 max token for this agent, because it's a long conversation
         model_settings=ModelSettings(max_tokens=10000),
         system_prompt=prompt_manager.render("conversation_splitter.j2"),
-        output_type=List[Topic],
+        output_type=Topic,
         retries=5,
     )
 
@@ -170,9 +170,9 @@ def split_messages(
 
 async def get_conversation_topics(
     settings: Settings, messages: list[Message], my_number: str
-) -> List[Topic]:
+) -> Topic | None:
     if len(messages) == 0:
-        return []
+        return None
 
     speaker_mapping = _get_speaker_mapping(messages)
     speaker_mapping[my_number] = "bot"
@@ -188,55 +188,52 @@ async def get_conversation_topics(
     )
 
     result = await conversation_splitter_agent(settings, conversation_content)
-    return [
-        _topic_with_filtered_speakers(topic, speaker_mapping) for topic in result.output
-    ]
+    return _topic_with_filtered_speakers(result.data, speaker_mapping)
 
 
 async def load_topics(
     db_session: AsyncSession,
     group: Group,
     embedding_client: AsyncClient,
-    topics: List[Topic],
+    topic: Topic,
     start_time: datetime,
     message_ids: List[str],
 ):
-    if len(topics) == 0:
+    if not topic:
         return
-    documents = [f"# {topic.subject}\n{topic.summary}" for topic in topics]
+        
+    documents = [f"# {topic.subject}\n{topic.summary}"]
     topics_embeddings = await voyage_embed_text(embedding_client, documents)
-
-    doc_models = [
-        # TODO: Replace topic.subject with something else that is deterministic.
-        # topic.subject is not deterministic because it's the result of the LLM.
-        KBTopicCreate(
-            id=str(
-                hashlib.sha256(
-                    f"{group.group_jid}_{start_time}_{topic.subject}".encode()
-                ).hexdigest()
-            ),
-            embedding=emb,
-            group_jid=group.group_jid,
-            start_time=start_time,
-            speakers=",".join(topic._speaker_map.values()),
-            summary=_deid_text(topic.summary, topic._speaker_map),
-            subject=_deid_text(topic.subject, topic._speaker_map),
-        )
-        for topic, emb in zip(topics, topics_embeddings)
-    ]
-    # Once we give a meaningfull ID, we should migrate to upsert!
-    await bulk_upsert(db_session, [KBTopic(**doc.model_dump()) for doc in doc_models])
+    
+    # We only have one topic
+    emb = topics_embeddings[0]
+    
+    kb_topic_id = str(
+        hashlib.sha256(
+            f"{group.group_jid}_{start_time}_{topic.subject}".encode()
+        ).hexdigest()
+    )
+    
+    doc_model = KBTopicCreate(
+        id=kb_topic_id,
+        embedding=emb,
+        group_jid=group.group_jid,
+        start_time=start_time,
+        speakers=",".join(topic._speaker_map.values()),
+        summary=_deid_text(topic.summary, topic._speaker_map),
+        subject=_deid_text(topic.subject, topic._speaker_map),
+    )
+    
+    await bulk_upsert(db_session, [KBTopic(**doc_model.model_dump())])
 
     # Link topics to their source messages
-    from models.kb_topic_message import KBTopicMessage
-
-    for doc_model in doc_models:
-        for message_id in message_ids:
-            kb_topic_message = KBTopicMessage(
-                kb_topic_id=doc_model.id,
-                message_id=message_id,
-            )
-            db_session.add(kb_topic_message)
+    # Efficiently update all messages in the chunk with the new kb_topic_id
+    stmt = (
+        update(Message)
+        .where(Message.message_id.in_(message_ids))  # type: ignore
+        .values(kb_topic_id=kb_topic_id)
+    )
+    await db_session.exec(stmt)
 
     # Update the group with the new last_ingest
     group.last_ingest = datetime.now()
@@ -288,20 +285,21 @@ class topicsLoader:
                 )
 
                 settings = get_settings()
-                topics = await get_conversation_topics(settings, chunk, my_jid.user)
-                logger.info(
-                    f"Loading {len(topics)} topics from chunk {i + 1} for group {group.group_name}"
-                )
+                topic = await get_conversation_topics(settings, chunk, my_jid.user)
+                if topic:
+                    logger.info(
+                        f"Loading topic '{topic.subject}' from chunk {i + 1} for group {group.group_name}"
+                    )
 
-                message_ids = [msg.message_id for msg in chunk]
-                await load_topics(
-                    db_session,
-                    group,
-                    embedding_client,
-                    topics,
-                    start_time,
-                    message_ids,
-                )
+                    message_ids = [msg.message_id for msg in chunk]
+                    await load_topics(
+                        db_session,
+                        group,
+                        embedding_client,
+                        topic,
+                        start_time,
+                        message_ids,
+                    )
 
             logger.info(f"All topics loaded for group {group.group_name}")
         except Exception as e:

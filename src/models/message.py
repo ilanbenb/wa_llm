@@ -2,12 +2,12 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import field_validator, model_validator
-from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime, String, ForeignKey
 
 
 from whatsapp.jid import normalize_jid, parse_jid, JID
 from .webhook import WhatsAppWebhookPayload, Message as PayloadMessage
-from .kb_topic_message import KBTopicMessage
+
 
 if TYPE_CHECKING:
     from .group import Group
@@ -81,9 +81,11 @@ class Message(BaseMessage, table=True):
         back_populates="message", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
-    kb_topics: List["KBTopic"] = Relationship(
-        back_populates="messages", link_model=KBTopicMessage
+    kb_topic_id: Optional[str] = Field(
+        default=None,
+        sa_column=Column(String, ForeignKey("kbtopic.id", ondelete="SET NULL")),
     )
+    kb_topic: Optional["KBTopic"] = Relationship(back_populates="messages")
 
     @classmethod
     def from_webhook(cls, payload: WhatsAppWebhookPayload) -> "Message":
