@@ -1,6 +1,6 @@
 from typing import Optional
 from ..protocols import WhatsAppClientProtocol
-
+import time
 from ..models import (
     SendMessageRequest,
     MessageSendResponse,
@@ -15,6 +15,7 @@ from ..models import (
 class MessageMixin(WhatsAppClientProtocol):
     async def send_message(self, request: SendMessageRequest) -> MessageSendResponse:
         response = await self._post("/send/message", json=request)
+        time.sleep(1)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_image(

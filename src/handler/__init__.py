@@ -6,7 +6,7 @@ from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
-from config import Settings
+from config import Settings, get_settings
 from handler.router import Router
 from handler.whatsapp_group_link_spam import WhatsappGroupLinkSpamHandler
 from handler.kb_qa import KBQAHandler
@@ -17,6 +17,7 @@ from whatsapp import WhatsAppClient
 from .base_handler import BaseHandler
 from models import Message, OptOut, Group
 from summarize_and_send_to_groups import summarize_and_send_to_group
+from utils.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,12 @@ _processing_lock = asyncio.Lock()
 
 # Track groups currently being summarized to prevent duplicate triggers
 _summary_in_progress: set[str] = set()
+
+# Rate limiters
+_settings = get_settings()
+_user_rate_limiter = RateLimiter(_settings.rate_limit_user_messages, _settings.rate_limit_user_window_seconds)
+_group_rate_limiter = RateLimiter(_settings.rate_limit_group_messages, _settings.rate_limit_group_window_seconds)
+
 
 
 async def run_summary_task(settings, session_factory, whatsapp, group_jid):
@@ -114,6 +121,11 @@ class MessageHandler(BaseHandler):
 
         # direct message
         if message and not message.group:
+            # Rate limit check for DMs
+            if not _user_rate_limiter.is_allowed(message.sender_jid):
+                logger.warning(f"Rate limit exceeded for user {message.sender_jid} in DM")
+                return
+
             command = message.text.strip().lower()
             if command == "opt-out":
                 await self.handle_opt_out(message)
@@ -131,7 +143,7 @@ class MessageHandler(BaseHandler):
                     self.settings.dm_autoreply_message,
                     message.message_id,
                 )
-            return
+                return
 
         # In-memory dedupe: if this message is already being processed/recently processed, skip
         if message and message.message_id:
@@ -164,9 +176,18 @@ class MessageHandler(BaseHandler):
             logger.info(f"Ignoring message from unmanaged group: {message.group.group_name} ({message.group.group_jid})")
             return
 
-        mentioned = message.has_mentioned(my_jid)
+        mentioned = message.has_mentioned(my_jid) or (not message.group)
         logger.info(f"Message text: '{message.text}' | Bot user: '{my_jid.user}' | Mentioned: {mentioned}")
         if mentioned:
+            # Rate limit check for mentions
+            if not _user_rate_limiter.is_allowed(message.sender_jid):
+                logger.warning(f"Rate limit exceeded for user {message.sender_jid} in group {message.group_jid}")
+                return
+            
+            if message.group_jid and not _group_rate_limiter.is_allowed(message.group_jid):
+                logger.warning(f"Rate limit exceeded for group {message.group_jid}")
+                return
+
             logger.info("Bot was mentioned, routing message...")
             await self.router(message)
             return

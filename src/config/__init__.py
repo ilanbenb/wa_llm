@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     # QA test groups (group JIDs where /kb_qa command is allowed)
     qa_test_groups: list[str] = []
 
+    # Rate limiting settings
+    rate_limit_user_messages: int = 5
+    rate_limit_user_window_seconds: int = 60
+    rate_limit_group_messages: int = 20
+    rate_limit_group_window_seconds: int = 60
+
     # Optional settings
     debug: bool = False
     log_level: str = "INFO"
