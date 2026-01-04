@@ -14,6 +14,12 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc,mode=0600 \
     --mount=type=bind,source=./.python-version,target=.python-version \
     uv sync --frozen --no-dev --no-install-project
 
+ARG INSTALL_LOCAL=false
+RUN --mount=type=cache,target=/root/.cache/uv \
+    if [ "$INSTALL_LOCAL" = "true" ]; then \
+        uv sync --frozen --no-dev --no-install-project --extra local; \
+    fi
+
 COPY . /app
 
 FROM python:3.12-slim-bookworm

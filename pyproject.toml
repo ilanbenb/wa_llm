@@ -20,6 +20,15 @@ dependencies = [
     "tenacity>=9.0.0",
     "uvicorn>=0.34.0",
     "voyageai>=0.3.2",
+    "tavily-python>=0.5.0",
+]
+
+[project.optional-dependencies]
+local = [
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+    "accelerate>=1.12.0",
+    "bitsandbytes>=0.45.0",
 ]
 
 [dependency-groups]

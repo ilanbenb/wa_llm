@@ -22,6 +22,8 @@ from utils.voyage_embed_text import voyage_embed_text
 from .base_handler import BaseHandler
 from config import Settings
 from services.prompt_manager import prompt_manager
+from utils.model_factory import get_model
+from services.web_search import web_search_service
 
 
 # Creating an object
@@ -69,7 +71,9 @@ class KnowledgeBaseAnswers(BaseHandler):
 
         # Determine which groups to search
         group_jids = None
+        enable_web_search = False
         if message.group:
+            enable_web_search = message.group.enable_web_search
             group_jids = [message.group.group_jid]
             if message.group.community_keys:
                 related_groups = await message.group.get_related_community_groups(
@@ -98,8 +102,22 @@ class KnowledgeBaseAnswers(BaseHandler):
         ]
 
         sender_number = parse_jid(message.sender_jid).user
+        
+        logger.info(f"Generating answer for {sender_number}. Web search enabled: {enable_web_search}")
+
+        if enable_web_search:
+            await self.send_message(
+                message.chat_jid,
+                "I'm checking the web for this information, please wait a moment... 🌐"
+            )
+        
         generation_result = await self.generation_agent(
-            message.text, formatted_topics, message.sender_jid, history, opt_out_map
+            message.text,
+            formatted_topics,
+            message.sender_jid,
+            history,
+            opt_out_map,
+            enable_web_search,
         )
         logger.info(
             "RAG Query Results:\n"
@@ -132,10 +150,18 @@ class KnowledgeBaseAnswers(BaseHandler):
         sender: str,
         history: List[Message],
         opt_out_map: dict[str, str],
+        enable_web_search: bool = False,
     ) -> AgentRunResult[str]:
+        tools = []
+        if enable_web_search:
+            tools.append(web_search_service.search)
+
         agent = Agent(
-            model=self.settings.model_name,
-            system_prompt=prompt_manager.render("rag.j2"),
+            model=get_model(self.settings),
+            system_prompt=prompt_manager.render(
+                "rag.j2", enable_web_search=enable_web_search
+            ),
+            tools=tools,
         )
 
         sender_user = parse_jid(sender).user
@@ -167,7 +193,7 @@ class KnowledgeBaseAnswers(BaseHandler):
         opt_out_map: dict[str, str],
     ) -> AgentRunResult[str]:
         rephrased_agent = Agent(
-            model=self.settings.model_name,
+            model=get_model(self.settings),
             system_prompt=prompt_manager.render("rephrase.j2", my_jid=my_jid),
         )
 

@@ -7,9 +7,9 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: webhook_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - wa_llm_postgres:/var/lib/postgresql/data
+      - F:/wa_llm_data/postgres:/var/lib/postgresql/data
     command: ["postgres", "-c", "log_statement=all"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d webhook_db"]
@@ -28,7 +28,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - wa_llm_whatsapp:/app/storages
+      - F:/wa_llm_data/whatsapp:/app/storages
     environment:
       - APP_PORT=3000
       - APP_OS=Chrome

@@ -17,6 +17,7 @@ from sqlmodel import (
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from whatsapp.jid import normalize_jid
+from .group_member import GroupMember
 
 if TYPE_CHECKING:
     from .message import Message
@@ -32,12 +33,24 @@ class BaseGroup(SQLModel):
     )
     managed: bool = Field(default=False)
     notify_on_spam: bool = Field(default=False)
+    enable_web_search: bool = Field(default=False, description="Enable web search for this group")
+    
+    # Auto-summary configuration
+    auto_summary_threshold: Optional[int] = Field(default=None, description="Number of messages to trigger auto-summary")
+    msg_count_since_last_summary: int = Field(default=0, description="Counter for messages since last summary")
+
     community_keys: Optional[List[str]] = Field(
         default=None, sa_column=Column(ARRAY(String))
     )
 
-    last_ingest: datetime = Field(default_factory=datetime.now)
-    last_summary_sync: datetime = Field(default_factory=datetime.now)
+    last_ingest: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    last_summary_sync: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(DateTime(timezone=True), nullable=False),
@@ -52,6 +65,7 @@ class BaseGroup(SQLModel):
 class Group(BaseGroup, table=True):
     owner: Optional["Sender"] = Relationship(back_populates="groups_owned")
     messages: List["Message"] = Relationship(back_populates="group")
+    members: List["Sender"] = Relationship(back_populates="groups", link_model=GroupMember)
 
     __table_args__ = (
         Index("idx_group_community_keys", "community_keys", postgresql_using="gin"),

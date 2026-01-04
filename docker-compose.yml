@@ -10,12 +10,17 @@ services:
       service: whatsapp
     environment:
       - WHATSAPP_WEBHOOK=http://web-server:8000/webhook
+      - APP_BASIC_AUTH=${WHATSAPP_BASIC_AUTH_USER}:${WHATSAPP_BASIC_AUTH_PASSWORD}
 
   web-server:
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_LOCAL: "false"
     volumes:
       - ./src:/app/src
       - ./migrations:/app/migrations
+      - F:/wa_llm_data/huggingface:/root/.cache/huggingface
     env_file:
       - .env
     ports:
@@ -23,9 +28,16 @@ services:
     depends_on:
       - postgres
       - whatsapp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment:
       - PORT=8000
-      - DB_URI=postgresql+asyncpg://user:password@postgres:5432/postgres
+      - DB_URI=postgresql+asyncpg://user:password@postgres:5432/webhook_db
       - WHATSAPP_HOST=http://whatsapp:3000
 
 volumes:

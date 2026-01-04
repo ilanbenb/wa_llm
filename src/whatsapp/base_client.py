@@ -114,14 +114,19 @@ class BaseWhatsAppClient:
         headers: Dict[str, str] = {}
 
         if isinstance(json, BaseModel):
-            content = json.model_dump_json()
+            content = json.model_dump_json(by_alias=True, exclude_none=True)
             headers = {"Content-Type": "application/json"}
             request_json = None
             request_data = None
         elif isinstance(data, BaseModel):
-            content = data.model_dump_json()
+            content = data.model_dump_json(by_alias=True, exclude_none=True)
             headers = {"Content-Type": "application/json"}
             request_data = None
+
+        # Log the request payload for debugging
+        if content:
+            # Avoid logging large payloads if necessary, but for now it's useful
+            print(f"DEBUG: Sending POST to {path} with body: {content}")
 
         response = await self.client.post(
             path,
