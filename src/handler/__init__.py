@@ -121,6 +121,8 @@ class MessageHandler(BaseHandler):
 
         # direct message
         if message and not message.group:
+            logger.info(f"Processing DM from {message.sender_jid}. Autoreply enabled: {self.settings.dm_autoreply_enabled}")
+
             # Rate limit check for DMs
             if not _user_rate_limiter.is_allowed(message.sender_jid):
                 logger.warning(f"Rate limit exceeded for user {message.sender_jid} in DM")
@@ -138,11 +140,15 @@ class MessageHandler(BaseHandler):
                 return
             # if autoreply is enabled, send autoreply
             elif self.settings.dm_autoreply_enabled:
+                logger.info(f"Sending autoreply to {message.sender_jid}")
                 await self.send_message(
                     message.sender_jid,
                     self.settings.dm_autoreply_message,
                     message.message_id,
                 )
+                return
+            else:
+                logger.info(f"Autoreply disabled, ignoring DM from {message.sender_jid}")
                 return
 
         # In-memory dedupe: if this message is already being processed/recently processed, skip
@@ -180,7 +186,8 @@ class MessageHandler(BaseHandler):
         logger.info(f"Message text: '{message.text}' | Bot user: '{my_jid.user}' | Mentioned: {mentioned}")
         if mentioned:
             # Rate limit check for mentions
-            if not _user_rate_limiter.is_allowed(message.sender_jid):
+            # Only check user rate limit if it's a group (DMs are checked above)
+            if message.group and not _user_rate_limiter.is_allowed(message.sender_jid):
                 logger.warning(f"Rate limit exceeded for user {message.sender_jid} in group {message.group_jid}")
                 return
             
