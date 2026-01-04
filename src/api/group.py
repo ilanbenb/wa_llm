@@ -15,6 +15,7 @@ from sqlalchemy import func
 from api.deps import get_whatsapp, get_db_async_session
 from models.group_member import GroupMember
 from models.group import Group
+from models.message import Message
 from whatsapp import WhatsAppClient
 from whatsapp.init_groups import gather_groups
 from whatsapp.jid import DefaultUserServer, GroupServer
@@ -38,6 +39,7 @@ class GroupSummary(BaseModel):
     JID: str
     Name: Optional[str] = None
     ParticipantCount: int = 0
+    MessagesSinceSummary: int = 0
     GroupCreated: Optional[datetime] = None
     AutoSummaryThreshold: Optional[int] = None
     EnableWebSearch: bool = False
@@ -205,6 +207,7 @@ async def get_me(
 @router.get("/group/list", response_model=GroupListResponse)
 async def list_groups(
     session: Annotated[AsyncSession, Depends(get_db_async_session)],
+    whatsapp: Annotated[WhatsAppClient, Depends(get_whatsapp)],
 ) -> GroupListResponse:
     """
     List all groups from DB (Summary only).
@@ -212,18 +215,51 @@ async def list_groups(
     try:
         logger.info("Fetching user groups from DB...")
         
-        # Query groups with participant count
+        # Get current bot JID to filter groups
+        my_jid_obj = await whatsapp.get_my_jid()
+        my_jid = my_jid_obj.normalize_str()
+        
+        # Query groups with participant count and message count since last summary
+        # We use a subquery for message count to avoid Cartesian product with GroupMember
+        
+        # Subquery for message count
+        # Note: We need to be careful with the correlation. 
+        # Since SQLModel/SQLAlchemy can be tricky with correlated subqueries in select(),
+        # we will fetch the groups first and then count messages, OR use a cleaner join.
+        # Given the complexity, let's try a separate query approach for message counts if the list is small,
+        # or a proper group by.
+        
+        # Let's try to include it in the main query using a left join on a subquery
+        msg_count_subq = (
+            select(
+                Message.group_jid, 
+                func.count(Message.message_id).label("msg_count")
+            )
+            .join(Group, Message.group_jid == Group.group_jid)
+            .where(Message.timestamp > Group.last_summary_sync)
+            .group_by(Message.group_jid)
+            .subquery()
+        )
+
         stmt = (
-            select(Group, func.count(GroupMember.sender_jid))
+            select(
+                Group, 
+                func.count(GroupMember.sender_jid),
+                func.coalesce(msg_count_subq.c.msg_count, 0)
+            )
             .join(GroupMember, Group.group_jid == GroupMember.group_jid, isouter=True)
-            .group_by(Group)
+            .join(msg_count_subq, Group.group_jid == msg_count_subq.c.group_jid, isouter=True)
+            .where(Group.group_jid.in_(
+                select(GroupMember.group_jid).where(GroupMember.sender_jid == my_jid)
+            ))
+            .group_by(Group, msg_count_subq.c.msg_count)
         )
         
         result = await session.exec(stmt)
         rows = result.all()
         
         summaries = []
-        for group, count in rows:
+        for group, participant_count, msg_count in rows:
             # Debug log to verify threshold values
             if group.auto_summary_threshold:
                 logger.info(f"Group {group.group_jid} has threshold: {group.auto_summary_threshold}")
@@ -231,7 +267,8 @@ async def list_groups(
             summaries.append(GroupSummary(
                 JID=group.group_jid, 
                 Name=group.group_name,
-                ParticipantCount=count,
+                ParticipantCount=participant_count,
+                MessagesSinceSummary=msg_count,
                 GroupCreated=group.created_at,
                 AutoSummaryThreshold=group.auto_summary_threshold,
                 EnableWebSearch=group.enable_web_search
@@ -415,6 +452,7 @@ async def get_group_ui():
                                 <th>Group ID</th>
                                 <th>Name</th>
                                 <th>Participants</th>
+                                <th>Msgs Since Summary</th>
                                 <th>Auto-Summary</th>
                                 <th>Web Search</th>
                                 <th>Created At</th>
@@ -895,6 +933,7 @@ async def get_group_ui():
                                     <td style="font-family:monospace;">${g.JID}</td>
                                     <td>${g.Name || '(No Name)'}</td>
                                     <td>${g.ParticipantCount}</td>
+                                    <td>${g.MessagesSinceSummary}</td>
                                     <td>${autoSummaryHtml}</td>
                                     <td>${webSearchHtml}</td>
                                     <td>${created}</td>
@@ -1292,8 +1331,9 @@ async def update_group_settings(
             # The user should sync groups first
             raise HTTPException(status_code=404, detail="Group not found in database. Please sync groups first.")
             
-        if request.auto_summary_threshold is not None:
+        if "auto_summary_threshold" in request.model_fields_set:
             group.auto_summary_threshold = request.auto_summary_threshold
+            logger.info(f"Updated auto_summary_threshold for group {group_id} to {group.auto_summary_threshold}")
         
         if request.enable_web_search is not None:
             group.enable_web_search = request.enable_web_search

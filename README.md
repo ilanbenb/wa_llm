@@ -142,7 +142,9 @@ Swagger docs available at: `http://localhost:8000/docs`
 
 #### Key Endpoints
 
-- <b>/load_new_kbtopic (POST)</b> Loads a new knowledge base topic, prepares content for summarization.
+- <b>/load_new_kbtopics (POST)</b>: Triggers the Knowledge Base Ingestion process.
+    - **Use this when**: The bot says it "has no memory" of recent messages, or you want to force an immediate update of the vector database.
+    - **Command**: `curl -X POST http://localhost:8000/load_new_kbtopics`
 - <b>/trigger_summarize_and_send_to_groups (POST)</b> Generates & dispatches summaries, Sends summaries to all managed groups
 
 ### 7. Opt-Out Feature

@@ -62,6 +62,9 @@ async def summarize_and_send_to_group(
     min_messages = 15
     if group.auto_summary_threshold and group.auto_summary_threshold > 0:
         min_messages = group.auto_summary_threshold
+        logging.info(f"Auto-summary ENABLED for group {group.group_name} ({group.group_jid}). Threshold: {min_messages}, Current: {len(messages)}")
+    else:
+        logging.info(f"Auto-summary DISABLED for group {group.group_name} ({group.group_jid}). Threshold: {group.auto_summary_threshold}")
 
     if len(messages) < min_messages:
         logging.info("Not enough messages to summarize in group %s (found %d, needed %d)", group.group_name, len(messages), min_messages)

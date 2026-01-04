@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
     try:
         groups = await client.get_user_groups()
+        my_jid_obj = await client.get_my_jid()
+        my_jid = my_jid_obj.normalize_str()
     except Exception as e:
         logger.error(f"Failed to gather groups: {e}")
         return
@@ -79,6 +81,22 @@ async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
                                 else ("superadmin" if p.IsSuperAdmin else "participant"),
                             )
                         )
+                
+                # Ensure the bot itself is added as a member
+                if my_jid not in senders_map:
+                    senders_map[my_jid] = Sender(
+                        **BaseSender(
+                            jid=my_jid,
+                            push_name="Me (Bot)",
+                        ).model_dump()
+                    )
+                    group_members.append(
+                        GroupMember(
+                            group_jid=g.JID,
+                            sender_jid=my_jid,
+                            role="admin", # Assume bot is admin or at least participant
+                        )
+                    )
 
                 # Perform bulk upserts
                 if senders_map:
