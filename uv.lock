@@ -841,6 +841,21 @@ wheels = [
 ]
 
 [[package]]
+name = "gowa-sdk"
+version = "0.1.0"
+source = { editable = "sdk-python-gowa" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pydantic", specifier = ">=2.6.1" },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3347,13 +3362,14 @@ wheels = [
 
 [[package]]
 name = "wa-llm"
-version = "1.0.2"
+version = "1.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
     { name = "cachetools" },
     { name = "fastapi" },
+    { name = "gowa-sdk" },
     { name = "httpx" },
     { name = "jinja2" },
     { name = "logfire", extra = ["fastapi", "httpx", "sqlalchemy", "system-metrics"] },
@@ -3390,6 +3406,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "cachetools", specifier = ">=5.5.2" },
     { name = "fastapi", specifier = ">=0.115.6" },
+    { name = "gowa-sdk", editable = "sdk-python-gowa" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "logfire", extras = ["fastapi", "httpx", "sqlalchemy", "system-metrics"], specifier = ">=4.11.0" },

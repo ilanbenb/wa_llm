@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from api.deps import get_handler
 from handler import MessageHandler
-from models.webhook import WhatsAppWebhookPayload
+from gowa_sdk.webhooks import WebhookEnvelope
 
 # Create router for webhook endpoints
 router = APIRouter(tags=["webhook"])
@@ -12,7 +12,7 @@ router = APIRouter(tags=["webhook"])
 
 @router.post("/webhook")
 async def webhook(
-    payload: WhatsAppWebhookPayload,
+    payload: WebhookEnvelope,
     handler: Annotated[MessageHandler, Depends(get_handler)],
 ) -> str:
     """
@@ -20,8 +20,8 @@ async def webhook(
     Returns:
         Simple "ok" response to acknowledge receipt
     """
-    # Only process messages that have a sender (from_ field)
-    if payload.from_:
+    # Only process message and reaction events
+    if payload.event in {"message", "message.reaction"}:
         await handler(payload)
 
     return "ok"

@@ -1,7 +1,7 @@
 import pytest
 from pytest_httpx import HTTPXMock
 from whatsapp.client import WhatsAppClient
-from whatsapp.models import BaseResponse
+from gowa_sdk import ApiResponse
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ async def test_login(client: WhatsAppClient, httpx_mock: HTTPXMock):
         },
     )
     response = await client.login()
-    assert isinstance(response, BaseResponse)
+    assert isinstance(response, ApiResponse)
     assert response.code == "200"
     assert response.results is not None
     assert response.results.qr_link == "test_qr"
@@ -42,7 +42,7 @@ async def test_get_user_info(client: WhatsAppClient, httpx_mock: HTTPXMock):
         },
     )
     response = await client.get_user_info("1234567890")
-    assert isinstance(response, BaseResponse)
+    assert isinstance(response, ApiResponse)
     assert response.code == "200"
     assert response.results is not None
     assert response.results.verified_name == "Test User"
@@ -59,11 +59,11 @@ async def test_send_message(client: WhatsAppClient, httpx_mock: HTTPXMock):
             "results": {"message_id": "msg_123", "status": "SENT"},
         },
     )
-    from whatsapp.models import SendMessageRequest
+    from gowa_sdk import SendMessageRequest
 
     request = SendMessageRequest(phone="1234567890", message="Hello")
     response = await client.send_message(request)
-    assert isinstance(response, BaseResponse)
+    assert isinstance(response, ApiResponse)
     assert response.code == "200"
     assert response.results is not None
     assert response.results.message_id == "msg_123"

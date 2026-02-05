@@ -9,9 +9,7 @@ from config import Settings
 from handler.router import Router
 from handler.whatsapp_group_link_spam import WhatsappGroupLinkSpamHandler
 from handler.kb_qa import KBQAHandler
-from models import (
-    WhatsAppWebhookPayload,
-)
+from gowa_sdk.webhooks import WebhookEnvelope
 from whatsapp import WhatsAppClient
 from .base_handler import BaseHandler
 from models import Message, OptOut
@@ -39,7 +37,7 @@ class MessageHandler(BaseHandler):
         self.settings = settings
         super().__init__(session, whatsapp, embedding_client)
 
-    async def __call__(self, payload: WhatsAppWebhookPayload):
+    async def __call__(self, payload: WebhookEnvelope):
         message = await self.store_message(payload)
 
         # ignore messages that don't exist or don't have text

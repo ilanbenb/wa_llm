@@ -3,8 +3,8 @@ import logging
 from sqlmodel.ext.asyncio.session import AsyncSession
 from voyageai.client_async import AsyncClient
 
+from gowa_sdk.webhooks import WebhookEnvelope, WebhookMessagePayload
 from models import (
-    WhatsAppWebhookPayload,
     BaseGroup,
     BaseSender,
     Message,
@@ -33,23 +33,27 @@ class BaseHandler:
 
     async def store_message(
         self,
-        message: Message | BaseMessage | WhatsAppWebhookPayload,
+        message: Message | BaseMessage | WebhookEnvelope,
         sender_pushname: str | None = None,
     ) -> Message | None:
         """
         Store a message or reaction in the database
-        :param message:  Message to store - can be a Message, BaseMessage or WhatsAppWebhookPayload
+        :param message:  Message to store - can be a Message, BaseMessage or WebhookEnvelope
         :param sender_pushname:  Pushname of the sender [Optional]
         :return: The stored message, or None if a reaction was stored
         """
         # Handle webhook payload - could be message or reaction
-        if isinstance(message, WhatsAppWebhookPayload):
-            sender_pushname = message.pushname
+        if isinstance(message, WebhookEnvelope):
+            data = WebhookMessagePayload.model_validate(message.payload)
+            sender_pushname = data.from_name
 
             # Check if this is a reaction payload
-            if message.reaction:
+            if message.event == "message.reaction":
                 await self.store_reaction(message)
                 return None  # Reaction stored, no message to return
+
+            if message.event != "message":
+                return None
 
             # Otherwise, treat as regular message
             message = Message.from_webhook(message)
@@ -86,13 +90,14 @@ class BaseHandler:
             stored_message = await self.upsert(message)
             return stored_message if isinstance(stored_message, Message) else message
 
-    async def store_reaction(self, payload: WhatsAppWebhookPayload) -> Reaction | None:
+    async def store_reaction(self, payload: WebhookEnvelope) -> Reaction | None:
         """
         Store a reaction from a WhatsApp webhook payload
         :param payload: WhatsApp webhook payload containing reaction data
         :return: The stored reaction, or None if failed
         """
-        if not payload.reaction:
+        data = WebhookMessagePayload.model_validate(payload.payload)
+        if payload.event != "message.reaction" or not data.reaction:
             logger.warning("No reaction found in webhook payload")
             return None
 
@@ -107,7 +112,7 @@ class BaseHandler:
                     sender = Sender(
                         **BaseSender(
                             jid=reaction.sender_jid,
-                            push_name=payload.pushname,
+                            push_name=data.from_name,
                         ).model_dump()
                     )
                     await self.upsert(sender)
@@ -155,9 +160,11 @@ class BaseHandler:
             )
         )
         assert resp.results, "Failed to send message"
+        sent_message_id = resp.results.message_id
+        assert sent_message_id, "Failed to get sent message ID"
         my_number = await self.whatsapp.get_my_jid()
         new_message = BaseMessage(
-            message_id=resp.results.message_id if resp.results else "unknown",
+            message_id=sent_message_id,
             text=message,
             sender_jid=str(my_number),
             chat_jid=to_jid,
