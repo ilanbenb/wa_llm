@@ -2,21 +2,22 @@ from datetime import datetime, timezone
 
 import pytest
 
-from models import Message, WhatsAppWebhookPayload
+from gowa_sdk.webhooks import WebhookEnvelope
+from models import Message
 
 
 @pytest.mark.asyncio
 async def test_webhook_to_message():
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "1234567890@s.whatsapp.net in 123456789-123456@g.us",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "Test User",
-            "message": {
+            "event": "message",
+            "payload": {
                 "id": "test_message_id",
-                "text": "Hello @bot how are you?",
-                "replied_id": None,
-                "quoted_message": None,
+                "chat_id": "123456789-123456@g.us",
+                "from": "1234567890@s.whatsapp.net",
+                "from_name": "Test User",
+                "timestamp": datetime.now(timezone.utc),
+                "body": "Hello @bot how are you?",
             },
         }
     )
@@ -49,15 +50,20 @@ async def test_message_with_image(mock_session):
     #   'caption': 'https://github.com/mongodb-developer/GenAI-Showcase\n\nMongoDB\nמשחררים Repository די מרשים של דוגמאות של agents ו-RAG.\n\n10,000 נקודות למי שמנחש באיזה DB הם משתמשים.'},
     #  'pushname': 'Ilan Benborhoum',
     #  'timestamp': '2025-02-16T12:03:48Z'}
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "1234567890@s.whatsapp.net in 123456789-123456@g.us",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "Test User",
-            "image": {
-                "caption": "This is an image",
-                "media_path": "https://example.com/image.jpg",
-                "mime_type": "image/jpeg",
+            "event": "message",
+            "payload": {
+                "id": "test_message_id",
+                "chat_id": "123456789-123456@g.us",
+                "from": "1234567890@s.whatsapp.net",
+                "from_name": "Test User",
+                "timestamp": datetime.now(timezone.utc),
+                "image": {
+                    "caption": "This is an image",
+                    "path": "https://example.com/image.jpg",
+                    "mimetype": "image/jpeg",
+                },
             },
         }
     )

@@ -5,7 +5,7 @@ from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
 from whatsapp.jid import normalize_jid
-from .webhook import WhatsAppWebhookPayload
+from gowa_sdk.webhooks import WebhookEnvelope, WebhookMessagePayload
 
 if TYPE_CHECKING:
     from .message import Message
@@ -52,32 +52,26 @@ class Reaction(BaseReaction, table=True):
     )
 
     @classmethod
-    def from_webhook(cls, payload: WhatsAppWebhookPayload) -> "Reaction":
+    def from_webhook(cls, payload: WebhookEnvelope) -> "Reaction":
         """Create Reaction instance from WhatsApp webhook payload."""
-        if not payload.reaction:
-            raise ValueError("Missing reaction in webhook payload")
+        if payload.event != "message.reaction":
+            raise ValueError(f"Unsupported webhook event: {payload.event}")
 
-        if not payload.reaction.id:
-            raise ValueError("Missing reaction message ID")
+        data = WebhookMessagePayload.model_validate(payload.payload)
+        if not data.reacted_message_id:
+            raise ValueError("Missing reacted message ID")
 
-        if not payload.reaction.message:
+        if not data.reaction:
             raise ValueError("Missing reaction emoji")
 
-        if not payload.from_:
+        if not data.from_:
             raise ValueError("Missing sender in webhook payload")
 
-        # Parse sender JID from the 'from' field
-        # Format can be "sender_jid" or "sender_jid in group_jid"
-        if " in " in payload.from_:
-            sender_jid, _ = payload.from_.split(" in ")
-        else:
-            sender_jid = payload.from_
-
         return cls(
-            message_id=payload.reaction.id,
-            sender_jid=normalize_jid(sender_jid),
-            emoji=payload.reaction.message,
-            timestamp=payload.timestamp,
+            message_id=data.reacted_message_id,
+            sender_jid=normalize_jid(data.from_),
+            emoji=data.reaction,
+            timestamp=data.timestamp or payload.timestamp or datetime.now(timezone.utc),
         )
 
     @classmethod

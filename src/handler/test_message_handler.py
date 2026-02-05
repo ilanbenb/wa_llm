@@ -4,7 +4,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from handler import MessageHandler
-from models import Message, WhatsAppWebhookPayload
+from gowa_sdk.webhooks import WebhookEnvelope
+from models import Message
 from test_utils.mock_session import AsyncSessionMock
 from whatsapp import SendMessageRequest
 from whatsapp.jid import JID
@@ -60,12 +61,17 @@ async def test_message_handler_dm_opt_out(
     handler.store_message = AsyncMock(return_value=test_message)
 
     # Create a dummy payload
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "user@s.whatsapp.net",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "User",
-            "message": {"text": "opt-out"},
+            "event": "message",
+            "payload": {
+                "id": "msg_opt_out",
+                "chat_id": "user@s.whatsapp.net",
+                "from": "user@s.whatsapp.net",
+                "from_name": "User",
+                "timestamp": datetime.now(timezone.utc),
+                "body": "opt-out",
+            },
         }
     )
 
@@ -109,12 +115,17 @@ async def test_message_handler_dm_opt_in(
     )
     handler.store_message = AsyncMock(return_value=test_message)
 
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "user@s.whatsapp.net",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "User",
-            "message": {"text": "opt-in"},
+            "event": "message",
+            "payload": {
+                "id": "msg_opt_in",
+                "chat_id": "user@s.whatsapp.net",
+                "from": "user@s.whatsapp.net",
+                "from_name": "User",
+                "timestamp": datetime.now(timezone.utc),
+                "body": "opt-in",
+            },
         }
     )
 
@@ -164,12 +175,17 @@ async def test_message_handler_dm_status(
     )
     handler.store_message = AsyncMock(return_value=test_message)
 
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "user@s.whatsapp.net",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "User",
-            "message": {"text": "status"},
+            "event": "message",
+            "payload": {
+                "id": "msg_status",
+                "chat_id": "user@s.whatsapp.net",
+                "from": "user@s.whatsapp.net",
+                "from_name": "User",
+                "timestamp": datetime.now(timezone.utc),
+                "body": "status",
+            },
         }
     )
 

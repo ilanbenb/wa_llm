@@ -15,7 +15,7 @@ async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
             if groups is None or groups.results is None:
                 return
             for g in groups.results.data:
-                ownerUsr = g.OwnerPN or g.OwnerJID or None
+                ownerUsr = g.owner_pn or g.owner_jid or None
                 if (await session.get(Sender, ownerUsr)) is None and ownerUsr:
                     owner = Sender(
                         **BaseSender(
@@ -24,13 +24,13 @@ async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
                     )
                     await upsert(session, owner)
 
-                og = await session.get(Group, g.JID)
+                og = await session.get(Group, g.jid)
 
                 group = Group(
                     **BaseGroup(
-                        group_jid=g.JID,
-                        group_name=g.Name,
-                        group_topic=g.Topic,
+                        group_jid=g.jid,
+                        group_name=g.name,
+                        group_topic=g.topic,
                         owner_jid=ownerUsr,
                         managed=og.managed if og else False,
                         community_keys=og.community_keys if og else None,

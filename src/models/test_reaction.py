@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 from models.reaction import Reaction
-from models.webhook import WhatsAppWebhookPayload
+from gowa_sdk.webhooks import WebhookEnvelope
 from unittest.mock import AsyncMock, MagicMock
 
 
@@ -17,12 +17,18 @@ def test_reaction_normalization():
 
 
 def test_from_webhook():
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "1234567890@s.whatsapp.net",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "Test",
-            "reaction": {"id": "msg1", "message": "👍"},
+            "event": "message.reaction",
+            "payload": {
+                "id": "reaction_msg_id",
+                "chat_id": "1234567890@s.whatsapp.net",
+                "from": "1234567890@s.whatsapp.net",
+                "from_name": "Test",
+                "timestamp": datetime.now(timezone.utc),
+                "reaction": "👍",
+                "reacted_message_id": "msg1",
+            },
         }
     )
     reaction = Reaction.from_webhook(payload)
@@ -32,12 +38,18 @@ def test_from_webhook():
 
 
 def test_from_webhook_in_group():
-    payload = WhatsAppWebhookPayload.model_validate(
+    payload = WebhookEnvelope.model_validate(
         {
-            "from": "1234567890@s.whatsapp.net in group@g.us",
-            "timestamp": datetime.now(timezone.utc),
-            "pushname": "Test",
-            "reaction": {"id": "msg1", "message": "👍"},
+            "event": "message.reaction",
+            "payload": {
+                "id": "reaction_msg_id",
+                "chat_id": "group@g.us",
+                "from": "1234567890@s.whatsapp.net",
+                "from_name": "Test",
+                "timestamp": datetime.now(timezone.utc),
+                "reaction": "👍",
+                "reacted_message_id": "msg1",
+            },
         }
     )
     reaction = Reaction.from_webhook(payload)
