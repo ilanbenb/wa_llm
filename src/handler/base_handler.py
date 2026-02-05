@@ -160,9 +160,11 @@ class BaseHandler:
             )
         )
         assert resp.results, "Failed to send message"
+        sent_message_id = resp.results.message_id
+        assert sent_message_id, "Failed to get sent message ID"
         my_number = await self.whatsapp.get_my_jid()
         new_message = BaseMessage(
-            message_id=resp.results.message_id if resp.results else "unknown",
+            message_id=sent_message_id,
             text=message,
             sender_jid=str(my_number),
             chat_jid=to_jid,

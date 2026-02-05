@@ -56,6 +56,8 @@ class WebhookMessagePayload(WebhookBaseModel):
     text: Optional[str] = Field(
         default=None, validation_alias=AliasChoices("text", "message", "body")
     )
+    reaction: Optional[str] = None
+    reacted_message_id: Optional[str] = None
     replied_to_id: Optional[str] = None
     quoted_body: Optional[str] = None
 
