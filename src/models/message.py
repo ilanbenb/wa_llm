@@ -113,7 +113,9 @@ class Message(BaseMessage, table=True):
                 text=cls._extract_message_text(data),
                 chat_jid=chat_jid,
                 sender_jid=normalize_jid(sender_jid),
-                timestamp=data.timestamp or payload.timestamp or datetime.now(timezone.utc),
+                timestamp=data.timestamp
+                or payload.timestamp
+                or datetime.now(timezone.utc),
                 reply_to_id=data.replied_to_id,
                 media_url=cls._extract_media_url(data),
             ).model_dump()

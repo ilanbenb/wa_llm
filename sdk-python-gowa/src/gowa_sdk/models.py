@@ -26,7 +26,9 @@ class ErrorResponse(BaseModelConfig):
 
 
 class MessageSendResult(BaseModelConfig):
-    message_id: Optional[str] = Field(default=None, validation_alias=AliasChoices("message_id", "id"))
+    message_id: Optional[str] = Field(
+        default=None, validation_alias=AliasChoices("message_id", "id")
+    )
     status: Optional[str] = None
 
 
@@ -131,7 +133,9 @@ class Group(BaseModelConfig):
         default=None, alias="DefaultMembershipApprovalMode"
     )
     linked_parent_jid: Optional[str] = Field(default=None, alias="LinkedParentJID")
-    is_default_sub_group: Optional[bool] = Field(default=None, alias="IsDefaultSubGroup")
+    is_default_sub_group: Optional[bool] = Field(
+        default=None, alias="IsDefaultSubGroup"
+    )
     is_join_approval_required: Optional[bool] = Field(
         default=None, alias="IsJoinApprovalRequired"
     )
@@ -139,7 +143,9 @@ class Group(BaseModelConfig):
     participant_version_id: Optional[str] = Field(
         default=None, alias="ParticipantVersionID"
     )
-    participants: Optional[List[Participant]] = Field(default=None, alias="Participants")
+    participants: Optional[List[Participant]] = Field(
+        default=None, alias="Participants"
+    )
     member_add_mode: Optional[str] = Field(default=None, alias="MemberAddMode")
 
 

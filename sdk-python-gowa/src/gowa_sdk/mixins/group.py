@@ -88,7 +88,9 @@ class GroupMixin(GoWaClientProtocol):
         self, link: str, *, device_id: Optional[str] = None
     ) -> GenericResponse:
         response = await self._post(
-            "/group/join-with-link", json=JoinGroupRequest(link=link), device_id=device_id
+            "/group/join-with-link",
+            json=JoinGroupRequest(link=link),
+            device_id=device_id,
         )
         return GenericResponse.model_validate_json(response.content)
 
@@ -134,7 +136,9 @@ class GroupMixin(GoWaClientProtocol):
         self, group_id: str, *, device_id: Optional[str] = None
     ) -> GenericResponse:
         response = await self._post(
-            "/group/leave", json=LeaveGroupRequest(group_id=group_id), device_id=device_id
+            "/group/leave",
+            json=LeaveGroupRequest(group_id=group_id),
+            device_id=device_id,
         )
         return GenericResponse.model_validate_json(response.content)
 
@@ -157,17 +161,13 @@ class GroupMixin(GoWaClientProtocol):
     async def set_group_name(
         self, request: GroupNameRequest, *, device_id: Optional[str] = None
     ) -> ApiResponse[dict]:
-        response = await self._post(
-            "/group/name", json=request, device_id=device_id
-        )
+        response = await self._post("/group/name", json=request, device_id=device_id)
         return ApiResponse[dict].model_validate_json(response.content)
 
     async def set_group_topic(
         self, request: GroupTopicRequest, *, device_id: Optional[str] = None
     ) -> ApiResponse[dict]:
-        response = await self._post(
-            "/group/topic", json=request, device_id=device_id
-        )
+        response = await self._post("/group/topic", json=request, device_id=device_id)
         return ApiResponse[dict].model_validate_json(response.content)
 
     async def set_group_description(

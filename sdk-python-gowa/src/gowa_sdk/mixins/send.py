@@ -122,9 +122,7 @@ class SendMixin(GoWaClientProtocol):
     async def send_location(
         self, request: SendLocationRequest, *, device_id: Optional[str] = None
     ) -> MessageSendResponse:
-        response = await self._post(
-            "/send/location", json=request, device_id=device_id
-        )
+        response = await self._post("/send/location", json=request, device_id=device_id)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_poll(
@@ -136,9 +134,7 @@ class SendMixin(GoWaClientProtocol):
     async def send_presence(
         self, request: SendPresenceRequest, *, device_id: Optional[str] = None
     ) -> MessageSendResponse:
-        response = await self._post(
-            "/send/presence", json=request, device_id=device_id
-        )
+        response = await self._post("/send/presence", json=request, device_id=device_id)
         return MessageSendResponse.model_validate_json(response.content)
 
     async def send_chat_presence(

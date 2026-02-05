@@ -10,7 +10,10 @@ from ..protocols import GoWaClientProtocol
 
 class ChatMixin(GoWaClientProtocol):
     async def list_chats(
-        self, *, params: Optional[Dict[str, Any]] = None, device_id: Optional[str] = None
+        self,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        device_id: Optional[str] = None,
     ) -> ApiResponse[dict]:
         response = await self._get("/chats", params=params, device_id=device_id)
         return ApiResponse[dict].model_validate_json(response.content)

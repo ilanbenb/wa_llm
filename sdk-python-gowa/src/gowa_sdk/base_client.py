@@ -71,7 +71,9 @@ class GoWaBaseClient:
         return merged
 
     @staticmethod
-    def _model_to_json(data: Optional[Dict[str, Any] | BaseModel]) -> Optional[Dict[str, Any]]:
+    def _model_to_json(
+        data: Optional[Dict[str, Any] | BaseModel],
+    ) -> Optional[Dict[str, Any]]:
         if data is None:
             return None
         if isinstance(data, BaseModel):
@@ -95,7 +97,9 @@ class GoWaBaseClient:
             raw = data.model_dump(by_alias=True, exclude_none=True)
         else:
             raw = {k: v for k, v in data.items() if v is not None}
-        coerced = {k: self._coerce_form_value(v) for k, v in raw.items() if v is not None}
+        coerced = {
+            k: self._coerce_form_value(v) for k, v in raw.items() if v is not None
+        }
         return coerced or None
 
     async def _request(
