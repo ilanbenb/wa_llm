@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-02-05)
+
+### Features
+
+- Introduce `gowa_sdk` with new client, webhooks, and mixins, refactoring existing WhatsApp client
+  functionality. ([#59](https://github.com/ilanbenb/wa_llm/pull/59),
+  [`ac0393f`](https://github.com/ilanbenb/wa_llm/commit/ac0393f1cc2fd9212b3ffde33413addee730bf82))
+
+- Support v8 breaking changes and create a separated python-sdk for GOWA to organize the code
+  ([#59](https://github.com/ilanbenb/wa_llm/pull/59),
+  [`ac0393f`](https://github.com/ilanbenb/wa_llm/commit/ac0393f1cc2fd9212b3ffde33413addee730bf82))
+
+
 ## v1.0.3 (2025-12-10)
 
 ### Bug Fixes
