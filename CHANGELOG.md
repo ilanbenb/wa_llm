@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-02-06)
+
+### Build System
+
+- Add bind mount for sdk-python-gowa directory to Dockerfile
+  ([#60](https://github.com/ilanbenb/wa_llm/pull/60),
+  [`4e18737`](https://github.com/ilanbenb/wa_llm/commit/4e18737af68c2eddb825a2c6908dd100868b0662))
+
+- Fix docker build ([#60](https://github.com/ilanbenb/wa_llm/pull/60),
+  [`4e18737`](https://github.com/ilanbenb/wa_llm/commit/4e18737af68c2eddb825a2c6908dd100868b0662))
+
+### Features
+
+- Introduce `gowa_sdk` with new client, webhooks, and mixins, refactoring existing WhatsApp client
+  functionality. ([#60](https://github.com/ilanbenb/wa_llm/pull/60),
+  [`4e18737`](https://github.com/ilanbenb/wa_llm/commit/4e18737af68c2eddb825a2c6908dd100868b0662))
+
+
 ## v1.1.0 (2026-02-05)
 
 ### Features
