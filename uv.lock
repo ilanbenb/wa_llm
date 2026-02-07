@@ -841,18 +841,16 @@ wheels = [
 ]
 
 [[package]]
-name = "gowa-sdk"
+name = "gowa"
 version = "0.1.0"
-source = { editable = "sdk-python-gowa" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pydantic", specifier = ">=2.6.1" },
+sdist = { url = "https://files.pythonhosted.org/packages/87/11/f2ae4ef9d6955cdbdd0812d087ab4d31234e3c41375e156b0215b1f0f7db/gowa-0.1.0.tar.gz", hash = "sha256:f02c18de8e332de8a15e4ac2acd60f9d639059b74d2a6fadec0b990290ec6dfa", size = 9222, upload-time = "2026-02-07T06:14:03.277Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3e/be/2b0e263bb82cf0c7fd30f621d277c0d3eb31281d0cee95ad869929d20c10/gowa-0.1.0-py3-none-any.whl", hash = "sha256:42264ab04b6934cdd276a6373907e56ce65b59fc907c292c3e81a4938c1fcdc7", size = 14431, upload-time = "2026-02-07T06:14:01.564Z" },
 ]
 
 [[package]]
@@ -3369,7 +3367,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "cachetools" },
     { name = "fastapi" },
-    { name = "gowa-sdk" },
+    { name = "gowa" },
     { name = "httpx" },
     { name = "jinja2" },
     { name = "logfire", extra = ["fastapi", "httpx", "sqlalchemy", "system-metrics"] },
@@ -3406,7 +3404,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "cachetools", specifier = ">=5.5.2" },
     { name = "fastapi", specifier = ">=0.115.6" },
-    { name = "gowa-sdk", editable = "sdk-python-gowa" },
+    { name = "gowa", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "logfire", extras = ["fastapi", "httpx", "sqlalchemy", "system-metrics"], specifier = ">=4.11.0" },
