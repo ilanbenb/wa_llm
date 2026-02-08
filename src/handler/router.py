@@ -72,7 +72,7 @@ class Router(BaseHandler):
 
     async def _route(self, message: str) -> IntentEnum:
         agent = Agent(
-            model=self.settings.model_name,
+            model=self.settings.router_model_name,
             system_prompt=prompt_manager.render("intent.j2"),
             output_type=Intent,
         )

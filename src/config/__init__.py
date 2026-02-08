@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # Model settings
     model_name: str = "anthropic:claude-sonnet-4-5-20250929"
+    router_model_name: str = "anthropic:claude-haiku-4-5-20251001"
 
     # Direct Message settings
     dm_autoreply_enabled: bool = False
