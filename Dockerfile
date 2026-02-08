@@ -12,7 +12,6 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc,mode=0600 \
     --mount=type=bind,source=./uv.lock,target=uv.lock \
     --mount=type=bind,source=./pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=./.python-version,target=.python-version \
-    --mount=type=bind,source=./sdk-python-gowa,target=sdk-python-gowa \
     uv sync --frozen --no-dev --no-install-project
 
 COPY . /app
