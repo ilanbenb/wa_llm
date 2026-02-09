@@ -50,7 +50,16 @@ async def lifespan(app: FastAPI):
         engine, expire_on_commit=False, class_=AsyncSession
     )
 
-    asyncio.create_task(gather_groups(engine, app.state.whatsapp))
+    async def sync_groups_on_startup() -> None:
+        async with async_session() as session:
+            try:
+                await gather_groups(session, app.state.whatsapp)
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+
+    asyncio.create_task(sync_groups_on_startup())
 
     app.state.db_engine = engine
     app.state.async_session = async_session
