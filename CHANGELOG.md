@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-02-09)
+
+### Build System
+
+- Use external sdk gowa ([#62](https://github.com/ilanbenb/wa_llm/pull/62),
+  [`aad5885`](https://github.com/ilanbenb/wa_llm/commit/aad58855ce07204ca7a288a7a3b07199bca868ee))
+
+### Features
+
+- Gather groups when number is added to a new group as well on startup to avoid manual restarts when
+  being added to new groups ([#72](https://github.com/ilanbenb/wa_llm/pull/72),
+  [`491317d`](https://github.com/ilanbenb/wa_llm/commit/491317da1e72332704ce4fe52d7e7ce85506e4c8))
+
+
 ## v1.2.0 (2026-02-06)
 
 ### Build System
