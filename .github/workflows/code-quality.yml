@@ -19,7 +19,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
 
