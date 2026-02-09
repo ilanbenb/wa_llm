@@ -16,7 +16,7 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc,mode=0600 \
 
 COPY . /app
 
-FROM python:3.14-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 COPY --from=builder --chown=app:app /app /app
 
