@@ -1,51 +1,53 @@
 from datetime import datetime
 
-from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import Group, BaseGroup, Sender, BaseSender, upsert
 from .client import WhatsAppClient
 
 
-async def gather_groups(db_engine: AsyncEngine, client: WhatsAppClient):
+async def gather_groups(session: AsyncSession, client: WhatsAppClient) -> None:
     groups = await client.get_user_groups()
 
-    async with AsyncSession(db_engine) as session:
-        try:
-            if groups is None or groups.results is None:
-                return
-            for g in groups.results.data:
-                if not g.jid:
-                    continue
-                ownerUsr = g.owner_pn or g.owner_jid or None
-                if (await session.get(Sender, ownerUsr)) is None and ownerUsr:
-                    owner = Sender(
-                        **BaseSender(
-                            jid=ownerUsr,
-                        ).model_dump()
-                    )
-                    await upsert(session, owner)
+    if groups is None or groups.results is None:
+        return
 
-                og = await session.get(Group, g.jid)
+    for g in groups.results.data:
+        if not g.jid:
+            continue
+        owner_usr = g.owner_pn or g.owner_jid or None
+        if owner_usr and (await session.get(Sender, owner_usr)) is None:
+            owner = Sender(
+                **BaseSender(
+                    jid=owner_usr,
+                ).model_dump()
+            )
+            await upsert(session, owner)
 
-                group = Group(
-                    **BaseGroup(
-                        group_jid=g.jid,
-                        group_name=g.name,
-                        group_topic=g.topic,
-                        owner_jid=ownerUsr,
-                        managed=og.managed if og else False,
-                        community_keys=og.community_keys if og else None,
-                        last_ingest=og.last_ingest if og else datetime.now(),
-                        last_summary_sync=og.last_summary_sync
-                        if og
-                        else datetime.now(),
-                        notify_on_spam=og.notify_on_spam if og else False,
-                        created_at=og.created_at if og else datetime.now(),
-                    ).model_dump()
-                )
-                await upsert(session, group)
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+        existing_group = await session.get(Group, g.jid)
+
+        group = Group(
+            **BaseGroup(
+                group_jid=g.jid,
+                group_name=g.name,
+                group_topic=g.topic,
+                owner_jid=owner_usr,
+                managed=existing_group.managed if existing_group else False,
+                community_keys=existing_group.community_keys
+                if existing_group
+                else None,
+                last_ingest=existing_group.last_ingest
+                if existing_group
+                else datetime.now(),
+                last_summary_sync=existing_group.last_summary_sync
+                if existing_group
+                else datetime.now(),
+                notify_on_spam=existing_group.notify_on_spam
+                if existing_group
+                else False,
+                created_at=existing_group.created_at
+                if existing_group
+                else datetime.now(),
+            ).model_dump()
+        )
+        await upsert(session, group)
