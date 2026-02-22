@@ -2,7 +2,7 @@
 name = "wa-llm"
 version = "1.4.0"
 description = ""
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.14.1",
     "asyncpg>=0.30.0",

@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 RUN apt-get update -qy
@@ -16,7 +16,7 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc,mode=0600 \
 
 COPY . /app
 
-FROM python:3.13-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 COPY --from=builder --chown=app:app /app /app
 

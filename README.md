@@ -37,7 +37,7 @@ This project includes multiple Docker Compose files for different environments:
 ## 📋 Prerequisites
 
 - 🐳 Docker and Docker Compose
-- 🐍 Python 3.13+
+- 🐍 Python 3.14+
 - 🗄️ PostgreSQL with `pgvector` extension
 - 🔑 Voyage AI API key
 - 📲 WhatsApp account for the bot
