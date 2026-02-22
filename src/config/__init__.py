@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     voyage_max_retries: int = 5
 
     # Model settings
-    model_name: str = "anthropic:claude-sonnet-4-5-20250929"
+    model_name: str = "anthropic:claude-sonnet-4-6"
 
     # Direct Message settings
     dm_autoreply_enabled: bool = False
