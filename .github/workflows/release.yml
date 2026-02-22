@@ -23,12 +23,12 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Python Semantic Release
-        uses: python-semantic-release/python-semantic-release@v10.5.2
+        uses: python-semantic-release/python-semantic-release@v10.5.3
         with:
           github_token: ${{ steps.app-token.outputs.token }}

@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-02-22)
+
+### Features
+
+- Upgrade to sonnet 4.6 ([#91](https://github.com/ilanbenb/wa_llm/pull/91),
+  [`f8285b5`](https://github.com/ilanbenb/wa_llm/commit/f8285b50586cff6030544a695e5342be84c3c0b1))
+
+
 ## v1.3.0 (2026-02-09)
 
 ### Build System
