@@ -8,7 +8,7 @@
 - Extras: `notebooks/`, `data/`.
 
 ## Build, Test, and Development Commands
-- Install deps: `uv sync --all-extras --active` (Python 3.12).
+- Install deps: `uv sync --all-extras --active` (Python 3.13).
 - Lint/format: `ruff check` and `ruff format`.
 - Type check: `pyright`.
 - Run tests: `pytest -q` or `pytest --cov=src --cov-report=xml`.
