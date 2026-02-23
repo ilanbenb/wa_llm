@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.4.1 (2026-02-23)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#103](https://github.com/ilanbenb/wa_llm/pull/103),
+  [`e4d73cf`](https://github.com/ilanbenb/wa_llm/commit/e4d73cfbd844670b6a8379ec5287ca2ddc007d32))
+
+### Chores
+
+- Migrate to renvate. Better support for uv ([#101](https://github.com/ilanbenb/wa_llm/pull/101),
+  [`959b446`](https://github.com/ilanbenb/wa_llm/commit/959b446af90c80145f0e8861520cc44a1d257ea0))
+
+- Update logfire ([#99](https://github.com/ilanbenb/wa_llm/pull/99),
+  [`24c5014`](https://github.com/ilanbenb/wa_llm/commit/24c5014ca11014533f2624c444e9cb64016f09de))
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.3.1
+  ([#104](https://github.com/ilanbenb/wa_llm/pull/104),
+  [`7f5132b`](https://github.com/ilanbenb/wa_llm/commit/7f5132b2f0d056dae4920df70efabc73586b7dff))
+
+
 ## v1.4.0 (2026-02-22)
 
 ### Features
