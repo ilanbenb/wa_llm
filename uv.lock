@@ -559,14 +559,14 @@ name = "cohere"
 version = "5.20.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "fastavro" },
-    { name = "httpx" },
-    { name = "pydantic" },
-    { name = "pydantic-core" },
-    { name = "requests" },
-    { name = "tokenizers" },
-    { name = "types-requests" },
-    { name = "typing-extensions" },
+    { name = "fastavro", marker = "sys_platform != 'emscripten'" },
+    { name = "httpx", marker = "sys_platform != 'emscripten'" },
+    { name = "pydantic", marker = "sys_platform != 'emscripten'" },
+    { name = "pydantic-core", marker = "sys_platform != 'emscripten'" },
+    { name = "requests", marker = "sys_platform != 'emscripten'" },
+    { name = "tokenizers", marker = "sys_platform != 'emscripten'" },
+    { name = "types-requests", marker = "sys_platform != 'emscripten'" },
+    { name = "typing-extensions", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9a/7c/415e9b150843d879427ad4760c2331443d3f4e6860d17a3c3b3841357898/cohere-5.20.6.tar.gz", hash = "sha256:96b53fafcca97d7345646b66caafb79d6d92fa144c44b6d7fd63fbeade2a5155", size = 185110, upload-time = "2026-02-18T15:57:38.19Z" }
 wheels = [
@@ -4364,7 +4364,7 @@ name = "types-requests"
 version = "2.32.4.20260107"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "urllib3" },
+    { name = "urllib3", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0f/f3/a0663907082280664d745929205a89d41dffb29e89a50f753af7d57d0a96/types_requests-2.32.4.20260107.tar.gz", hash = "sha256:018a11ac158f801bfa84857ddec1650750e393df8a004a8a9ae2a9bec6fcb24f", size = 23165, upload-time = "2026-01-07T03:20:54.091Z" }
 wheels = [
@@ -4517,39 +4517,39 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", specifier = ">=1.14.1" },
-    { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "cachetools", specifier = ">=5.5.2" },
-    { name = "fastapi", specifier = ">=0.115.6" },
+    { name = "alembic", specifier = ">=1.18.4" },
+    { name = "asyncpg", specifier = ">=0.31.0" },
+    { name = "cachetools", specifier = ">=7.0.1" },
+    { name = "fastapi", specifier = ">=0.131.0" },
     { name = "gowa", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "jinja2", specifier = ">=3.1.0" },
+    { name = "jinja2", specifier = ">=3.1.6" },
     { name = "logfire", extras = ["fastapi", "httpx", "sqlalchemy", "system-metrics"], specifier = ">=4.25.0" },
-    { name = "pgvector", specifier = ">=0.3.6" },
-    { name = "pydantic", specifier = ">=2.6.1" },
+    { name = "pgvector", specifier = ">=0.4.2" },
+    { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-ai", specifier = ">=1.62.0" },
-    { name = "pydantic-settings", specifier = ">=2.7.1" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.37" },
-    { name = "sqlmodel", specifier = ">=0.0.22" },
-    { name = "tenacity", specifier = ">=9.0.0" },
-    { name = "uvicorn", specifier = ">=0.34.0" },
-    { name = "voyageai", specifier = ">=0.3.2" },
+    { name = "pydantic-settings", specifier = ">=2.13.1" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.46" },
+    { name = "sqlmodel", specifier = ">=0.0.37" },
+    { name = "tenacity", specifier = ">=9.1.4" },
+    { name = "uvicorn", specifier = ">=0.41.0" },
+    { name = "voyageai", specifier = ">=0.3.7" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "nbstripout", specifier = ">=0.8.1" },
-    { name = "notebook", specifier = ">=7.3.2" },
-    { name = "pandas", specifier = ">=2.2.3" },
-    { name = "poethepoet", specifier = ">=0.31.1" },
-    { name = "pyright", specifier = ">=1.1.407" },
-    { name = "pytest", specifier = ">=8.0.0" },
-    { name = "pytest-asyncio", specifier = ">=0.25.0" },
-    { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "pytest-httpx", specifier = ">=0.35.0" },
-    { name = "ruff", specifier = ">=0.11.1" },
-    { name = "tqdm", specifier = ">=4.67.1" },
-    { name = "whatstk", specifier = ">=0.7.1" },
+    { name = "nbstripout", specifier = ">=0.9.1" },
+    { name = "notebook", specifier = ">=7.5.3" },
+    { name = "pandas", specifier = ">=2.3.3" },
+    { name = "poethepoet", specifier = ">=0.42.0" },
+    { name = "pyright", specifier = ">=1.1.408" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "pytest-cov", specifier = ">=6.3.0" },
+    { name = "pytest-httpx", specifier = ">=0.36.0" },
+    { name = "ruff", specifier = ">=0.15.2" },
+    { name = "tqdm", specifier = ">=4.67.3" },
+    { name = "whatstk", specifier = ">=0.8.1" },
 ]
 
 [[package]]
