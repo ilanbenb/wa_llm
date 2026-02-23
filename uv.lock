@@ -4477,7 +4477,7 @@ wheels = [
 
 [[package]]
 name = "wa-llm"
-version = "1.4.0"
+version = "1.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
@@ -4543,9 +4543,9 @@ dev = [
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "poethepoet", specifier = ">=0.42.0" },
     { name = "pyright", specifier = ">=1.1.408" },
-    { name = "pytest", specifier = ">=8.4.2" },
-    { name = "pytest-asyncio", specifier = ">=0.26.0" },
-    { name = "pytest-cov", specifier = ">=6.3.0" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-asyncio", specifier = ">=1.3.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-httpx", specifier = ">=0.36.0" },
     { name = "ruff", specifier = ">=0.15.2" },
     { name = "tqdm", specifier = ">=4.67.3" },
