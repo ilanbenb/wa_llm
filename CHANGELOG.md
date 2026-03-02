@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v1.4.2 (2026-03-02)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#110](https://github.com/ilanbenb/wa_llm/pull/110),
+  [`3c666a0`](https://github.com/ilanbenb/wa_llm/commit/3c666a0f49b0c5ecb8abfea01f96f0ea907873fd))
+
+### Chores
+
+- **deps**: Lock file maintenance ([#108](https://github.com/ilanbenb/wa_llm/pull/108),
+  [`2192c56`](https://github.com/ilanbenb/wa_llm/commit/2192c561adcb3ad6883b550caf6ca44989261db2))
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.3.2
+  ([#109](https://github.com/ilanbenb/wa_llm/pull/109),
+  [`09c8691`](https://github.com/ilanbenb/wa_llm/commit/09c86917835d407ace395c91be0e6ba443ca3a5e))
+
+- **deps**: Update python non-major dependencies
+  ([#107](https://github.com/ilanbenb/wa_llm/pull/107),
+  [`4dd179b`](https://github.com/ilanbenb/wa_llm/commit/4dd179b4b9ea74fbfb569225e6441129cd4bdc60))
+
+
 ## v1.4.1 (2026-02-23)
 
 ### Bug Fixes
