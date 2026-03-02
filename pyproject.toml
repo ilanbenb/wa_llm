@@ -7,15 +7,15 @@ dependencies = [
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
     "cachetools>=7.0.1",
-    "fastapi>=0.131.0",
+    "fastapi>=0.135.1",
     "httpx>=0.28.1",
     "logfire[fastapi,httpx,sqlalchemy,system-metrics]>=4.25.0",
     "jinja2>=3.1.6",
     "pgvector>=0.4.2",
-    "pydantic-ai>=1.62.0",
+    "pydantic-ai>=1.63.0",
     "pydantic-settings>=2.13.1",
     "pydantic>=2.12.5",
-    "sqlalchemy[asyncio]>=2.0.46",
+    "sqlalchemy[asyncio]>=2.0.47",
     "sqlmodel>=0.0.37",
     "tenacity>=9.1.4",
     "uvicorn>=0.41.0",
@@ -25,18 +25,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "notebook>=7.5.3",
+    "notebook>=7.5.4",
     "pandas>=2.3.3",
     "nbstripout>=0.9.1",
     "whatstk>=0.8.1",
-    "ruff>=0.15.2",
+    "ruff>=0.15.4",
     "pytest>=9.0.2",
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=7.0.0",
     "pytest-httpx>=0.36.0",
     "pyright>=1.1.408",
     "tqdm>=4.67.3",
-    "poethepoet>=0.42.0",
+    "poethepoet>=0.42.1",
 ]
 
 [build-system]
