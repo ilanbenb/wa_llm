@@ -2,6 +2,34 @@
 
 <!-- version list -->
 
+## v1.4.3 (2026-03-03)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#114](https://github.com/ilanbenb/wa_llm/pull/114),
+  [`2ef2996`](https://github.com/ilanbenb/wa_llm/commit/2ef29961e50b3699a419bdb2e3d48d7c8b79b1ae))
+
+### Build System
+
+- Update postgres docker tag to v17 ([#111](https://github.com/ilanbenb/wa_llm/pull/111),
+  [`dd73062`](https://github.com/ilanbenb/wa_llm/commit/dd730620c03f64515a7eb44d5b97215d6157981d))
+
+### Chores
+
+- **deps**: Lock file maintenance ([#115](https://github.com/ilanbenb/wa_llm/pull/115),
+  [`33c8db3`](https://github.com/ilanbenb/wa_llm/commit/33c8db3d382aef11a5fa2239e65e94c5a577107f))
+
+- **deps**: Lock file maintenance ([#113](https://github.com/ilanbenb/wa_llm/pull/113),
+  [`d30307a`](https://github.com/ilanbenb/wa_llm/commit/d30307a4f5537c23b3322e27feba3734e7bbea6c))
+
+- **deps**: Lock file maintenance ([#112](https://github.com/ilanbenb/wa_llm/pull/112),
+  [`ea97e13`](https://github.com/ilanbenb/wa_llm/commit/ea97e135578ec1edd575c91c62804cb1f57deabe))
+
+- **deps**: Update postgres docker tag to v18 ([#111](https://github.com/ilanbenb/wa_llm/pull/111),
+  [`dd73062`](https://github.com/ilanbenb/wa_llm/commit/dd730620c03f64515a7eb44d5b97215d6157981d))
+
+
 ## v1.4.2 (2026-03-02)
 
 ### Bug Fixes
