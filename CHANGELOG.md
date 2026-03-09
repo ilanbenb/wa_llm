@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.4.4 (2026-03-09)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#116](https://github.com/ilanbenb/wa_llm/pull/116),
+  [`174d4bf`](https://github.com/ilanbenb/wa_llm/commit/174d4bff58fbe1c9724cf6ccb21ef4485db135ab))
+
+### Chores
+
+- **deps**: Update docker/build-push-action action to v7
+  ([#117](https://github.com/ilanbenb/wa_llm/pull/117),
+  [`3874d2d`](https://github.com/ilanbenb/wa_llm/commit/3874d2ddd49f3d878b38c9c61682c883ca172855))
+
+
 ## v1.4.3 (2026-03-03)
 
 ### Bug Fixes
