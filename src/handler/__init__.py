@@ -13,6 +13,8 @@ from gowa_sdk.webhooks import WebhookEnvelope
 from whatsapp import WhatsAppClient
 from .base_handler import BaseHandler
 from models import Message, OptOut
+from urllib.parse import urlparse
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -113,10 +115,27 @@ class MessageHandler(BaseHandler):
         if (
             message.group
             and message.group.notify_on_spam
-            and "https://chat.whatsapp.com/" in message.text
+            and self._contains_whatsapp_group_link(message.text)
         ):
             await self.whatsapp_group_link_spam(message)
             return
+
+    def _contains_whatsapp_group_link(self, text: str) -> bool:
+        """
+        Return True if the given text contains a WhatsApp group invite link
+        hosted on chat.whatsapp.com.
+        """
+        if not text:
+            return False
+
+        # Simple regex to extract candidate HTTP(S) URLs from text.
+        url_pattern = re.compile(r"https?://[^\s]+", re.IGNORECASE)
+        for match in url_pattern.finditer(text):
+            candidate = match.group(0)
+            parsed = urlparse(candidate)
+            if parsed.scheme in ("http", "https") and parsed.hostname == "chat.whatsapp.com":
+                return True
+        return False
 
     async def handle_opt_out(self, message: Message):
         opt_out = await self.session.get(OptOut, message.sender_jid)
