@@ -9,6 +9,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   quality:
     uses: ./.github/workflows/code-quality.yml
