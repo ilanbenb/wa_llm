@@ -2,6 +2,33 @@
 
 <!-- version list -->
 
+## v1.4.6 (2026-03-12)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#125](https://github.com/ilanbenb/wa_llm/pull/125),
+  [`d6464b5`](https://github.com/ilanbenb/wa_llm/commit/d6464b581a76f135c74eaaf19eee7b3cb498e5f3))
+
+### Chores
+
+- **deps**: Update docker/login-action action to v4
+  ([#126](https://github.com/ilanbenb/wa_llm/pull/126),
+  [`e1a9c1d`](https://github.com/ilanbenb/wa_llm/commit/e1a9c1d1f80a28a57b7b86608c16f039a933638d))
+
+- **deps**: Update docker/metadata-action action to v6
+  ([#127](https://github.com/ilanbenb/wa_llm/pull/127),
+  [`2bfe3e9`](https://github.com/ilanbenb/wa_llm/commit/2bfe3e9884d9f8f58642d036b1700d4b5e30edac))
+
+- **deps**: Update docker/setup-buildx-action action to v4
+  ([#128](https://github.com/ilanbenb/wa_llm/pull/128),
+  [`a7ba41b`](https://github.com/ilanbenb/wa_llm/commit/a7ba41bb66812f41349b1a10fd9a34e1df0e2e02))
+
+- **deps**: Update docker/setup-qemu-action action to v4
+  ([#129](https://github.com/ilanbenb/wa_llm/pull/129),
+  [`c8d4029`](https://github.com/ilanbenb/wa_llm/commit/c8d4029e84db487cc1d82ecbd21eaa0af5145c82))
+
+
 ## v1.4.5 (2026-03-12)
 
 ### Bug Fixes
