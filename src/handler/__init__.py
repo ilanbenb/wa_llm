@@ -133,7 +133,10 @@ class MessageHandler(BaseHandler):
         for match in url_pattern.finditer(text):
             candidate = match.group(0)
             parsed = urlparse(candidate)
-            if parsed.scheme in ("http", "https") and parsed.hostname == "chat.whatsapp.com":
+            if (
+                parsed.scheme in ("http", "https")
+                and parsed.hostname == "chat.whatsapp.com"
+            ):
                 return True
         return False
 
