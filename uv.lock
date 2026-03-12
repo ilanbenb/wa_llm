@@ -427,11 +427,11 @@ wheels = [
 
 [[package]]
 name = "cachetools"
-version = "7.0.4"
+version = "7.0.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/cc/eb3fd22f3b96b8b70ce456d0854ef08434e5ca79c02bf8db3fc07ccfca87/cachetools-7.0.4.tar.gz", hash = "sha256:7042c0e4eea87812f04744ce6ee9ed3de457875eb1f82d8a206c46d6e48b6734", size = 37379, upload-time = "2026-03-08T21:37:17.133Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/dd/57fe3fdb6e65b25a5987fd2cdc7e22db0aef508b91634d2e57d22928d41b/cachetools-7.0.5.tar.gz", hash = "sha256:0cd042c24377200c1dcd225f8b7b12b0ca53cc2c961b43757e774ebe190fd990", size = 37367, upload-time = "2026-03-09T20:51:29.451Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/bc/72adfb3f2ed19eb0317f89ea9b1eeccc670ae46bc394ec2c4ba1dd8c22b7/cachetools-7.0.4-py3-none-any.whl", hash = "sha256:0c8bb1b9ec8194fa4d764accfde602dfe52f70d0f311e62792d4c3f8c051b1e9", size = 13900, upload-time = "2026-03-08T21:37:15.805Z" },
+    { url = "https://files.pythonhosted.org/packages/06/f3/39cf3367b8107baa44f861dc802cbf16263c945b62d8265d36034fc07bea/cachetools-7.0.5-py3-none-any.whl", hash = "sha256:46bc8ebefbe485407621d0a4264b23c080cedd913921bad7ac3ed2f26c183114", size = 13918, upload-time = "2026-03-09T20:51:27.33Z" },
 ]
 
 [[package]]
@@ -1853,7 +1853,7 @@ wheels = [
 
 [[package]]
 name = "jupyterlab"
-version = "4.5.5"
+version = "4.5.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "async-lru" },
@@ -1870,9 +1870,9 @@ dependencies = [
     { name = "tornado" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6e/2d/953a5612a34a3c799a62566a548e711d103f631672fd49650e0f2de80870/jupyterlab-4.5.5.tar.gz", hash = "sha256:eac620698c59eb810e1729909be418d9373d18137cac66637141abba613b3fda", size = 23968441, upload-time = "2026-02-23T18:57:34.339Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ac/d5/730628e03fff2e8a8e8ccdaedde1489ab1309f9a4fa2536248884e30b7c7/jupyterlab-4.5.6.tar.gz", hash = "sha256:642fe2cfe7f0f5922a8a558ba7a0d246c7bc133b708dfe43f7b3a826d163cf42", size = 23970670, upload-time = "2026-03-11T14:17:04.531Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/52/372d3494766d690dfdd286871bf5f7fb9a6c61f7566ccaa7153a163dd1df/jupyterlab-4.5.5-py3-none-any.whl", hash = "sha256:a35694a40a8e7f2e82f387472af24e61b22adcce87b5a8ab97a5d9c486202a6d", size = 12446824, upload-time = "2026-02-23T18:57:30.398Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/1b/dad6fdcc658ed7af26fdf3841e7394072c9549a8b896c381ab49dd11e2d9/jupyterlab-4.5.6-py3-none-any.whl", hash = "sha256:d6b3dac883aa4d9993348e0f8e95b24624f75099aed64eab6a4351a9cdd1e580", size = 12447124, upload-time = "2026-03-11T14:17:00.229Z" },
 ]
 
 [[package]]
@@ -2040,7 +2040,7 @@ wheels = [
 
 [[package]]
 name = "logfire"
-version = "4.27.0"
+version = "4.28.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "executing" },
@@ -2051,9 +2051,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f5/5a/2ce2764fab3a23f1b49a799c1a5ab759c3e8200be300c108755ef5e8b73c/logfire-4.27.0.tar.gz", hash = "sha256:d05366abc4a16acb44b62dc9ca68933591a9755e138fc3e072cb73813db10d45", size = 1055824, upload-time = "2026-03-06T18:24:28.041Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/83/5e0569754b545cdf381ea0e56ff347944a0be42bfa7036c5c6a520a35ff1/logfire-4.28.0.tar.gz", hash = "sha256:11cf93cd02b58ed1090d5962b3222ac2555cf3c41b4851436689709af8c0e69b", size = 1057109, upload-time = "2026-03-11T16:23:41.335Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/b1/24eca9932376df4fba6902394c03532a138e87478a5a810799f0a22217a5/logfire-4.27.0-py3-none-any.whl", hash = "sha256:c1db6357d59ed4d58d614bdc9a90fcc46ddb7d1a7410e2bd56fa441e7c61f4e4", size = 301261, upload-time = "2026-03-06T18:24:25.101Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/ad/a8407cb281500713122ae3d7ec194b99a73afa89a58c9174239375ffac33/logfire-4.28.0-py3-none-any.whl", hash = "sha256:30f9cd969ccaf4eafcce4fe46b8bcc4e5967a722d64ae8c7f9c47e0905ec2949", size = 302168, upload-time = "2026-03-11T16:23:38.299Z" },
 ]
 
 [package.optional-dependencies]
@@ -2476,7 +2476,7 @@ wheels = [
 
 [[package]]
 name = "notebook"
-version = "7.5.4"
+version = "7.5.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jupyter-server" },
@@ -2485,9 +2485,9 @@ dependencies = [
     { name = "notebook-shim" },
     { name = "tornado" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/78/08/9d446fbb49f95de316ea6d7f25d0a4bc95117dd574e35f405895ac706f29/notebook-7.5.4.tar.gz", hash = "sha256:b928b2ba22cb63aa83df2e0e76fe3697950a0c1c4a41b84ebccf1972b1bb5771", size = 14167892, upload-time = "2026-02-24T14:13:56.116Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/6d/41052c48d6f6349ca0a7c4d1f6a78464de135e6d18f5829ba2510e62184c/notebook-7.5.5.tar.gz", hash = "sha256:dc0bfab0f2372c8278c457423d3256c34154ac2cc76bf20e9925260c461013c3", size = 14169167, upload-time = "2026-03-11T16:32:51.922Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/01/05e5387b53e0f549212d5eff58845886f3827617b5c9409c966ddc07cb6d/notebook-7.5.4-py3-none-any.whl", hash = "sha256:860e31782b3d3a25ca0819ff039f5cf77845d1bf30c78ef9528b88b25e0a9850", size = 14578014, upload-time = "2026-02-24T14:13:52.274Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/aa/cbd1deb9f07446241e88f8d5fecccd95b249bca0b4e5482214a4d1714c49/notebook-7.5.5-py3-none-any.whl", hash = "sha256:a7c14dbeefa6592e87f72290ca982e0c10f5bbf3786be2a600fda9da2764a2b8", size = 14578929, upload-time = "2026-03-11T16:32:48.021Z" },
 ]
 
 [[package]]
@@ -4524,12 +4524,12 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.18.4" },
     { name = "asyncpg", specifier = ">=0.31.0" },
-    { name = "cachetools", specifier = ">=7.0.4" },
+    { name = "cachetools", specifier = ">=7.0.5" },
     { name = "fastapi", specifier = ">=0.135.1" },
     { name = "gowa", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "logfire", extras = ["fastapi", "httpx", "sqlalchemy", "system-metrics"], specifier = ">=4.27.0" },
+    { name = "logfire", extras = ["fastapi", "httpx", "sqlalchemy", "system-metrics"], specifier = ">=4.28.0" },
     { name = "pgvector", specifier = ">=0.4.2" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-ai", specifier = ">=1.67.0" },
@@ -4544,7 +4544,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "nbstripout", specifier = ">=0.9.1" },
-    { name = "notebook", specifier = ">=7.5.4" },
+    { name = "notebook", specifier = ">=7.5.5" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "poethepoet", specifier = ">=0.42.1" },
     { name = "pyright", specifier = ">=1.1.408" },
