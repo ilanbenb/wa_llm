@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.4.5 (2026-03-12)
+
+### Bug Fixes
+
+- Potential fix for code scanning alert no. 4: Incomplete URL substring sanitization
+  ([#120](https://github.com/ilanbenb/wa_llm/pull/120),
+  [`237099c`](https://github.com/ilanbenb/wa_llm/commit/237099c7af7c4f610f7bc5043a05fe2b75f57ec4))
+
+### Build System
+
+- **deps**: Bump tornado in the uv group across 1 directory
+  ([#124](https://github.com/ilanbenb/wa_llm/pull/124),
+  [`bea4a51`](https://github.com/ilanbenb/wa_llm/commit/bea4a51d7a6c47bbd4b508fd63bc4d952ff3f187))
+
+
 ## v1.4.4 (2026-03-09)
 
 ### Bug Fixes
