@@ -26,7 +26,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "notebook>=7.5.5",
-    "pandas>=2.3.3",
+    "pandas>=3.0.1",
     "nbstripout>=0.9.1",
     "whatstk>=0.8.1",
     "ruff>=0.15.5",
