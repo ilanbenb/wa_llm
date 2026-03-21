@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.4.7 (2026-03-21)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#132](https://github.com/ilanbenb/wa_llm/pull/132),
+  [`0c79710`](https://github.com/ilanbenb/wa_llm/commit/0c7971037415beced0b2a710e03b36762375949f))
+
+### Build System
+
+- **deps**: Bump pyasn1 in the uv group across 1 directory
+  ([#133](https://github.com/ilanbenb/wa_llm/pull/133),
+  [`3c0a7f1`](https://github.com/ilanbenb/wa_llm/commit/3c0a7f1cd8d00107699a7eb7f317704e35145585))
+
+### Chores
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.3.3
+  ([#131](https://github.com/ilanbenb/wa_llm/pull/131),
+  [`dbdc3bf`](https://github.com/ilanbenb/wa_llm/commit/dbdc3bfeb8d8474505bc0b2fe3d905b64182c677))
+
+
 ## v1.4.6 (2026-03-12)
 
 ### Bug Fixes
