@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v1.4.8 (2026-03-30)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#139](https://github.com/ilanbenb/wa_llm/pull/139),
+  [`4111f50`](https://github.com/ilanbenb/wa_llm/commit/4111f50bb5f5b3e098274ff0969cff05d58be14f))
+
+### Build System
+
+- **deps**: Bump requests in the uv group across 1 directory
+  ([#137](https://github.com/ilanbenb/wa_llm/pull/137),
+  [`ad438a4`](https://github.com/ilanbenb/wa_llm/commit/ad438a43bb67ead8178fea8e6edf8a88e30e8442))
+
+### Chores
+
+- **deps**: Lock file maintenance ([#136](https://github.com/ilanbenb/wa_llm/pull/136),
+  [`0914fb2`](https://github.com/ilanbenb/wa_llm/commit/0914fb2f66ed909f8d1b70a010c266617c2a7009))
+
+- **deps**: Lock file maintenance ([#135](https://github.com/ilanbenb/wa_llm/pull/135),
+  [`3058797`](https://github.com/ilanbenb/wa_llm/commit/305879790a0c79a87233aeda54208574086c9d8c))
+
+- **deps**: Update actions/create-github-app-token action to v3
+  ([#134](https://github.com/ilanbenb/wa_llm/pull/134),
+  [`dccb504`](https://github.com/ilanbenb/wa_llm/commit/dccb50400ebfac83d1eef33dfa522b73ace98781))
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.3.5
+  ([#138](https://github.com/ilanbenb/wa_llm/pull/138),
+  [`7afbd14`](https://github.com/ilanbenb/wa_llm/commit/7afbd1483dc8d2694dd4be27520669d76f416118))
+
+
 ## v1.4.7 (2026-03-21)
 
 ### Bug Fixes
