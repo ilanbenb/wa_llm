@@ -2,6 +2,43 @@
 
 <!-- version list -->
 
+## v1.4.9 (2026-07-06)
+
+### Bug Fixes
+
+- **deps**: Update python non-major dependencies
+  ([#141](https://github.com/ilanbenb/wa_llm/pull/141),
+  [`3864c0e`](https://github.com/ilanbenb/wa_llm/commit/3864c0e52620040f6579b6eea5d8db469725546d))
+
+### Build System
+
+- **deps**: Bump the uv group across 1 directory with 15 updates
+  ([#147](https://github.com/ilanbenb/wa_llm/pull/147),
+  [`67755fd`](https://github.com/ilanbenb/wa_llm/commit/67755fdfc1023177040286528f85ed15ff848b29))
+
+- **deps**: Bump the uv group across 1 directory with 2 updates
+  ([#140](https://github.com/ilanbenb/wa_llm/pull/140),
+  [`af71c2c`](https://github.com/ilanbenb/wa_llm/commit/af71c2c650c109efe1bdbbcc6aec7504e1985a7f))
+
+### Chores
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.5.0
+  ([#145](https://github.com/ilanbenb/wa_llm/pull/145),
+  [`f53e3af`](https://github.com/ilanbenb/wa_llm/commit/f53e3afbbe5392675343a37b3bf4fb66a223c2c3))
+
+- **deps**: Update astral-sh/setup-uv action to v8
+  ([#148](https://github.com/ilanbenb/wa_llm/pull/148),
+  [`3ae559b`](https://github.com/ilanbenb/wa_llm/commit/3ae559ba9f63b371f5c7b34010d6206f68066661))
+
+- **deps**: Update dependency pydantic-settings to v2.14.2 [security]
+  ([#150](https://github.com/ilanbenb/wa_llm/pull/150),
+  [`53e4308`](https://github.com/ilanbenb/wa_llm/commit/53e4308c80cece04f0083a21b4bc6e3609809220))
+
+- **deps**: Update dependency pytest to v9.0.3 [security]
+  ([#144](https://github.com/ilanbenb/wa_llm/pull/144),
+  [`a700427`](https://github.com/ilanbenb/wa_llm/commit/a700427db6475423e0d5e212b8f2a4f31199f2cf))
+
+
 ## v1.4.8 (2026-03-30)
 
 ### Bug Fixes
