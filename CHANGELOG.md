@@ -2,6 +2,46 @@
 
 <!-- version list -->
 
+## v1.4.10 (2026-08-19)
+
+### Bug Fixes
+
+- Parse bot JID from new gowa device response shape
+  ([#161](https://github.com/ilanbenb/wa_llm/pull/161),
+  [`984b369`](https://github.com/ilanbenb/wa_llm/commit/984b369c2d5f8ad28848cba6a2ea194592c059c1))
+
+### Chores
+
+- **deps**: Update actions/checkout action to v7
+  ([#156](https://github.com/ilanbenb/wa_llm/pull/156),
+  [`e302321`](https://github.com/ilanbenb/wa_llm/commit/e302321dad86b27631a486d3c479bac47f7dac5a))
+
+- **deps**: Update actions/setup-python action to v7
+  ([#157](https://github.com/ilanbenb/wa_llm/pull/157),
+  [`582179a`](https://github.com/ilanbenb/wa_llm/commit/582179acb7acb95a9f1b017b8f8273a9e77fd61b))
+
+- **deps**: Update aldinokemal2104/go-whatsapp-web-multidevice docker tag to v8.11.0
+  ([#153](https://github.com/ilanbenb/wa_llm/pull/153),
+  [`73cbea0`](https://github.com/ilanbenb/wa_llm/commit/73cbea085d4fac6e638b117a79e62f256c05c517))
+
+- **deps**: Update astral-sh/setup-uv action to v8.3.2
+  ([#154](https://github.com/ilanbenb/wa_llm/pull/154),
+  [`b2dbaca`](https://github.com/ilanbenb/wa_llm/commit/b2dbaca8f32df407a190ca9b91449dfa483e181a))
+
+- **deps**: Update astral-sh/setup-uv action to v9
+  ([#159](https://github.com/ilanbenb/wa_llm/pull/159),
+  [`eaaecd1`](https://github.com/ilanbenb/wa_llm/commit/eaaecd16ee4c16c452cc96e712cf7fa60807a173))
+
+- **deps**: Update python-semantic-release/python-semantic-release action to v10.6.1
+  ([#155](https://github.com/ilanbenb/wa_llm/pull/155),
+  [`160559f`](https://github.com/ilanbenb/wa_llm/commit/160559f33fcda43819c3a97c4072b3f75a90a220))
+
+### Code Style
+
+- Format test_client.py ([#161](https://github.com/ilanbenb/wa_llm/pull/161),
+  [`984b369`](https://github.com/ilanbenb/wa_llm/commit/984b369c2d5f8ad28848cba6a2ea194592c059c1))
+
+
 ## v1.4.9 (2026-07-06)
 
 ### Bug Fixes
