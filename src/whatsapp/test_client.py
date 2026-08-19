@@ -49,7 +49,9 @@ async def test_get_user_info(client: WhatsAppClient, httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
-async def test_get_my_jid_new_device_shape(client: WhatsAppClient, httpx_mock: HTTPXMock):
+async def test_get_my_jid_new_device_shape(
+    client: WhatsAppClient, httpx_mock: HTTPXMock
+):
     """Newer gowa returns a device UUID in `device` and the JID in `jid`."""
     httpx_mock.add_response(
         url="http://test-api/app/devices",
