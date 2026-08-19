@@ -52,10 +52,14 @@ async def status(
                 "device_count": 0,
             }
         else:
+            # Ensure the primary device JID is actually parseable — webhook
+            # handling depends on it (see WhatsAppClient.get_my_jid).
+            my_jid = await whatsapp.get_my_jid()
             health_data["checks"]["whatsapp"] = {
                 "status": "healthy",
                 "duration_seconds": devices_duration,
                 "device_count": len(devices_response.results),
+                "bot_jid": str(my_jid),
                 "devices": [
                     {"name": device.name, "device": device.device}
                     for device in devices_response.results

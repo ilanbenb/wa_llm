@@ -19,7 +19,10 @@ class WhatsAppClient(GoWaClient):
         info = await self.get_devices()
         if not info.results:
             raise ValueError("No devices found")
-        device_jid = info.results[0].device
+        # Newer gowa versions return the WhatsApp JID in `jid` and an internal
+        # device UUID in `device`; older versions put the JID in `device`.
+        result = info.results[0]
+        device_jid = getattr(result, "jid", None) or result.device
         if not device_jid:
             raise ValueError("No primary device JID found")
         self._jid = parse_jid(device_jid)

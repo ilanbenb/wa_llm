@@ -42,6 +42,10 @@ class MessageHandler(BaseHandler):
     async def __call__(self, payload: WebhookEnvelope):
         message = await self.store_message(payload)
 
+        # Persist immediately: a failure later in the handler must not roll
+        # back the stored message (it would be lost for the daily summary).
+        await self.session.commit()
+
         # ignore messages that don't exist or don't have text
         if not message or not message.text:
             return

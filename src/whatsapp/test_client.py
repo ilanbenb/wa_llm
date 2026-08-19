@@ -49,6 +49,50 @@ async def test_get_user_info(client: WhatsAppClient, httpx_mock: HTTPXMock):
 
 
 @pytest.mark.asyncio
+async def test_get_my_jid_new_device_shape(
+    client: WhatsAppClient, httpx_mock: HTTPXMock
+):
+    """Newer gowa returns a device UUID in `device` and the JID in `jid`."""
+    httpx_mock.add_response(
+        url="http://test-api/app/devices",
+        json={
+            "code": "SUCCESS",
+            "message": "Fetch device success",
+            "results": [
+                {
+                    "name": "llm.org.il",
+                    "device": "d44c0c8b-8443-4128-a9d7-1708db4c2020",
+                    "jid": "972545380874@s.whatsapp.net",
+                }
+            ],
+        },
+    )
+    jid = await client.get_my_jid()
+    assert jid.user == "972545380874"
+    assert jid.server == "s.whatsapp.net"
+
+
+@pytest.mark.asyncio
+async def test_get_my_jid_legacy_device_shape(
+    client: WhatsAppClient, httpx_mock: HTTPXMock
+):
+    """Older gowa returns the JID directly in `device`."""
+    httpx_mock.add_response(
+        url="http://test-api/app/devices",
+        json={
+            "code": "SUCCESS",
+            "message": "Fetch device success",
+            "results": [
+                {"name": "llm.org.il", "device": "972545380874@s.whatsapp.net"}
+            ],
+        },
+    )
+    jid = await client.get_my_jid()
+    assert jid.user == "972545380874"
+    assert jid.server == "s.whatsapp.net"
+
+
+@pytest.mark.asyncio
 async def test_send_message(client: WhatsAppClient, httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url="http://test-api/send/message",
