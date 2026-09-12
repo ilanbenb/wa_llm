@@ -22,7 +22,7 @@ services:
     image: aldinokemal2104/go-whatsapp-web-multidevice:v8.11.0
     container_name: whatsapp
     ports:
-      - "3003:3000"
+      - "3003:3003"
     restart: always
     depends_on:
       postgres:
