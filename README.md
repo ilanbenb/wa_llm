@@ -69,12 +69,23 @@ cp .env.example .env
 | `VOYAGE_API_KEY`               | Voyage AI key                                                                      | –                                                            |
 | `DB_URI`                       | PostgreSQL URI                                                                     | `postgresql+asyncpg://user:password@localhost:5432/postgres` |
 | `LOG_LEVEL`                    | Log level (`DEBUG`, `INFO`, `ERROR`)                                               | `INFO`                                                       |
-| `ANTHROPIC_API_KEY`            | Anthropic API key. You need to have a real anthropic key here, starts with sk-.... | –                                                            |
+| `MODEL_NAME`                   | LLM to use, as `provider:model`. Selects which API key is required.                | `anthropic:claude-sonnet-4-6`                                |
+| `ANTHROPIC_API_KEY`            | Anthropic API key (starts with `sk-`). Required when `MODEL_NAME` uses `anthropic:`. | –                                                            |
+| `OPENROUTER_API_KEY`           | OpenRouter API key (starts with `sk-or-`). Required when `MODEL_NAME` uses `openrouter:`. | –                                                            |
 | `LOGFIRE_TOKEN`                | Logfire monitoring key, You need to have a real logfire key here                   | –                                                            |
 | `DM_AUTOREPLY_ENABLED`         | Enable auto-reply for direct messages                                              | `False`                                                      |
 | `DM_AUTOREPLY_MESSAGE`         | Message to send as auto-reply                                                      | `Hello, I am not designed to answer to personal messages.`   |
 
 </div>
+
+#### Choosing a model provider
+
+`MODEL_NAME` decides which LLM the bot talks to, and only the API key for that provider is required.
+
+- **Anthropic (default)** — `MODEL_NAME=anthropic:claude-sonnet-4-6` with `ANTHROPIC_API_KEY`.
+- **OpenRouter** — `MODEL_NAME=openrouter:<vendor>/<model>` (e.g. `openrouter:anthropic/claude-sonnet-4.6`) with `OPENROUTER_API_KEY`. `ANTHROPIC_API_KEY` is then not needed at all.
+
+A mismatch — an `openrouter:` model with no `OPENROUTER_API_KEY`, say — fails at startup with an explicit error rather than on the first message.
 
 ### 3. Starting the Services
 
