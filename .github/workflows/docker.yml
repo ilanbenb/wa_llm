@@ -4,9 +4,9 @@ on:
   push:
     branches: ['main']
     tags: ['v*']
-
-permissions:
-  contents: read
+    
+  workflow_dispatch:
+  
 
 env:
   REGISTRY: ghcr.io
