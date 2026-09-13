@@ -27,7 +27,7 @@ services:
     environment:
       - PORT=8000
       - DB_URI=postgresql+asyncpg://user:password@postgres:5432/postgres
-      - WHATSAPP_HOST=http://whatsapp:3003
+      - WHATSAPP_HOST=http://whatsapp:3000
     restart: always
 
 volumes:

@@ -22,7 +22,7 @@ services:
     image: aldinokemal2104/go-whatsapp-web-multidevice:v9.3.1
     container_name: whatsapp
     ports:
-      - "3003:3003"
+      - "3003:3000"
     restart: always
     depends_on:
       postgres:
@@ -32,7 +32,7 @@ services:
       - wa_llm_whatsapp_statics:/app/statics
 
     environment:
-      - APP_PORT=3003
+      - APP_PORT=3000
       - APP_OS=Chrome
       - DB_URI=postgres://user:password@postgres:5432/webhook_db?sslmode=disable
       - APP_BASIC_AUTH=admin:admin
