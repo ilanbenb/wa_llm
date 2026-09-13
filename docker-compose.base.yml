@@ -29,15 +29,20 @@ services:
         condition: service_healthy
     volumes:
       - wa_llm_whatsapp:/app/storages
+      - wa_llm_whatsapp_statics:/app/statics
+
     environment:
       - APP_PORT=3003
       - APP_OS=Chrome
       - DB_URI=postgres://user:password@postgres:5432/webhook_db?sslmode=disable
       - APP_BASIC_AUTH=admin:admin
       - WHATSAPP_CHAT_STORAGE=false
-
+    command:
+      - rest
 volumes:
   wa_llm_whatsapp:
     name: wa_llm_whatsapp
+  wa_llm_whatsapp_statics:
+    name: wa_llm_whatsapp_statics
   wa_llm_postgres:
     name: wa_llm_postgres
