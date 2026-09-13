@@ -33,5 +33,7 @@ services:
 volumes:
   wa_llm_whatsapp:
     name: wa_llm_whatsapp
+  wa_llm_whatsapp_statics:
+    name: wa_llm_whatsapp_statics    
   wa_llm_postgres:
     name: wa_llm_postgres
