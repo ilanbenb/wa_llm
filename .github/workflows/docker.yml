@@ -23,6 +23,11 @@ jobs:
     secrets: inherit
 
   test:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+      issues: read
     uses: ./.github/workflows/test.yml
     secrets: inherit
 
