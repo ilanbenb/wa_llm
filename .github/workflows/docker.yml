@@ -14,7 +14,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 permissions:
-  contents: write
+  contents: read
   packages: read
 
 jobs:
