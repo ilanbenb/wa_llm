@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>wa-scribe</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px/1.4 system-ui, sans-serif;
+        color: #1c1c1c;
+        background: #f6f5f2;
+      }
+      main {
+        padding: 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      p,
+      pre {
+        margin: 0 0 8px;
+      }
+      pre {
+        white-space: pre-wrap;
+        font: 12px/1.4 ui-monospace, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>wa-scribe</h1>
+      <p id="status">Setup is not implemented.</p>
+      <pre id="panel-pong"></pre>
+      <pre id="panel-wrong-context"></pre>
+      <pre id="panel-invalid"></pre>
+    </main>
+    <script type="module" src="./panel.ts"></script>
+  </body>
+</html>

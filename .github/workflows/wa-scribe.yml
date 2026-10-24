@@ -1,0 +1,42 @@
+name: wa-scribe
+
+on:
+  push:
+    paths:
+      - "projects/wa-scribe/**"
+      - ".github/workflows/wa-scribe.yml"
+  pull_request:
+    paths:
+      - "projects/wa-scribe/**"
+      - ".github/workflows/wa-scribe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/wa-scribe
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: projects/wa-scribe/.node-version
+          cache: npm
+          cache-dependency-path: projects/wa-scribe/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        run: npm run test:browser
+      - name: Production build
+        run: npm run build

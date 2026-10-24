@@ -17,3 +17,4 @@ build/
 *.log
 .git
 .github
+projects/wa-scribe/
